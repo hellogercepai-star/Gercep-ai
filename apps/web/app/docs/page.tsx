@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DocsCode } from "@/components/docs/CodeBlock";
+import { DocsHeaderActions } from "@/components/docs/DocsHeaderActions";
 import { Card } from "@/components/ui/Card";
 import { listPublicModels } from "@/lib/gateway/models";
 
@@ -58,24 +59,7 @@ export default function DocsPage() {
             <p className="text-sm text-white/50">API Documentation</p>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/playground"
-              className="text-sm text-white/60 transition hover:text-white"
-            >
-              Playground
-            </Link>
-            <Link
-              href="/whitepaper"
-              className="text-sm text-white/60 transition hover:text-white"
-            >
-              Whitepaper
-            </Link>
-            <Link
-              href="/developers"
-              className="rounded-full border border-white/10 px-3 py-1.5 text-sm text-white/80 transition hover:border-white/30"
-            >
-              API Keys
-            </Link>
+            <DocsHeaderActions />
           </div>
         </div>
       </header>
