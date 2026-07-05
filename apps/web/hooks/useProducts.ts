@@ -237,6 +237,34 @@ export function useProducts(activeBusiness: Business | null) {
     return mapProductRow(data as ProductRow);
   };
 
+  const addStock = async (
+    productId: string,
+    quantity: number,
+    reason?: string
+  ): Promise<void> => {
+    if (!businessId) throw new Error("Pilih bisnis dulu.");
+    if (quantity <= 0) throw new Error("Jumlah harus lebih dari 0.");
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Kamu harus login.");
+
+    const { error } = await supabase.from("stock_movements").insert({
+      product_id: productId,
+      business_id: businessId,
+      type: "in",
+      quantity,
+      reason: reason?.trim() || null,
+      created_by: user.id,
+    });
+
+    if (error) throw new Error(error.message);
+
+    // refresh supaya kolom stok di tabel produk ter-update
+    await loadInventory();
+  };
+
   return {
     products,
     categories,
@@ -245,6 +273,7 @@ export function useProducts(activeBusiness: Business | null) {
     getProductStock,
     createProduct,
     createCategory,
+    addStock,
     refreshInventory: loadInventory,
   };
 }

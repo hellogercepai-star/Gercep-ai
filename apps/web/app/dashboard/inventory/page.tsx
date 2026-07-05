@@ -7,8 +7,10 @@ import { Header } from "@/components/shared/Header";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { AddProductModal } from "@/components/inventory/AddProductModal";
+import { AddStockModal } from "@/components/inventory/AddStockModal";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useProducts } from "@/hooks/useProducts";
+import type { Product } from "@/types";
 
 function formatRupiah(value: number): string {
   return `Rp ${value.toLocaleString("id-ID")}`;
@@ -23,8 +25,10 @@ export default function InventoryPage() {
     loading,
     createProduct,
     createCategory,
+    addStock,
   } = useProducts(activeBusiness);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [stockProduct, setStockProduct] = useState<Product | null>(null);
 
   return (
     <div className="flex min-h-screen bg-[#070711]">
@@ -90,6 +94,9 @@ export default function InventoryPage() {
                         <th className="px-6 py-4 text-right font-medium">
                           Harga Jual
                         </th>
+                        <th className="px-6 py-4 text-right font-medium">
+                          Aksi
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -128,6 +135,17 @@ export default function InventoryPage() {
                           <td className="px-6 py-4 text-right text-white/80">
                             {formatRupiah(product.sellPrice)}
                           </td>
+                          <td className="px-6 py-4 text-right">
+                            {product.trackingType === "bulk" && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setStockProduct(product)}
+                              >
+                                + Stok
+                              </Button>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -145,6 +163,12 @@ export default function InventoryPage() {
         categories={categories}
         onCreateProduct={createProduct}
         onCreateCategory={createCategory}
+      />
+
+      <AddStockModal
+        product={stockProduct}
+        onClose={() => setStockProduct(null)}
+        onAddStock={addStock}
       />
     </div>
   );
