@@ -142,7 +142,18 @@ export async function POST(request: NextRequest) {
         );
       }
     } catch (quotaErr) {
-      console.error("Quota check skipped:", quotaErr);
+      console.error("Quota check failed:", quotaErr);
+      if (process.env.NODE_ENV === "production") {
+        return NextResponse.json(
+          {
+            error: {
+              message: "Quota service unavailable. Coba lagi nanti.",
+              type: "server_error",
+            },
+          },
+          { status: 503 }
+        );
+      }
     }
   }
 
