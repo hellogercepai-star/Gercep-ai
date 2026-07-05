@@ -312,7 +312,7 @@ export const sections = {
     intro:
       "Gateway inferensi kompatibel OpenAI. Satu base URL, satu API key sk-gercep- — request shape sama persis dengan OpenAI.",
     quickStart: "Quick start",
-    step1: "Buat akun & login → Buat API Key",
+    step1: "Buat akun & login →",
     step2: "Test di Playground atau langsung hit API",
     step3: "Set baseURL ke /api/v1 di OpenAI SDK",
     authentication: "Authentication",
@@ -331,9 +331,9 @@ export const sections = {
     usageBillingDesc:
       "Setiap completion di-log ke dashboard di /developers. Token usage (prompt, completion, total) tersedia per request dan per API key. Billing credits & $GERCEP — coming soon.",
     errors: "Errors",
-    error401: "401 — Missing or invalid API key",
-    error400: "400 — Invalid request body (model, messages)",
-    error502: "502 — Upstream provider error",
+    error401: "API key tidak ada atau tidak valid",
+    error400: "Request body tidak valid (model, messages)",
+    error502: "Error dari upstream provider",
   },
   legal: {
     privacyTitle: "Kebijakan Privasi",

@@ -168,7 +168,7 @@ export function DocsPageContent() {
             <Link href="/developers" className="text-[#2DD4BF] hover:underline">
               /developers
             </Link>
-            . {t("docs.usageSuffix")}
+            .
           </p>
         </Card>
 
