@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { WalletLinkCard } from "@/components/wallet/WalletLinkCard";
 
 interface ApiKeyItem {
   id: string;
@@ -298,6 +299,8 @@ export default function DevelopersPage() {
             </>
           ) : null}
         </section>
+
+        <WalletLinkCard />
 
         <Card
           title="Create API Key"
