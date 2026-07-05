@@ -117,6 +117,12 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-2">
             <Link
+              href="/docs"
+              className="hidden text-sm text-white/60 transition hover:text-white sm:inline"
+            >
+              Docs
+            </Link>
+            <Link
               href="/login"
               className="hidden text-sm text-white/60 transition hover:text-white sm:inline"
             >
@@ -124,9 +130,9 @@ export default function HomePage() {
             </Link>
             <Link
               href="/developers"
-              className="rounded-full bg-white px-4 py-2 text-xs font-medium text-[#070711] transition hover:bg-white/90"
+              className="rounded-full border border-white/10 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/30 sm:border-0 sm:bg-white sm:text-[#070711] sm:hover:bg-white/90"
             >
-              Start building
+              API Keys
             </Link>
           </div>
         </div>
@@ -135,37 +141,70 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative z-10 mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
         <div>
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#2DD4BF]">
-            Inference gateway
-          </p>
+          <span className="mb-6 inline-block rounded-full border border-[#2DD4BF]/30 bg-[#2DD4BF]/10 px-3 py-1 text-xs font-medium tracking-wide text-[#2DD4BF]">
+            OpenAI-compatible inference gateway
+          </span>
           <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold leading-[1.08] tracking-tight md:text-5xl lg:text-6xl">
-            Build what&apos;s next
+            Leading models behind
             <br />
             <span className="bg-gradient-to-r from-[#2DD4BF] via-[#A78BFA] to-[#F472B6] bg-clip-text text-transparent">
-              with pooled LLM compute
+              one Gercep gateway
             </span>
           </h1>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-white/55">
-            Access pooled nodes, clusters, and GPU capacity through one
-            multi-model inference layer. Gercep turns distributed compute into
-            reliable tokens for production apps.
+          <p className="mt-5 max-w-lg text-base leading-relaxed text-white/60">
+            Test fast in the Playground, create your{" "}
+            <code className="text-[#2DD4BF]">sk-gercep-</code> API key, and ship
+            with the same compatible request shape. Token usage tracked — ready
+            for billing and{" "}
+            <span className="font-medium text-[#A78BFA]">$GERCEP</span> ecosystem.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              href="/developers"
+              href="/playground"
               className="rounded-full bg-white px-6 py-3 text-sm font-medium text-[#070711] transition hover:bg-white/90"
             >
-              Start building
+              Open Playground
             </Link>
             <Link
-              href="/docs"
+              href="/developers"
               className="rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-white/80 transition hover:border-white/30"
             >
-              Read quickstart
+              Create API Key
+            </Link>
+            <Link
+              href="/dashboard"
+              className="text-sm font-medium text-white/50 transition hover:text-white"
+            >
+              Business OS →
             </Link>
           </div>
         </div>
         <HeroPlayground />
+      </section>
+
+      {/* Core value props — copy asli Gercep, tetap di homepage */}
+      <section className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-6 md:mx-6 lg:mx-auto lg:grid-cols-3 lg:px-0">
+        {[
+          {
+            title: "Multi-model routing",
+            desc: "DeepSeek today — more providers tomorrow. One base URL, one key.",
+          },
+          {
+            title: "Your API key",
+            desc: "Developers hold sk-gercep- keys. Usage logged per request.",
+          },
+          {
+            title: "Business OS (dogfood)",
+            desc: "Inventory, keuangan, dashboard — built on our own gateway.",
+          },
+        ].map((f) => (
+          <div key={f.title} className="bg-[#070711] p-8">
+            <h3 className="font-[family-name:var(--font-display)] text-base font-semibold">
+              {f.title}
+            </h3>
+            <p className="mt-2 text-sm text-white/50">{f.desc}</p>
+          </div>
+        ))}
       </section>
 
       {/* Trusted by */}
