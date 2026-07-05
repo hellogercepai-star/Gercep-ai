@@ -14,34 +14,116 @@ interface ApiKeyItem {
   lastUsedAt: string | null;
 }
 
+interface UsageSummary {
+  requests: number;
+  totalTokens: number;
+  promptTokens: number;
+  completionTokens: number;
+}
+
+interface UsageByKey {
+  apiKeyId: string;
+  keyName: string;
+  keyPrefix: string;
+  requests: number;
+  totalTokens: number;
+}
+
+interface UsageRecentEntry {
+  id: string;
+  apiKeyId: string;
+  keyName: string;
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  createdAt: string;
+}
+
+interface UsageStats {
+  summary: {
+    today: UsageSummary;
+    month: UsageSummary;
+    allTime: UsageSummary;
+  };
+  byKey: UsageByKey[];
+  recent: UsageRecentEntry[];
+}
+
+function formatTokens(n: number) {
+  return n.toLocaleString("id-ID");
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleString("id-ID", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function StatBox({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+      <p className="text-xs uppercase tracking-wide text-white/40">{label}</p>
+      <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold text-[#2DD4BF]">
+        {value}
+      </p>
+      {sub && <p className="mt-1 text-xs text-white/40">{sub}</p>}
+    </div>
+  );
+}
+
 export default function DevelopersPage() {
   const router = useRouter();
   const [keys, setKeys] = useState<ApiKeyItem[]>([]);
+  const [usage, setUsage] = useState<UsageStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [plainKey, setPlainKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [origin, setOrigin] = useState("https://your-domain");
 
-  const loadKeys = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/v1/keys");
-    if (res.status === 401) {
+    setError(null);
+
+    const [keysRes, usageRes] = await Promise.all([
+      fetch("/api/v1/keys"),
+      fetch("/api/v1/usage"),
+    ]);
+
+    if (keysRes.status === 401 || usageRes.status === 401) {
       router.push("/login?next=/developers");
       return;
     }
-    const data = await res.json();
-    if (res.ok) setKeys(data.keys ?? []);
-    else setError(data.error ?? "Gagal memuat keys.");
+
+    const keysData = await keysRes.json();
+    const usageData = await usageRes.json();
+
+    if (keysRes.ok) setKeys(keysData.keys ?? []);
+    else setError(keysData.error ?? "Gagal memuat keys.");
+
+    if (usageRes.ok) setUsage(usageData);
+    else setError((prev) => prev ?? usageData.error ?? "Gagal memuat usage.");
+
     setLoading(false);
   }, [router]);
 
   useEffect(() => {
-    async function init() {
-      await loadKeys();
-    }
-    init();
-  }, [loadKeys]);
+    setOrigin(window.location.origin);
+    loadData();
+  }, [loadData]);
 
   const handleCreate = async () => {
     setCreating(true);
@@ -63,21 +145,25 @@ export default function DevelopersPage() {
 
     setPlainKey(data.plainKey);
     setNewKeyName("");
-    await loadKeys();
+    await loadData();
     setCreating(false);
   };
 
   const handleRevoke = async (id: string) => {
-    if (!confirm("Revoke API key ini? Aplikasi yang pakai key ini akan berhenti jalan."))
+    if (
+      !confirm(
+        "Revoke API key ini? Aplikasi yang pakai key ini akan berhenti jalan."
+      )
+    )
       return;
     await fetch(`/api/v1/keys?id=${id}`, { method: "DELETE" });
-    await loadKeys();
+    await loadData();
   };
 
   return (
     <div className="min-h-screen bg-[#070711] text-white">
       <header className="border-b border-white/10 px-6 py-4">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div>
             <Link
               href="/"
@@ -85,7 +171,7 @@ export default function DevelopersPage() {
             >
               Gercep AI
             </Link>
-            <p className="text-sm text-white/50">Developers — API Keys</p>
+            <p className="text-sm text-white/50">Developers — API Keys & Usage</p>
           </div>
           <Link href="/playground">
             <Button variant="secondary" size="sm">
@@ -95,7 +181,116 @@ export default function DevelopersPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-8">
+      <main className="mx-auto max-w-4xl px-6 py-8">
+        {/* Usage summary */}
+        <section className="mb-8">
+          <h2 className="mb-4 font-[family-name:var(--font-display)] text-lg font-semibold">
+            Token Usage
+          </h2>
+          {loading ? (
+            <p className="text-sm text-white/50">Memuat usage...</p>
+          ) : usage ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <StatBox
+                  label="Hari ini"
+                  value={formatTokens(usage.summary.today.totalTokens)}
+                  sub={`${usage.summary.today.requests} request`}
+                />
+                <StatBox
+                  label="Bulan ini"
+                  value={formatTokens(usage.summary.month.totalTokens)}
+                  sub={`${usage.summary.month.requests} request`}
+                />
+                <StatBox
+                  label="Total"
+                  value={formatTokens(usage.summary.allTime.totalTokens)}
+                  sub={`${usage.summary.allTime.requests} request`}
+                />
+              </div>
+
+              {usage.byKey.length > 0 && (
+                <Card title="Per API Key (bulan ini)" className="mt-4">
+                  <ul className="divide-y divide-white/5">
+                    {usage.byKey.map((k) => (
+                      <li
+                        key={k.apiKeyId}
+                        className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+                      >
+                        <div>
+                          <p className="font-medium">{k.keyName}</p>
+                          <p className="text-xs text-white/40">{k.keyPrefix}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-[#2DD4BF]">
+                            {formatTokens(k.totalTokens)} tokens
+                          </p>
+                          <p className="text-xs text-white/40">
+                            {k.requests} request
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+
+              <Card title="Riwayat Request" className="mt-4">
+                {usage.recent.length === 0 ? (
+                  <p className="text-sm text-white/50">
+                    Belum ada request. Coba kirim prompt di{" "}
+                    <Link href="/playground" className="text-[#2DD4BF] hover:underline">
+                      Playground
+                    </Link>
+                    .
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10 text-xs uppercase text-white/40">
+                          <th className="pb-2 pr-4 font-medium">Waktu</th>
+                          <th className="pb-2 pr-4 font-medium">Model</th>
+                          <th className="pb-2 pr-4 font-medium">Key</th>
+                          <th className="pb-2 pr-4 font-medium text-right">
+                            Prompt
+                          </th>
+                          <th className="pb-2 pr-4 font-medium text-right">
+                            Completion
+                          </th>
+                          <th className="pb-2 font-medium text-right">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {usage.recent.map((entry) => (
+                          <tr key={entry.id} className="text-white/80">
+                            <td className="py-2.5 pr-4 whitespace-nowrap text-white/50">
+                              {formatDate(entry.createdAt)}
+                            </td>
+                            <td className="py-2.5 pr-4 font-mono text-xs">
+                              {entry.model}
+                            </td>
+                            <td className="py-2.5 pr-4">{entry.keyName}</td>
+                            <td className="py-2.5 pr-4 text-right tabular-nums">
+                              {formatTokens(entry.promptTokens)}
+                            </td>
+                            <td className="py-2.5 pr-4 text-right tabular-nums">
+                              {formatTokens(entry.completionTokens)}
+                            </td>
+                            <td className="py-2.5 text-right tabular-nums font-medium text-[#2DD4BF]">
+                              {formatTokens(entry.totalTokens)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </Card>
+            </>
+          ) : null}
+        </section>
+
         <Card
           title="Create API Key"
           description="Key format: sk-gercep-... — user pegang & simpan sendiri. Plain key hanya ditampilkan sekali."
@@ -146,6 +341,11 @@ export default function DevelopersPage() {
                   <div>
                     <p className="font-medium">{k.name}</p>
                     <p className="text-xs text-white/40">{k.keyPrefix}</p>
+                    {k.lastUsedAt && (
+                      <p className="mt-0.5 text-xs text-white/30">
+                        Last used {formatDate(k.lastUsedAt)}
+                      </p>
+                    )}
                   </div>
                   <Button
                     variant="danger"
@@ -164,7 +364,7 @@ export default function DevelopersPage() {
 
         <Card className="mt-6" title="Quickstart">
           <pre className="overflow-x-auto rounded-lg bg-black/40 p-4 text-xs text-white/80">
-{`curl https://your-domain/api/v1/chat/completions \\
+{`curl ${origin}/api/v1/chat/completions \\
   -H "Authorization: Bearer sk-gercep-YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"Hello"}]}'`}
