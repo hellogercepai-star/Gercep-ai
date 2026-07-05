@@ -10,7 +10,7 @@ interface ModelInfo {
 }
 
 const inputClass =
-  "w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#2DD4BF]/50";
+  "w-full rounded-lg border border-[#00fff0]/20 bg-[#030308]/80 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#00fff0]/60 focus:shadow-[0_0_12px_rgba(0,255,240,0.15)]";
 
 export function HeroPlayground() {
   const { t } = useLanguage();
@@ -93,10 +93,10 @@ export function HeroPlayground() {
   const modelLabel = models.find((m) => m.id === model)?.id ?? model;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-sm md:p-5">
+    <div className="cyber-panel rounded-2xl p-4 md:p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="rounded-md bg-[#2DD4BF]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#2DD4BF]">
+          <span className="rounded-md border border-[#00fff0]/30 bg-[#00fff0]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#00fff0]">
             {t("common.chat")}
           </span>
           <span className="font-mono text-xs text-white/60">{modelLabel}</span>
