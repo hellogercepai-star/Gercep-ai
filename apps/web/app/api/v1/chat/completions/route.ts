@@ -3,6 +3,7 @@ import { extractBearerToken } from "@/lib/gateway/api-key";
 import { openAiUnauthorized, validateApiKey } from "@/lib/gateway/auth";
 import { getModelById } from "@/lib/gateway/models";
 import { logUsage } from "@/lib/gateway/usage";
+import { assertWithinDailyQuota } from "@/lib/gateway/quota";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ChatCompletionRequest } from "@/lib/ai-providers/types";
 import type { ValidatedApiKey } from "@/types/gateway";
@@ -118,6 +119,31 @@ export async function POST(request: NextRequest) {
       },
       { status: 404 }
     );
+  }
+
+  if (!apiKey.id.startsWith("dev")) {
+    try {
+      const admin = createAdminClient();
+      const quotaCheck = await assertWithinDailyQuota(admin, apiKey.userId);
+      if (!quotaCheck.ok) {
+        return NextResponse.json(
+          {
+            error: {
+              message: quotaCheck.message,
+              type: "rate_limit_error",
+              quota: {
+                tier: quotaCheck.quota.tier.id,
+                dailyRequests: quotaCheck.quota.dailyRequests,
+                usedToday: quotaCheck.quota.usedToday,
+              },
+            },
+          },
+          { status: 429 }
+        );
+      }
+    } catch (quotaErr) {
+      console.error("Quota check skipped:", quotaErr);
+    }
   }
 
   try {

@@ -6,6 +6,7 @@ import {
 } from "@/lib/wallet/solana";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getWalletQuotaForUser } from "@/lib/gateway/quota";
 
 interface WalletLinkRow {
   id: string;
@@ -52,12 +53,27 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const walletRow = data as WalletLinkRow | null;
+  const quotaInfo = await getWalletQuotaForUser(
+    supabase,
+    user.id,
+    walletRow?.address ?? null
+  );
+
   return NextResponse.json({
-    wallet: data ? mapWallet(data as WalletLinkRow) : null,
+    wallet: walletRow ? mapWallet(walletRow) : null,
     quota: {
-      tier: "beta",
-      dailyRequests: 1000,
-      note: "$GERCEP balance tiers — coming soon",
+      tier: quotaInfo.tier.id,
+      tierLabel: quotaInfo.tier.label,
+      dailyRequests: quotaInfo.dailyRequests,
+      usedToday: quotaInfo.usedToday,
+      remainingToday: quotaInfo.remainingToday,
+      gercepBalance: quotaInfo.gercepBalance,
+      mintConfigured: quotaInfo.mintConfigured,
+      nextTier: quotaInfo.nextTier?.id ?? null,
+      nextTierLabel: quotaInfo.nextTier?.label ?? null,
+      tokensToNextTier: quotaInfo.tokensToNextTier,
+      note: quotaInfo.note,
     },
   });
 }
