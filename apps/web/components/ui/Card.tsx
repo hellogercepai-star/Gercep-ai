@@ -23,9 +23,9 @@ export function Card({
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between">
           {title && (
-            <h3 className="font-[family-name:var(--font-display)] text-base font-semibold">
+            <h2 className="font-[family-name:var(--font-display)] text-base font-semibold">
               {title}
-            </h3>
+            </h2>
           )}
           {action}
         </div>

@@ -95,7 +95,7 @@ export default function DashboardPage() {
                     <p className="mt-4 font-[family-name:var(--font-display)] text-3xl font-semibold">
                       {statsLoading ? "—" : stat.value}
                     </p>
-                    <p className="mt-1 text-xs text-white/40">
+                    <p className="mt-1 text-xs text-white/60">
                       {statsLoading ? "" : stat.change}
                     </p>
                   </Card>
