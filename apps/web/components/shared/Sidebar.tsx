@@ -22,7 +22,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-16 flex-col items-center gap-1 border-r border-white/10 bg-[#070711] py-6 transition-all duration-200 hover:w-56">
+    <aside className="sticky top-0 flex h-screen w-16 shrink-0 flex-col items-center gap-1 border-r border-white/10 bg-[#070711] py-6 transition-all duration-200 hover:w-56">
       <div className="mb-6 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#2DD4BF] via-[#A78BFA] to-[#F472B6] font-[family-name:var(--font-display)] text-sm font-bold text-[#070711]">
         G
       </div>

@@ -39,7 +39,12 @@ export default function PlaygroundPage() {
         const data = await r.json();
         const list = (data.data ?? []) as ModelInfo[];
         setModels(list);
-        if (list[0]) setModel(list[0].id);
+        const fromUrl = new URLSearchParams(window.location.search).get("model");
+        if (fromUrl && list.some((m) => m.id === fromUrl)) {
+          setModel(fromUrl);
+        } else if (list[0]) {
+          setModel(list[0].id);
+        }
       } catch {
         // models endpoint optional saat offline
       }
@@ -95,7 +100,7 @@ export default function PlaygroundPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070711] text-white">
+    <div className="bg-[#070711] text-white">
       <header className="border-b border-white/10 px-6 py-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div>
@@ -127,7 +132,7 @@ export default function PlaygroundPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-6 py-8">
+      <main className="mx-auto max-w-4xl px-6 py-8 pb-20">
         <Card
           title="Test model via Gercep Gateway"
           description="Satu request shape, sama persis dengan production API key."
