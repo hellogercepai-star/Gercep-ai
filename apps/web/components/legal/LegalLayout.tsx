@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
 
 export function LegalLayout({
   title,
@@ -21,6 +24,7 @@ export function LegalLayout({
             Gercep AI
           </Link>
           <div className="flex items-center gap-3 text-sm">
+            <LanguageToggle />
             <Link href="/privacy" className="text-white/60 hover:text-white">
               Privacy
             </Link>

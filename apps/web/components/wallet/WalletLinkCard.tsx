@@ -20,6 +20,7 @@ import {
   PHANTOM_EXTENSION_URL,
 } from "@/lib/wallet/device";
 import { PhantomOpenButton } from "@/components/wallet/PhantomOpenButton";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface LinkedWallet {
   address: string;
@@ -47,6 +48,7 @@ function formatBalance(n: number): string {
 }
 
 export function WalletLinkCard() {
+  const { t } = useLanguage();
   const { publicKey, signMessage, connected } = useWallet();
   const [linked, setLinked] = useState<LinkedWallet | null>(null);
   const [quota, setQuota] = useState<WalletQuota | null>(null);
@@ -96,7 +98,7 @@ export function WalletLinkCard() {
 
   const handleLink = async () => {
     if (!publicKey) {
-      setError("Connect wallet dulu.");
+      setError(t("wallet.connectFirst"));
       return;
     }
 
@@ -184,43 +186,37 @@ export function WalletLinkCard() {
 
   return (
     <Card
-      title="Solana Wallet"
-      description="Masuk lewat Phantom app — link wallet ke akun Gercep. Token $GERCEP belum perlu, tier Beta sudah aktif."
+      title={t("wallet.title")}
+      description={t("wallet.desc")}
       className="mb-6"
     >
       {inPhantom && !linked && (
         <div className="mb-4 rounded-lg border border-[#2DD4BF]/30 bg-[#2DD4BF]/10 p-3 text-xs text-white/70">
-          <p className="font-medium text-[#2DD4BF]">✓ Kamu buka dari Phantom</p>
-          <p className="mt-1">
-            Wallet auto-connect → login Gercep → Sign &amp; Link. Token $GERCEP
-            belum launch, tier Beta tetap jalan.
-          </p>
+          <p className="font-medium text-[#2DD4BF]">{t("wallet.inPhantom")}</p>
+          <p className="mt-1">{t("wallet.inPhantomDesc")}</p>
         </div>
       )}
       {needsLogin ? (
         <div className="rounded-lg border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-4">
           {hasWallet && (
             <p className="mb-2 text-xs font-medium text-[#2DD4BF]">
-              ✓ Phantom terhubung — tapi belum login akun Gercep
+              {t("wallet.phantomNoLogin")}
             </p>
           )}
-          <p className="text-sm text-white/70">
-            Wallet Phantom ≠ akun Gercep. Masuk/daftar email dulu, baru link
-            wallet ke akun kamu.
-          </p>
+          <p className="text-sm text-white/70">{t("wallet.phantomLoginHint")}</p>
           <Link
             href="/login?next=/developers&wallet=1"
             className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-medium text-[#070711]"
           >
-            Step 1: Masuk / Daftar
+            {t("wallet.loginStep")}
           </Link>
         </div>
       ) : loading ? (
-        <p className="text-sm text-white/50">Memuat wallet...</p>
+        <p className="text-sm text-white/50">{t("wallet.loading")}</p>
       ) : linked ? (
         <div>
           <div className="rounded-lg border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-4">
-            <p className="text-xs uppercase text-[#A78BFA]">Linked</p>
+            <p className="text-xs uppercase text-[#A78BFA]">{t("wallet.linked")}</p>
             <p className="mt-1 font-mono text-sm">{linked.addressShort}</p>
             <p className="mt-1 break-all font-mono text-[10px] text-white/40">
               {linked.address}
@@ -230,14 +226,14 @@ export function WalletLinkCard() {
             <div className="mt-3 space-y-2 rounded-lg border border-white/10 bg-white/[0.02] p-3">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                 <span className="text-white/50">
-                  Tier:{" "}
+                  {t("wallet.tier")}:{" "}
                   <span className="font-medium text-[#2DD4BF]">
                     {quota.tierLabel ?? quota.tier}
                   </span>
                 </span>
                 {quota.gercepBalance != null && (
                   <span className="text-white/50">
-                    $GERCEP:{" "}
+                    {t("wallet.gercep")}:{" "}
                     <span className="font-medium text-[#A78BFA]">
                       {formatBalance(quota.gercepBalance)}
                     </span>
@@ -246,9 +242,9 @@ export function WalletLinkCard() {
               </div>
               <div className="text-xs text-white/40">
                 {quota.usedToday ?? 0} /{" "}
-                {quota.dailyRequests.toLocaleString("id-ID")} req hari ini
+                {quota.dailyRequests.toLocaleString("id-ID")} {t("wallet.usageToday")}
                 {quota.remainingToday != null && (
-                  <> · sisa {quota.remainingToday.toLocaleString("id-ID")}</>
+                  <> · {t("wallet.remaining")} {quota.remainingToday.toLocaleString("id-ID")}</>
                 )}
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
@@ -268,36 +264,30 @@ export function WalletLinkCard() {
             className="mt-4"
             onClick={handleUnlink}
           >
-            Unlink wallet
+            {t("wallet.unlink")}
           </Button>
           <button
             type="button"
             onClick={() => loadWallet()}
             className="ml-2 mt-4 text-xs text-white/40 underline hover:text-white/60"
           >
-            Refresh balance
+            {t("wallet.refreshBalance")}
           </button>
         </div>
       ) : (
         <div className="space-y-4">
           {isMobile && !hasWallet ? (
             <div className="space-y-3 rounded-lg border border-[#2DD4BF]/20 bg-[#2DD4BF]/5 p-4">
-              <p className="text-sm text-white/70">
-                Di HP, buka halaman ini lewat{" "}
-                <strong className="text-white">Phantom app</strong> — wallet
-                connect otomatis di sana.
-              </p>
-              <PhantomOpenButton />
-              <p className="text-[11px] text-white/40">
-                1. Tap Buka di Phantom → 2. Login Gercep → 3. Sign &amp; Link
-              </p>
+              <p className="text-sm text-white/70">{t("wallet.mobileHint")}</p>
+              <PhantomOpenButton label={t("wallet.openPhantom")} />
+              <p className="text-[11px] text-white/40">{t("wallet.mobileSteps")}</p>
             </div>
           ) : hasWallet ? (
             <div className="flex flex-wrap items-center gap-3">
               <WalletMultiButton />
               {connected && publicKey && (
                 <Button onClick={handleLink} disabled={linking}>
-                  {linking ? "Verifying..." : "Sign & Link wallet"}
+                  {linking ? t("wallet.verifying") : t("wallet.signLink")}
                 </Button>
               )}
             </div>
@@ -333,10 +323,7 @@ export function WalletLinkCard() {
           )}
 
           {(hasWallet || isMobile) && (
-            <p className="text-xs text-white/40">
-              1. Connect Phantom → 2. Sign message → 3. Wallet ter-link ke akun
-              Gercep
-            </p>
+            <p className="text-xs text-white/40">{t("wallet.steps")}</p>
           )}
         </div>
       )}

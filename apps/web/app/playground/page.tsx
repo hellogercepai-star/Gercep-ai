@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface ModelInfo {
   id: string;
@@ -20,6 +22,7 @@ const inputClass =
   "w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#2DD4BF]/50";
 
 export default function PlaygroundPage() {
+  const { t } = useLanguage();
   const [apiKey, setApiKey] = useState(() => {
     if (typeof window === "undefined") return "";
     return localStorage.getItem("gercep_api_key") ?? "";
@@ -57,7 +60,7 @@ export default function PlaygroundPage() {
     if (loading) return;
 
     if (!apiKey.trim()) {
-      setError("API Key wajib diisi. Buat key di Developers dulu, lalu paste di sini.");
+      setError(t("playground.apiKeyRequired"));
       return;
     }
     if (!prompt.trim()) return;
@@ -86,14 +89,14 @@ export default function PlaygroundPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error?.message ?? "Request gagal.");
+        throw new Error(data.error?.message ?? t("playground.requestFailed"));
       }
 
-      const reply = data.choices?.[0]?.message?.content ?? "(kosong)";
+      const reply = data.choices?.[0]?.message?.content ?? t("playground.emptyReply");
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       setLastUsage(data.usage?.total_tokens ?? null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+      setError(err instanceof Error ? err.message : t("playground.genericError"));
     } finally {
       setLoading(false);
     }
@@ -110,22 +113,23 @@ export default function PlaygroundPage() {
             >
               Gercep AI
             </Link>
-            <p className="text-sm text-white/50">Playground</p>
+            <p className="text-sm text-white/50">{t("playground.subtitle")}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
             <Link href="/docs">
               <Button variant="ghost" size="sm">
-                Docs
+                {t("common.docs")}
               </Button>
             </Link>
             <Link href="/developers">
               <Button variant="secondary" size="sm">
-                API Keys
+                {t("common.apiKeys")}
               </Button>
             </Link>
             <Link href="/dashboard">
               <Button variant="ghost" size="sm">
-                Dashboard
+                {t("common.dashboard")}
               </Button>
             </Link>
           </div>
@@ -134,14 +138,14 @@ export default function PlaygroundPage() {
 
       <main className="mx-auto max-w-4xl px-6 py-8 pb-20">
         <Card
-          title="Test model via Gercep Gateway"
-          description="Satu request shape, sama persis dengan production API key."
+          title={t("playground.title")}
+          description={t("playground.desc")}
           className="mb-6"
         >
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-sm text-white/70">
-                API Key
+                {t("playground.apiKey")}
               </label>
               <input
                 type="password"
@@ -156,11 +160,11 @@ export default function PlaygroundPage() {
               />
               {!apiKey.trim() && (
                 <p className="mt-1 text-xs text-[#F472B6]">
-                  Paste API key dulu — belum terisi.
+                  {t("playground.apiKeyEmpty")}
                 </p>
               )}
               <p className="mt-1 text-xs text-white/40">
-                Buat key di{" "}
+                {t("playground.createKeyAt")}{" "}
                 <Link href="/developers" className="text-[#2DD4BF] underline">
                   Developers
                 </Link>
@@ -168,7 +172,7 @@ export default function PlaygroundPage() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm text-white/70">
-                Model
+                {t("playground.model")}
               </label>
               <select
                 value={model}
@@ -187,9 +191,7 @@ export default function PlaygroundPage() {
 
         <Card className="mb-4 min-h-[280px]">
           {messages.length === 0 ? (
-            <p className="text-sm text-white/40">
-              Kirim prompt pertama untuk test gateway...
-            </p>
+            <p className="text-sm text-white/40">{t("playground.emptyChat")}</p>
           ) : (
             <div className="flex flex-col gap-4">
               {messages.map((msg, i) => (
@@ -202,7 +204,7 @@ export default function PlaygroundPage() {
                   }`}
                 >
                   <span className="mb-1 block text-xs uppercase text-white/40">
-                    {msg.role === "user" ? "You" : "Assistant"}
+                    {msg.role === "user" ? t("common.you") : t("common.assistant")}
                   </span>
                   {msg.content}
                 </div>
@@ -211,7 +213,7 @@ export default function PlaygroundPage() {
           )}
           {lastUsage !== null && (
             <p className="mt-4 text-xs text-white/40">
-              Last request: {lastUsage} tokens
+              {t("playground.lastRequest")}: {lastUsage} tokens
             </p>
           )}
         </Card>
@@ -220,7 +222,7 @@ export default function PlaygroundPage() {
           <input
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Tulis prompt..."
+            placeholder={t("playground.promptPlaceholder")}
             className={`${inputClass} flex-1`}
             disabled={loading}
           />
@@ -228,7 +230,7 @@ export default function PlaygroundPage() {
             type="submit"
             disabled={loading || !prompt.trim() || !apiKey.trim()}
           >
-            {loading ? "..." : "Send"}
+            {loading ? "..." : t("common.send")}
           </Button>
         </form>
 

@@ -5,10 +5,14 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
+
 export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
+  const { t } = useLanguage();
 
   const nextPath = searchParams.get("next") || "/developers";
   const fromWallet = searchParams.get("wallet") === "1";
@@ -53,27 +57,29 @@ export default function RegisterForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#070711] px-6">
+    <main className="relative flex min-h-screen items-center justify-center bg-[#070711] px-6">
+      <div className="absolute right-6 top-6">
+        <LanguageToggle />
+      </div>
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.03] p-8">
         <h1 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Daftar ke Gercep AI
+          {t("auth.registerTitle")}
         </h1>
         <p className="mt-1 text-sm text-white/50">
           {isDevelopersFlow
-            ? "Buat akun developer — API keys, Playground, wallet Phantom."
-            : "Buat akun baru untuk mulai."}
+            ? t("auth.registerSubtitleDev")
+            : t("auth.registerSubtitleDefault")}
         </p>
 
         {isDevelopersFlow && (
           <div className="mt-4 rounded-lg border border-[#2DD4BF]/20 bg-[#2DD4BF]/5 p-3 text-xs text-white/70">
-            Setelah daftar → buat API key → test di Playground → link wallet
-            (opsional).
+            {t("auth.registerHint")}
           </div>
         )}
 
         <form onSubmit={handleRegister} className="mt-6 flex flex-col gap-4">
           <div>
-            <label className="mb-1 block text-xs text-white/60">Nama</label>
+            <label className="mb-1 block text-xs text-white/60">{t("auth.name")}</label>
             <input
               type="text"
               required
@@ -84,7 +90,7 @@ export default function RegisterForm() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs text-white/60">Email</label>
+            <label className="mb-1 block text-xs text-white/60">{t("auth.email")}</label>
             <input
               type="email"
               required
@@ -95,7 +101,7 @@ export default function RegisterForm() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs text-white/60">Password</label>
+            <label className="mb-1 block text-xs text-white/60">{t("auth.password")}</label>
             <input
               type="password"
               required
@@ -113,14 +119,14 @@ export default function RegisterForm() {
             disabled={loading}
             className="mt-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-[#070711] transition hover:bg-white/90 disabled:opacity-50"
           >
-            {loading ? "Memproses..." : "Daftar"}
+            {loading ? t("auth.processing") : t("auth.registerBtn")}
           </button>
         </form>
 
         <p className="mt-6 text-center text-xs text-white/50">
-          Sudah punya akun?{" "}
+          {t("auth.hasAccount")}{" "}
           <Link href={loginHref} className="text-white underline">
-            Masuk
+            {t("common.signIn")}
           </Link>
         </p>
       </div>
