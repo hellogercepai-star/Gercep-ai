@@ -183,8 +183,13 @@ export function useProducts(activeBusiness: Business | null) {
   }, [businessId, supabase]);
 
   useEffect(() => {
-    if (!businessId) return;
     async function initialLoad() {
+      // tanpa bisnis aktif tidak ada yang dimuat — matikan loading
+      // supaya halaman tidak stuck di "Memuat produk..." selamanya
+      if (!businessId) {
+        setLoading(false);
+        return;
+      }
       await loadInventory();
     }
     initialLoad();
