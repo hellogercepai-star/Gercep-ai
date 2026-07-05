@@ -11,65 +11,77 @@ export default function HomePage() {
         <span className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-tight">
           Gercep AI
         </span>
-        <a
-          href="/dashboard"
-          className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/80 transition hover:border-white/30 hover:text-white"
-        >
-          Masuk ke Dashboard
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href="/playground"
+            className="text-sm text-white/70 transition hover:text-white"
+          >
+            Playground
+          </a>
+          <a
+            href="/developers"
+            className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/80 transition hover:border-white/30 hover:text-white"
+          >
+            API Keys
+          </a>
+        </div>
       </nav>
 
       <section className="relative z-10 mx-auto flex max-w-4xl flex-col items-start px-6 pt-24 pb-32 md:px-12 md:pt-32">
         <span className="mb-6 rounded-full border border-[#2DD4BF]/30 bg-[#2DD4BF]/10 px-3 py-1 text-xs font-medium tracking-wide text-[#2DD4BF]">
-          Business OS untuk perusahaan yang bergerak cepat
+          OpenAI-compatible inference gateway
         </span>
 
         <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold leading-[1.1] tracking-tight md:text-6xl">
-          Satu platform untuk
+          Leading models behind
           <br />
           <span className="bg-gradient-to-r from-[#2DD4BF] via-[#A78BFA] to-[#F472B6] bg-clip-text text-transparent">
-            menjalankan seluruh bisnis
+            one Gercep gateway
           </span>
         </h1>
 
         <p className="mt-6 max-w-xl text-base text-white/60 md:text-lg">
-          Gercep AI menyatukan inventory, keuangan, produksi, dan automation
-          AI dalam satu dashboard. Dibangun untuk pemilik bisnis yang tidak
-          punya waktu untuk berpindah-pindah tools.
+          Test fast in the Playground, create your{" "}
+          <code className="text-[#2DD4BF]">sk-gercep-</code> API key, and ship
+          with the same compatible request shape. Token usage tracked — ready
+          for billing and $GERCEP ecosystem.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <a
-            href="/dashboard"
+            href="/playground"
             className="rounded-full bg-white px-6 py-3 text-sm font-medium text-[#070711] transition hover:bg-white/90"
           >
-            Mulai Sekarang
+            Open Playground
           </a>
           <a
-            href="#features"
-            className="text-sm font-medium text-white/70 transition hover:text-white"
+            href="/developers"
+            className="rounded-full border border-white/10 px-6 py-3 text-sm font-medium text-white/80 transition hover:border-white/30 hover:text-white"
           >
-            Lihat fitur →
+            Create API Key
+          </a>
+          <a
+            href="/dashboard"
+            className="text-sm font-medium text-white/50 transition hover:text-white"
+          >
+            Business OS →
           </a>
         </div>
       </section>
 
-      <section
-        id="features"
-        className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-6 md:mx-12 md:grid-cols-3 md:px-0"
-      >
+      <section className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-6 md:mx-12 md:grid-cols-3 md:px-0">
         {[
           {
-            title: "Inventory & Produksi",
-            desc: "Lacak stok, bahan baku, dan produksi real-time lintas bisnis.",
+            title: "Multi-model routing",
+            desc: "DeepSeek today — more providers tomorrow. One base URL, one key.",
           },
           {
-            title: "Keuangan Terpadu",
-            desc: "Cash flow bisnis dan pribadi terpisah, otomatis terhitung.",
+            title: "Your API key",
+            desc: "Developers hold sk-gercep- keys. Usage logged per request.",
           },
           {
-            title: "AI Automation",
-            desc: "Asisten AI untuk kasir, pajak, dan pengambilan keputusan.",
+            title: "Business OS (dogfood)",
+            desc: "Inventory, keuangan, dashboard — built on our own gateway.",
           },
         ].map((f) => (
           <div key={f.title} className="bg-[#070711] p-8">
