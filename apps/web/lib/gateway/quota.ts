@@ -1,0 +1,117 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { fetchGercepBalance, getGercepMintAddress } from "@/lib/wallet/balance";
+import { nextTier, tierForBalance, type QuotaTier } from "@/lib/wallet/tiers";
+import { startOfToday } from "@/lib/gateway/usage-stats";
+
+export interface WalletQuotaInfo {
+  tier: QuotaTier;
+  dailyRequests: number;
+  usedToday: number;
+  remainingToday: number;
+  gercepBalance: number | null;
+  mintConfigured: boolean;
+  walletLinked: boolean;
+  nextTier: QuotaTier | null;
+  tokensToNextTier: number | null;
+  note: string;
+}
+
+async function countTodayRequests(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("usage_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("created_at", startOfToday().toISOString());
+
+  if (error) return 0;
+  return count ?? 0;
+}
+
+export async function getWalletQuotaForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  walletAddress?: string | null
+): Promise<WalletQuotaInfo> {
+  const mintConfigured = Boolean(getGercepMintAddress());
+  const walletLinked = Boolean(walletAddress);
+  const usedToday = await countTodayRequests(supabase, userId);
+
+  let gercepBalance: number | null = null;
+  if (walletAddress && mintConfigured) {
+    try {
+      const result = await fetchGercepBalance(walletAddress);
+      gercepBalance = result?.balance ?? 0;
+    } catch {
+      gercepBalance = null;
+    }
+  }
+
+  const balanceForTier = gercepBalance ?? 0;
+  const tier = walletLinked ? tierForBalance(balanceForTier) : tierForBalance(0);
+  const upcoming = nextTier(tier);
+  const remainingToday = Math.max(0, tier.dailyRequests - usedToday);
+
+  let note: string;
+  if (!walletLinked) {
+    note = "Link wallet Phantom untuk tier $GERCEP.";
+  } else if (!mintConfigured) {
+    note = "Token $GERCEP mint belum dikonfigurasi di server.";
+  } else if (gercepBalance === null) {
+    note = "Gagal baca balance — coba refresh nanti.";
+  } else if (upcoming) {
+    note = `Hold ${formatTokens(upcoming.minBalance - balanceForTier)} $GERCEP lagi untuk tier ${upcoming.label}.`;
+  } else {
+    note = "Tier maksimum tercapai.";
+  }
+
+  return {
+    tier,
+    dailyRequests: tier.dailyRequests,
+    usedToday,
+    remainingToday,
+    gercepBalance,
+    mintConfigured,
+    walletLinked,
+    nextTier: upcoming,
+    tokensToNextTier: upcoming
+      ? Math.max(0, upcoming.minBalance - balanceForTier)
+      : null,
+    note,
+  };
+}
+
+export async function assertWithinDailyQuota(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<{ ok: true } | { ok: false; message: string; quota: WalletQuotaInfo }> {
+  const { data: wallet } = await supabase
+    .from("wallet_links")
+    .select("address")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const quota = await getWalletQuotaForUser(
+    supabase,
+    userId,
+    wallet?.address ?? null
+  );
+
+  if (quota.usedToday >= quota.dailyRequests) {
+    return {
+      ok: false,
+      message: `Daily quota habis (${quota.dailyRequests} req/day, tier ${quota.tier.label}). Link wallet & hold $GERCEP untuk naik tier.`,
+      quota,
+    };
+  }
+
+  return { ok: true };
+}
+
+function formatTokens(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+}

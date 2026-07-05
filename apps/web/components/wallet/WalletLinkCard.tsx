@@ -27,8 +27,21 @@ interface LinkedWallet {
 
 interface WalletQuota {
   tier: string;
+  tierLabel?: string;
   dailyRequests: number;
+  usedToday?: number;
+  remainingToday?: number;
+  gercepBalance?: number | null;
+  mintConfigured?: boolean;
+  nextTierLabel?: string | null;
+  tokensToNextTier?: number | null;
   note: string;
+}
+
+function formatBalance(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(2)}K`;
+  return n.toLocaleString("id-ID", { maximumFractionDigits: 4 });
 }
 
 export function WalletLinkCard() {
@@ -168,7 +181,7 @@ export function WalletLinkCard() {
   return (
     <Card
       title="Solana Wallet"
-      description="Link wallet untuk $GERCEP quota tiers. Phase 1: verify ownership — balance check coming soon."
+      description="Wallet Phantom ter-link ke akun Gercep. Tier quota naik otomatis sesuai balance $GERCEP."
       className="mb-6"
     >
       {needsLogin ? (
@@ -201,11 +214,45 @@ export function WalletLinkCard() {
             </p>
           </div>
           {quota && (
-            <p className="mt-3 text-sm text-white/50">
-              Tier: <span className="text-[#2DD4BF]">{quota.tier}</span> ·{" "}
-              {quota.dailyRequests.toLocaleString("id-ID")} req/day (beta) ·{" "}
-              {quota.note}
-            </p>
+            <div className="mt-3 space-y-2 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <span className="text-white/50">
+                  Tier:{" "}
+                  <span className="font-medium text-[#2DD4BF]">
+                    {quota.tierLabel ?? quota.tier}
+                  </span>
+                </span>
+                {quota.gercepBalance != null && (
+                  <span className="text-white/50">
+                    $GERCEP:{" "}
+                    <span className="font-medium text-[#A78BFA]">
+                      {formatBalance(quota.gercepBalance)}
+                    </span>
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-white/40">
+                {quota.usedToday ?? 0} /{" "}
+                {quota.dailyRequests.toLocaleString("id-ID")} req hari ini
+                {quota.remainingToday != null && (
+                  <> · sisa {quota.remainingToday.toLocaleString("id-ID")}</>
+                )}
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-[#2DD4BF]"
+                  style={{
+                    width: `${Math.min(100, ((quota.usedToday ?? 0) / quota.dailyRequests) * 100)}%`,
+                  }}
+                />
+              </div>
+              <p className="text-xs text-white/50">{quota.note}</p>
+              {quota.mintConfigured === false && (
+                <p className="text-[11px] text-[#F472B6]">
+                  Mint $GERCEP belum diset di server — tier Beta sementara.
+                </p>
+              )}
+            </div>
           )}
           <Button
             variant="danger"
@@ -215,6 +262,13 @@ export function WalletLinkCard() {
           >
             Unlink wallet
           </Button>
+          <button
+            type="button"
+            onClick={() => loadWallet()}
+            className="ml-2 mt-4 text-xs text-white/40 underline hover:text-white/60"
+          >
+            Refresh balance
+          </button>
         </div>
       ) : (
         <div className="space-y-4">
