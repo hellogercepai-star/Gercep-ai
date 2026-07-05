@@ -491,8 +491,9 @@ export default function HomePage() {
             {
               title: "Legal",
               links: [
-                { l: "Privacy", h: "/docs", soon: true },
-                { l: "API status", h: "/api/v1/models", soon: false },
+                { l: "Privacy", h: "/privacy" },
+                { l: "Terms", h: "/terms" },
+                { l: "Whitepaper", h: "/whitepaper" },
               ],
             },
           ].map((col) => (
@@ -506,14 +507,8 @@ export default function HomePage() {
                     <Link
                       href={link.h}
                       className="text-sm text-white/40 transition hover:text-white"
-                      {...("soon" in link && link.soon
-                        ? { title: "Privacy policy — coming soon" }
-                        : {})}
                     >
                       {link.l}
-                      {"soon" in link && link.soon ? (
-                        <span className="ml-1 text-[10px] text-white/25">(soon)</span>
-                      ) : null}
                     </Link>
                   </li>
                 ))}

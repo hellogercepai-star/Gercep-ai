@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gercep AI — Web App
 
-## Getting Started
+OpenAI-compatible inference gateway for developers. Live routes: Playground, API keys, usage dashboard, Phantom wallet link.
 
-First, run the development server:
+## Quick start
 
 ```bash
+cd apps/web
+cp .env.example .env.local
+# Fill Supabase + DEEPSEEK_API_KEY in .env.local
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/playground](http://localhost:3000/playground) after creating an account and API key at `/developers`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase migrations
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run in Supabase SQL Editor (in order):
 
-## Learn More
+1. `supabase/migrations/001_gateway_api_keys.sql`
+2. `supabase/migrations/002_wallet_links.sql`
 
-To learn more about Next.js, take a look at the following resources:
+## Required environment variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side gateway auth & usage insert |
+| `DEEPSEEK_API_KEY` | DeepSeek provider (inference) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See `.env.example` for optional Solana / dev vars.
 
-## Deploy on Vercel
+## Key routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Path | Description |
+|------|-------------|
+| `/` | Marketing landing |
+| `/playground` | Test models |
+| `/developers` | API keys + usage + wallet |
+| `/docs` | API reference |
+| `/whitepaper` | Tokenomics & vision |
+| `/privacy` `/terms` | Legal stubs |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Gateway API
+
+```bash
+curl $BASE/api/v1/chat/completions \
+  -H "Authorization: Bearer sk-gercep-YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+Business OS (`/dashboard`) is dogfood only — gateway is the core product.
