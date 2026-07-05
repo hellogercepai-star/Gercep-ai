@@ -84,15 +84,15 @@ export async function signWalletMessage(
   message: string,
   adapterSignMessage?: (msg: Uint8Array) => Promise<Uint8Array | { signature: Uint8Array }>
 ): Promise<Uint8Array> {
-  const phantom = getPhantom();
-  if (phantom?.isPhantom && phantom.signMessage) {
-    return signWithPhantom(message);
-  }
-
   if (adapterSignMessage) {
     const encoded = new TextEncoder().encode(message);
     const result = await adapterSignMessage(encoded);
     return normalizeSignatureBytes(result);
+  }
+
+  const phantom = getPhantom();
+  if (phantom?.isPhantom && phantom.signMessage) {
+    return signWithPhantom(message);
   }
 
   throw new Error("Wallet tidak support sign message.");

@@ -26,3 +26,13 @@ export function nextTier(current: QuotaTier): QuotaTier | null {
   if (idx < 0 || idx >= GERCEP_TIERS.length - 1) return null;
   return GERCEP_TIERS[idx + 1] ?? null;
 }
+
+/** Resolve daily quota tier from on-chain balance (defaults to Beta when unlinked or mint unset). */
+export function resolveQuotaTier(input: {
+  walletLinked: boolean;
+  gercepBalance: number | null;
+}): QuotaTier {
+  if (!input.walletLinked) return GERCEP_TIERS[0]!;
+  const balance = input.gercepBalance ?? 0;
+  return tierForBalance(balance);
+}

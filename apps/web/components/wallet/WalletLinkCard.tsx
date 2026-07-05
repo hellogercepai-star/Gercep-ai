@@ -6,7 +6,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { buildWalletLinkMessage } from "@/lib/wallet/solana";
 import {
   bytesToBase64,
   signWalletMessage,
@@ -90,7 +89,7 @@ export function WalletLinkCard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadWallet();
@@ -106,28 +105,30 @@ export function WalletLinkCard() {
     setError(null);
 
     try {
+      const address = publicKey.toBase58();
+
       const challengeRes = await fetch("/api/v1/wallet/challenge", {
+        method: "POST",
         credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address }),
       });
       const challengeData = await readJsonResponse<{
         nonce?: string;
-        expiresAt?: string;
+        message?: string;
         error?: string;
       }>(challengeRes, "Minta challenge");
       if (!challengeRes.ok) {
         throw new Error(
           challengeData.error ??
-            "Gagal minta challenge. Cek migration 002_wallet_links.sql di Supabase."
+            "Gagal minta challenge. Jalankan 003_wallet_links_repair.sql di Supabase SQL Editor."
         );
       }
 
-      const address = publicKey.toBase58();
-      const expiresAt = new Date(challengeData.expiresAt!);
-      const message = buildWalletLinkMessage({
-        address,
-        nonce: challengeData.nonce!,
-        expiresAt,
-      });
+      const message = challengeData.message?.trim();
+      if (!message || !challengeData.nonce) {
+        throw new Error("Challenge tidak lengkap dari server.");
+      }
 
       let signatureBytes: Uint8Array;
       try {
@@ -175,7 +176,16 @@ export function WalletLinkCard() {
 
   const handleUnlink = async () => {
     if (!confirm(t("wallet.unlinkConfirm"))) return;
-    await fetch("/api/v1/wallet", { method: "DELETE" });
+    setError(null);
+    const res = await fetch("/api/v1/wallet", {
+      method: "DELETE",
+      credentials: "same-origin",
+    });
+    if (!res.ok) {
+      const data = await readJsonResponse<{ error?: string }>(res, "Unlink wallet");
+      setError(data.error ?? t("wallet.loadError"));
+      return;
+    }
     setLinked(null);
     await loadWallet();
   };
