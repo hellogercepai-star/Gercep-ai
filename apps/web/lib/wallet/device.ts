@@ -13,7 +13,10 @@ export function hasInjectedSolanaWallet(): boolean {
 }
 
 export function isPhantomInAppBrowser(): boolean {
-  return hasInjectedSolanaWallet();
+  if (typeof window === "undefined") return false;
+  return Boolean(
+    (window as Window & { solana?: { isPhantom?: boolean } }).solana?.isPhantom
+  );
 }
 
 /** Buka halaman ini di Phantom mobile in-app browser (wallet connect jalan di sana). */

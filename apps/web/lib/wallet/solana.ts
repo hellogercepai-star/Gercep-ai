@@ -3,15 +3,26 @@ import nacl from "tweetnacl";
 import { PublicKey } from "@solana/web3.js";
 import { base64ToBytes } from "@/lib/wallet/sign";
 
+export function isValidSolanaAddress(address: string): boolean {
+  try {
+    const key = new PublicKey(address.trim());
+    return PublicKey.isOnCurve(key.toBytes());
+  } catch {
+    return false;
+  }
+}
+
 export function buildWalletLinkMessage(input: {
   address: string;
   nonce: string;
   expiresAt: Date;
+  domain: string;
 }): string {
   return [
     "Link wallet to Gercep AI",
     "",
-    `Address: ${input.address}`,
+    `Domain: ${input.domain}`,
+    `Address: ${input.address.trim()}`,
     `Nonce: ${input.nonce}`,
     `Expires: ${input.expiresAt.toISOString()}`,
   ].join("\n");

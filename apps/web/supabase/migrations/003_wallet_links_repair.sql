@@ -1,25 +1,39 @@
--- Gercep AI: Solana wallet linking
---
--- SUDAH PERNAH JALAN / ERROR "wallet_links already exists"?
---   → JANGAN jalankan file ini lagi.
---   → Jalankan: supabase/migrations/003_wallet_links_repair.sql
---
--- BELUM PERNAH (fresh Supabase)?
---   → Jalankan file ini sekali.
+-- Gercep AI: wallet repair — AMAN dijalankan jika 002 sudah pernah jalan
+-- Error "relation wallet_links already exists" = SKIP 002, jalankan file INI saja.
 
-create table if not exists public.wallet_links (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  chain text not null default 'solana',
-  address text not null,
-  verified_at timestamptz not null default now(),
-  created_at timestamptz not null default now(),
-  constraint wallet_links_user_id_unique unique (user_id),
-  constraint wallet_links_address_unique unique (address)
-);
+-- Pastikan kolom yang dipakai API ada (abaikan jika sudah ada)
+alter table public.wallet_links
+  add column if not exists chain text not null default 'solana';
+
+alter table public.wallet_links
+  add column if not exists verified_at timestamptz not null default now();
+
+alter table public.wallet_links
+  add column if not exists created_at timestamptz not null default now();
+
+-- Unique constraints (skip jika sudah ada — lihat NOTICE, bukan ERROR)
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'wallet_links_user_id_unique'
+  ) then
+    alter table public.wallet_links
+      add constraint wallet_links_user_id_unique unique (user_id);
+  end if;
+  if not exists (
+    select 1 from pg_constraint where conname = 'wallet_links_address_unique'
+  ) then
+    alter table public.wallet_links
+      add constraint wallet_links_address_unique unique (address);
+  end if;
+exception
+  when duplicate_table then null;
+  when duplicate_object then null;
+end $$;
 
 create index if not exists wallet_links_user_id_idx on public.wallet_links(user_id);
 
+-- Tabel challenge (untuk sign & link)
 create table if not exists public.wallet_link_challenges (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -29,8 +43,10 @@ create table if not exists public.wallet_link_challenges (
   created_at timestamptz not null default now()
 );
 
-create index if not exists wallet_link_challenges_user_id_idx on public.wallet_link_challenges(user_id);
+create index if not exists wallet_link_challenges_user_id_idx
+  on public.wallet_link_challenges(user_id);
 
+-- RLS
 alter table public.wallet_links enable row level security;
 alter table public.wallet_link_challenges enable row level security;
 
@@ -53,5 +69,3 @@ create policy "wallet_link_challenges_insert_own" on public.wallet_link_challeng
 drop policy if exists "wallet_link_challenges_delete_own" on public.wallet_link_challenges;
 create policy "wallet_link_challenges_delete_own" on public.wallet_link_challenges
   for delete using (auth.uid() = user_id);
-
--- Insert wallet_links via service role only (API verify route)

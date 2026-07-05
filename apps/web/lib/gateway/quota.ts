@@ -1,5 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { fetchGercepBalance, getGercepMintAddress } from "@/lib/wallet/balance";
+import {
+  fetchGercepBalanceResult,
+  getGercepMintAddress,
+} from "@/lib/wallet/balance";
 import { nextTier, tierForBalance, type QuotaTier } from "@/lib/wallet/tiers";
 import { startOfToday } from "@/lib/gateway/usage-stats";
 
@@ -11,6 +14,7 @@ export interface WalletQuotaInfo {
   gercepBalance: number | null;
   mintConfigured: boolean;
   walletLinked: boolean;
+  balanceReadable: boolean;
   nextTier: QuotaTier | null;
   tokensToNextTier: number | null;
   note: string;
@@ -40,16 +44,20 @@ export async function getWalletQuotaForUser(
   const usedToday = await countTodayRequests(supabase, userId);
 
   let gercepBalance: number | null = null;
+  let balanceReadable = !mintConfigured;
+
   if (walletAddress && mintConfigured) {
-    try {
-      const result = await fetchGercepBalance(walletAddress);
-      gercepBalance = result?.balance ?? 0;
-    } catch {
+    const result = await fetchGercepBalanceResult(walletAddress);
+    if (result.status === "ok") {
+      gercepBalance = result.balance;
+      balanceReadable = true;
+    } else if (result.status === "error") {
+      balanceReadable = false;
       gercepBalance = null;
     }
   }
 
-  const balanceForTier = gercepBalance ?? 0;
+  const balanceForTier = balanceReadable ? (gercepBalance ?? 0) : 0;
   const tier = walletLinked ? tierForBalance(balanceForTier) : tierForBalance(0);
   const upcoming = nextTier(tier);
   const remainingToday = Math.max(0, tier.dailyRequests - usedToday);
@@ -59,8 +67,11 @@ export async function getWalletQuotaForUser(
     note = "Connect Phantom → Sign & Link. Token $GERCEP belum launch — tier Beta tetap aktif.";
   } else if (!mintConfigured) {
     note = "Token $GERCEP belum launch — tier Beta (1.000 req/hari) aktif untuk wallet kamu.";
-  } else if (gercepBalance === null) {
-    note = "Gagal baca balance — coba refresh nanti.";
+  } else if (!balanceReadable) {
+    note =
+      "Balance sementara tidak terbaca (RPC sibuk atau mint belum live). Tier Beta (1.000 req/hari) tetap aktif.";
+  } else if (gercepBalance === 0 && upcoming) {
+    note = `Wallet ter-link — hold ${formatTokens(upcoming.minBalance)} $GERCEP untuk tier ${upcoming.label}. Saat ini tier Beta aktif.`;
   } else if (upcoming) {
     note = `Hold ${formatTokens(upcoming.minBalance - balanceForTier)} $GERCEP lagi untuk tier ${upcoming.label}.`;
   } else {
@@ -75,6 +86,7 @@ export async function getWalletQuotaForUser(
     gercepBalance,
     mintConfigured,
     walletLinked,
+    balanceReadable,
     nextTier: upcoming,
     tokensToNextTier: upcoming
       ? Math.max(0, upcoming.minBalance - balanceForTier)

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  buildWalletLinkMessage,
+  extractAddressFromLinkMessage,
+  isChallengeExpired,
+} from "@/lib/wallet/challenge";
+import {
+  isValidSolanaAddress,
   truncateAddress,
   verifySolanaSignature,
 } from "@/lib/wallet/solana";
@@ -89,23 +93,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { address?: string; signature?: string; signatureBase64?: string; nonce?: string };
+  let body: {
+    address?: string;
+    signature?: string;
+    signatureBase64?: string;
+    nonce?: string;
+  };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { address, signature, signatureBase64, nonce } = body;
-  if (
-    !address?.trim() ||
-    (!signature?.trim() && !signatureBase64?.trim()) ||
-    !nonce?.trim()
-  ) {
+  const address = body.address?.trim();
+  const signature = body.signature?.trim();
+  const signatureBase64 = body.signatureBase64?.trim();
+  const nonce = body.nonce?.trim();
+
+  if (!address || (!signature && !signatureBase64) || !nonce) {
     return NextResponse.json(
       { error: "address, signature, dan nonce wajib." },
       { status: 400 }
     );
+  }
+
+  if (!isValidSolanaAddress(address)) {
+    return NextResponse.json({ error: "Alamat Solana tidak valid." }, { status: 400 });
   }
 
   const { data: challenge, error: challengeError } = await supabase
@@ -117,46 +130,77 @@ export async function POST(request: NextRequest) {
 
   if (challengeError || !challenge) {
     return NextResponse.json(
-      { error: "Challenge tidak valid atau expired. Minta challenge baru." },
+      { error: "Challenge tidak valid atau sudah dipakai. Minta challenge baru." },
       { status: 400 }
     );
   }
 
   const row = challenge as ChallengeRow;
-  if (new Date(row.expires_at) < new Date()) {
+
+  if (isChallengeExpired(row.expires_at)) {
+    await supabase
+      .from("wallet_link_challenges")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("nonce", nonce);
     return NextResponse.json({ error: "Challenge expired." }, { status: 400 });
   }
 
-  const message = buildWalletLinkMessage({
-    address: address.trim(),
-    nonce: row.nonce,
-    expiresAt: new Date(row.expires_at),
-  });
+  const message = row.message?.trim();
+  if (!message) {
+    return NextResponse.json(
+      { error: "Challenge corrupt. Minta challenge baru." },
+      { status: 400 }
+    );
+  }
+
+  const challengeAddress = extractAddressFromLinkMessage(message);
+  if (!challengeAddress || challengeAddress !== address) {
+    return NextResponse.json(
+      { error: "Address tidak cocok dengan challenge." },
+      { status: 400 }
+    );
+  }
 
   const valid = verifySolanaSignature({
-    address: address.trim(),
+    address,
     message,
-    signatureBase58: signature?.trim(),
-    signatureBase64: signatureBase64?.trim(),
+    signatureBase58: signature,
+    signatureBase64,
   });
 
   if (!valid) {
     return NextResponse.json({ error: "Signature invalid." }, { status: 401 });
   }
 
+  // Consume challenge atomically — prevents replay even under concurrent POSTs.
+  const { data: consumed, error: consumeError } = await supabase
+    .from("wallet_link_challenges")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("nonce", nonce)
+    .select("nonce")
+    .maybeSingle();
+
+  if (consumeError || !consumed) {
+    return NextResponse.json(
+      { error: "Challenge sudah dipakai. Minta challenge baru." },
+      { status: 409 }
+    );
+  }
+
   let admin;
   try {
     admin = createAdminClient();
   } catch (err) {
-    const msg =
-      err instanceof Error ? err.message : "Server config error.";
+    const msg = err instanceof Error ? err.message : "Server config error.";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 
   const { data: existingAddress } = await admin
     .from("wallet_links")
     .select("user_id")
-    .eq("address", address.trim())
+    .eq("address", address)
     .maybeSingle();
 
   if (existingAddress && existingAddress.user_id !== user.id) {
@@ -172,7 +216,7 @@ export async function POST(request: NextRequest) {
       {
         user_id: user.id,
         chain: "solana",
-        address: address.trim(),
+        address,
         verified_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
@@ -183,8 +227,6 @@ export async function POST(request: NextRequest) {
   if (linkError) {
     return NextResponse.json({ error: linkError.message }, { status: 500 });
   }
-
-  await admin.from("wallet_link_challenges").delete().eq("user_id", user.id);
 
   return NextResponse.json({
     wallet: mapWallet(linked as WalletLinkRow),
@@ -210,6 +252,8 @@ export async function DELETE() {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await supabase.from("wallet_link_challenges").delete().eq("user_id", user.id);
 
   return NextResponse.json({ unlinked: true });
 }
