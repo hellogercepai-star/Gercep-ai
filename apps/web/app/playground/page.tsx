@@ -49,7 +49,13 @@ export default function PlaygroundPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!prompt.trim() || !apiKey.trim() || loading) return;
+    if (loading) return;
+
+    if (!apiKey.trim()) {
+      setError("API Key wajib diisi. Buat key di Developers dulu, lalu paste di sini.");
+      return;
+    }
+    if (!prompt.trim()) return;
 
     localStorage.setItem("gercep_api_key", apiKey.trim());
     setLoading(true);
@@ -130,10 +136,19 @@ export default function PlaygroundPage() {
               <input
                 type="password"
                 value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e) => {
+                  setApiKey(e.target.value);
+                  if (error?.includes("API Key")) setError(null);
+                }}
                 placeholder="sk-gercep-..."
-                className={inputClass}
+                className={`${inputClass} ${!apiKey.trim() ? "border-[#F472B6]/40" : ""}`}
+                required
               />
+              {!apiKey.trim() && (
+                <p className="mt-1 text-xs text-[#F472B6]">
+                  Paste API key dulu — belum terisi.
+                </p>
+              )}
               <p className="mt-1 text-xs text-white/40">
                 Buat key di{" "}
                 <Link href="/developers" className="text-[#2DD4BF] underline">
@@ -199,7 +214,10 @@ export default function PlaygroundPage() {
             className={`${inputClass} flex-1`}
             disabled={loading}
           />
-          <Button type="submit" disabled={loading || !prompt.trim()}>
+          <Button
+            type="submit"
+            disabled={loading || !prompt.trim() || !apiKey.trim()}
+          >
             {loading ? "..." : "Send"}
           </Button>
         </form>
