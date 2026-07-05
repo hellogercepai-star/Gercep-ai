@@ -22,3 +22,10 @@ export interface TransactionSummary {
   netProfit: number;
   period: "today" | "week" | "month" | "year";
 }
+
+export interface NewTransactionInput {
+  type: TransactionType;
+  amount: number;
+  description?: string;
+  category?: string;
+}
