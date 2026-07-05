@@ -2,6 +2,7 @@
 
 import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface ModelInfo {
   id: string;
@@ -12,6 +13,7 @@ const inputClass =
   "w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#2DD4BF]/50";
 
 export function HeroPlayground() {
+  const { t } = useLanguage();
   const [apiKey, setApiKey] = useState("");
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [model, setModel] = useState("deepseek-chat");
@@ -44,7 +46,7 @@ export function HeroPlayground() {
   const submit = async () => {
     if (loading || !prompt.trim()) return;
     if (!apiKey.trim()) {
-      setError("Paste API key dulu — buat di Developers.");
+      setError(t("heroPlayground.apiKeyRequired"));
       return;
     }
 
@@ -66,11 +68,11 @@ export function HeroPlayground() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message ?? "Request gagal.");
-      setReply(data.choices?.[0]?.message?.content ?? "(kosong)");
+      if (!res.ok) throw new Error(data.error?.message ?? t("playground.requestFailed"));
+      setReply(data.choices?.[0]?.message?.content ?? t("playground.emptyReply"));
       setTokens(data.usage?.total_tokens ?? null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+      setError(err instanceof Error ? err.message : t("playground.genericError"));
     } finally {
       setLoading(false);
     }
@@ -95,7 +97,7 @@ export function HeroPlayground() {
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="rounded-md bg-[#2DD4BF]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#2DD4BF]">
-            Chat
+            {t("common.chat")}
           </span>
           <span className="font-mono text-xs text-white/60">{modelLabel}</span>
         </div>
@@ -103,7 +105,7 @@ export function HeroPlayground() {
           href="/playground"
           className="text-[10px] uppercase tracking-wider text-white/40 transition hover:text-white"
         >
-          API view →
+          {t("heroPlayground.apiView")}
         </Link>
       </div>
 
@@ -115,7 +117,7 @@ export function HeroPlayground() {
             setApiKey(e.target.value);
             if (error) setError(null);
           }}
-          placeholder="sk-gercep-..."
+          placeholder={t("heroPlayground.apiKeyPlaceholder")}
           className={inputClass}
         />
         <select
@@ -136,11 +138,13 @@ export function HeroPlayground() {
           <p className="text-sm leading-relaxed text-white/80">{reply}</p>
         ) : (
           <p className="text-sm text-white/35">
-            Draft a launch plan for an AI finance assistant...
+            {t("heroPlayground.emptyDraft")}
           </p>
         )}
         {tokens !== null && (
-          <p className="mt-2 text-[10px] text-white/30">{tokens} tokens</p>
+          <p className="mt-2 text-[10px] text-white/30">
+            {tokens} {t("common.tokens")}
+          </p>
         )}
       </div>
 
@@ -150,15 +154,15 @@ export function HeroPlayground() {
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={onKeyDown}
           rows={2}
-          placeholder="Tulis prompt — Enter to submit"
+          placeholder={t("heroPlayground.promptPlaceholder")}
           className={`${inputClass} resize-none`}
           disabled={loading}
         />
         <div className="mt-2 flex items-center justify-between">
           <p className="text-[10px] text-white/35">
-            Buat key di{" "}
+            {t("heroPlayground.createKeyAt")}{" "}
             <Link href="/developers" className="text-[#2DD4BF] hover:underline">
-              Developers
+              {t("common.developers")}
             </Link>
           </p>
           <button
@@ -166,7 +170,7 @@ export function HeroPlayground() {
             disabled={loading || !prompt.trim()}
             className="rounded-full bg-white px-4 py-1.5 text-xs font-medium text-[#070711] transition hover:bg-white/90 disabled:opacity-40"
           >
-            {loading ? "..." : "Send"}
+            {loading ? "..." : t("common.send")}
           </button>
         </div>
       </form>

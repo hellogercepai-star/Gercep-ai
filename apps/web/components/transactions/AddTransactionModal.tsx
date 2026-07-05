@@ -3,13 +3,13 @@
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { TransactionType } from "@/types";
 import type { NewTransactionInput } from "@/types/transaction";
 
 interface AddTransactionModalProps {
   open: boolean;
   onClose: () => void;
-  /** teruskan createTransaction dari useTransactions() milik parent */
   onCreate: (input: NewTransactionInput) => Promise<unknown>;
 }
 
@@ -21,6 +21,7 @@ export function AddTransactionModal({
   onClose,
   onCreate,
 }: AddTransactionModalProps) {
+  const { t } = useLanguage();
   const [type, setType] = useState<TransactionType>("income");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -32,6 +33,21 @@ export function AddTransactionModal({
 
   const parsedAmount = Number(amount);
   const isValidAmount = parsedAmount > 0;
+
+  const typeOptions = [
+    {
+      value: "income" as const,
+      label: t("business.income"),
+      hint: t("business.incomeHint"),
+      activeClass: "border-[#2DD4BF]/60 bg-[#2DD4BF]/10 text-white",
+    },
+    {
+      value: "expense" as const,
+      label: t("business.expense"),
+      hint: t("business.expenseHint"),
+      activeClass: "border-[#F472B6]/60 bg-[#F472B6]/10 text-white",
+    },
+  ];
 
   const resetForm = () => {
     setType("income");
@@ -64,9 +80,7 @@ export function AddTransactionModal({
       onClose();
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal mencatat transaksi. Coba lagi."
+        err instanceof Error ? err.message : t("business.transactionError")
       );
     } finally {
       setSubmitting(false);
@@ -76,32 +90,17 @@ export function AddTransactionModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070711]/80 p-4 backdrop-blur-sm">
       <Card
-        title="Catat Transaksi"
-        description="Tambahkan pemasukan atau pengeluaran bisnis aktif."
+        title={t("business.recordTransaction")}
+        description={t("business.recordTransactionDesc")}
         className="w-full max-w-md bg-[#070711]"
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <span className="mb-1.5 block text-sm text-white/70">Tipe</span>
+            <span className="mb-1.5 block text-sm text-white/70">
+              {t("business.type")}
+            </span>
             <div className="grid grid-cols-2 gap-2">
-              {(
-                [
-                  {
-                    value: "income" as const,
-                    label: "Pemasukan",
-                    hint: "uang masuk",
-                    activeClass:
-                      "border-[#2DD4BF]/60 bg-[#2DD4BF]/10 text-white",
-                  },
-                  {
-                    value: "expense" as const,
-                    label: "Pengeluaran",
-                    hint: "uang keluar",
-                    activeClass:
-                      "border-[#F472B6]/60 bg-[#F472B6]/10 text-white",
-                  },
-                ] as const
-              ).map((opt) => (
+              {typeOptions.map((opt) => (
                 <label
                   key={opt.value}
                   className={`cursor-pointer rounded-lg border px-3 py-2.5 text-sm transition ${
@@ -132,7 +131,8 @@ export function AddTransactionModal({
               htmlFor="transaction-amount"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Jumlah <span className="text-[#F472B6]">*</span>
+              {t("business.amount")}{" "}
+              <span className="text-[#F472B6]">*</span>
             </label>
             <input
               id="transaction-amount"
@@ -142,7 +142,7 @@ export function AddTransactionModal({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
-              placeholder="cth. 500000"
+              placeholder={t("business.amountPlaceholder")}
               className={inputClass}
             />
           </div>
@@ -152,13 +152,13 @@ export function AddTransactionModal({
               htmlFor="transaction-category"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Kategori
+              {t("business.category")}
             </label>
             <input
               id="transaction-category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              placeholder='cth. "Penjualan", "Operasional", "Gaji"'
+              placeholder={t("business.transactionCategoryPlaceholder")}
               className={inputClass}
             />
           </div>
@@ -168,14 +168,15 @@ export function AddTransactionModal({
               htmlFor="transaction-description"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Keterangan <span className="text-white/40">(opsional)</span>
+              {t("business.notes")}{" "}
+              <span className="text-white/40">({t("business.optional")})</span>
             </label>
             <textarea
               id="transaction-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder="Detail transaksi..."
+              placeholder={t("business.transactionDescPlaceholder")}
               className={`${inputClass} resize-none`}
             />
           </div>
@@ -189,10 +190,10 @@ export function AddTransactionModal({
               onClick={handleClose}
               disabled={submitting}
             >
-              Batal
+              {t("business.cancel")}
             </Button>
             <Button type="submit" disabled={!isValidAmount || submitting}>
-              {submitting ? "Menyimpan..." : "Simpan Transaksi"}
+              {submitting ? t("business.saving") : t("business.saveTransaction")}
             </Button>
           </div>
         </form>

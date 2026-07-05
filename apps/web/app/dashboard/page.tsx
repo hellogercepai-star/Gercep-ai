@@ -6,6 +6,7 @@ import { Header } from "@/components/shared/Header";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { CreateBusinessModal } from "@/components/business/CreateBusinessModal";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 
@@ -26,6 +27,7 @@ function formatRupiah(value: number): string {
 }
 
 export default function DashboardPage() {
+  const { t } = useLanguage();
   const { businesses, activeBusiness, loading, createBusiness } =
     useBusiness();
   const { stats, loading: statsLoading } = useDashboardStats(activeBusiness);
@@ -33,21 +35,23 @@ export default function DashboardPage() {
 
   const statItems = [
     {
-      label: "Total Revenue",
+      label: t("dashboard.totalRevenue"),
       value: formatRupiah(stats.revenue),
-      change: `margin ${stats.margin.toFixed(1)}%`,
+      change: t("dashboard.marginChange", {
+        margin: stats.margin.toFixed(1),
+      }),
       accent: "#2DD4BF",
     },
     {
-      label: "Active Businesses",
+      label: t("dashboard.activeBusinesses"),
       value: String(businesses.filter((b) => b.isActive).length),
-      change: "dalam satu akun",
+      change: t("dashboard.inOneAccount"),
       accent: "#A78BFA",
     },
     {
-      label: "Pending Orders",
+      label: t("dashboard.pendingOrders"),
       value: String(stats.pendingOrders),
-      change: "menunggu diproses",
+      change: t("dashboard.awaitingProcess"),
       accent: "#F472B6",
     },
   ];
@@ -58,24 +62,26 @@ export default function DashboardPage() {
 
       <div className="min-w-0 flex-1">
         <Header
-          title="Dashboard"
-          subtitle="Ringkasan bisnis kamu hari ini."
-          businessName={activeBusiness?.name ?? "Bisnis Saya"}
+          title={t("dashboard.title")}
+          subtitle={t("dashboard.subtitle")}
+          businessName={activeBusiness?.name}
         />
 
         <main className="px-8 py-8 pb-20">
           {loading ? (
             <Card>
-              <p className="text-sm text-white/50">Memuat data bisnis...</p>
+              <p className="text-sm text-white/50">
+                {t("dashboard.loadingBusiness")}
+              </p>
             </Card>
           ) : businesses.length === 0 ? (
             <Card
-              title="Belum ada bisnis"
-              description="Gercep AI bisa mengelola banyak bisnis dalam satu akun. Buat bisnis pertamamu untuk mulai."
+              title={t("dashboard.noBusiness")}
+              description={t("dashboard.noBusinessDesc")}
               className="mx-auto max-w-lg"
             >
               <Button onClick={() => setShowCreateModal(true)}>
-                + Buat Bisnis Pertama
+                {t("dashboard.createFirstBusiness")}
               </Button>
             </Card>
           ) : (
@@ -104,8 +110,8 @@ export default function DashboardPage() {
 
               <Card
                 className="mt-6"
-                title="Modul akan tampil di sini"
-                description="Inventory, Keuangan, Produksi, dan modul lainnya akan terhubung ke dashboard ini."
+                title={t("dashboard.modulesTitle")}
+                description={t("dashboard.modulesDesc")}
               />
             </>
           )}

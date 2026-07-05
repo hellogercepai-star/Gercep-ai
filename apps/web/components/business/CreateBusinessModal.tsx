@@ -3,11 +3,11 @@
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface CreateBusinessModalProps {
   open: boolean;
   onClose?: () => void;
-  /** teruskan createBusiness dari useBusiness() milik parent */
   onCreate: (name: string, description?: string) => Promise<unknown>;
 }
 
@@ -16,6 +16,7 @@ export function CreateBusinessModal({
   onClose,
   onCreate,
 }: CreateBusinessModalProps) {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -37,7 +38,7 @@ export function CreateBusinessModal({
       onClose?.();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Gagal membuat bisnis. Coba lagi."
+        err instanceof Error ? err.message : t("business.createError")
       );
     } finally {
       setSubmitting(false);
@@ -47,8 +48,8 @@ export function CreateBusinessModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070711]/80 p-4 backdrop-blur-sm">
       <Card
-        title="Buat Bisnis Baru"
-        description="Satu akun bisa mengelola banyak bisnis. Mulai dari yang pertama."
+        title={t("business.createTitle")}
+        description={t("business.createDesc")}
         className="w-full max-w-md bg-[#070711]"
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -57,14 +58,14 @@ export function CreateBusinessModal({
               htmlFor="business-name"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Nama bisnis <span className="text-[#F472B6]">*</span>
+              {t("business.nameLabel")} <span className="text-[#F472B6]">*</span>
             </label>
             <input
               id="business-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="cth. Henima Collection"
+              placeholder={t("business.namePlaceholder")}
               className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#2DD4BF]/50"
             />
           </div>
@@ -74,14 +75,15 @@ export function CreateBusinessModal({
               htmlFor="business-description"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Deskripsi <span className="text-white/40">(opsional)</span>
+              {t("business.descriptionLabel")}{" "}
+              <span className="text-white/40">({t("business.optional")})</span>
             </label>
             <textarea
               id="business-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              placeholder="Bisnis ini bergerak di bidang..."
+              placeholder={t("business.descriptionPlaceholder")}
               className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#2DD4BF]/50"
             />
           </div>
@@ -96,11 +98,11 @@ export function CreateBusinessModal({
                 onClick={onClose}
                 disabled={submitting}
               >
-                Batal
+                {t("business.cancel")}
               </Button>
             )}
             <Button type="submit" disabled={!name.trim() || submitting}>
-              {submitting ? "Membuat..." : "Buat Bisnis"}
+              {submitting ? t("business.creating") : t("business.createBtn")}
             </Button>
           </div>
         </form>

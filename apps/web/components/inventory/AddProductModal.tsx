@@ -3,16 +3,15 @@
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { Category, Product, TrackingType } from "@/types";
 import type { NewProductInput, UpdateProductInput } from "@/types/inventory";
 
 interface AddProductModalProps {
   open: boolean;
-  /** jika diisi, form jadi mode edit; parent wajib memberi key={editProduct?.id ?? "new"} */
   editProduct?: Product | null;
   onClose: () => void;
   categories: Category[];
-  /** teruskan createProduct & createCategory dari useProducts() milik parent */
   onCreateProduct: (input: NewProductInput) => Promise<unknown>;
   onCreateCategory: (name: string) => Promise<Category>;
   onUpdateProduct?: (
@@ -35,6 +34,7 @@ export function AddProductModal({
   onCreateCategory,
   onUpdateProduct,
 }: AddProductModalProps) {
+  const { t } = useLanguage();
   const isEdit = !!editProduct;
   const [name, setName] = useState(editProduct?.name ?? "");
   const [categoryId, setCategoryId] = useState(editProduct?.categoryId ?? "");
@@ -58,6 +58,19 @@ export function AddProductModal({
 
   const isNewCategory = categoryId === NEW_CATEGORY;
 
+  const trackingOptions = [
+    {
+      value: "bulk" as const,
+      label: t("business.trackingBulk"),
+      hint: t("business.trackingBulkHint"),
+    },
+    {
+      value: "serial" as const,
+      label: t("business.trackingSerial"),
+      hint: t("business.trackingSerialHint"),
+    },
+  ];
+
   const resetForm = () => {
     setName("");
     setCategoryId("");
@@ -75,7 +88,7 @@ export function AddProductModal({
 
     if (!name.trim()) return;
     if (isNewCategory && !newCategoryName.trim()) {
-      setError("Isi nama kategori baru dulu.");
+      setError(t("business.categoryRequired"));
       return;
     }
 
@@ -112,7 +125,7 @@ export function AddProductModal({
       onClose();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Gagal menambah produk. Coba lagi."
+        err instanceof Error ? err.message : t("business.productCreateError")
       );
     } finally {
       setSubmitting(false);
@@ -122,9 +135,9 @@ export function AddProductModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070711]/80 p-4 backdrop-blur-sm">
       <Card
-        title={isEdit ? "Edit Produk" : "Tambah Produk"}
+        title={isEdit ? t("business.editProduct") : t("business.addProduct")}
         description={
-          isEdit ? editProduct.name : "Produk baru untuk bisnis aktif kamu."
+          isEdit ? editProduct.name : t("business.addProductDesc")
         }
         className="max-h-[90vh] w-full max-w-md overflow-y-auto bg-[#070711]"
       >
@@ -134,14 +147,15 @@ export function AddProductModal({
               htmlFor="product-name"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Nama produk <span className="text-[#F472B6]">*</span>
+              {t("business.productName")}{" "}
+              <span className="text-[#F472B6]">*</span>
             </label>
             <input
               id="product-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="cth. Parfum Ocean Breeze 50ml"
+              placeholder={t("business.productNamePlaceholder")}
               className={inputClass}
             />
           </div>
@@ -151,7 +165,7 @@ export function AddProductModal({
               htmlFor="product-category"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Kategori
+              {t("business.category")}
             </label>
             <select
               id="product-category"
@@ -159,19 +173,19 @@ export function AddProductModal({
               onChange={(e) => setCategoryId(e.target.value)}
               className={`${inputClass} bg-[#070711]`}
             >
-              <option value="">Tanpa kategori</option>
+              <option value="">{t("business.noCategory")}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
-              <option value={NEW_CATEGORY}>+ Buat kategori baru</option>
+              <option value={NEW_CATEGORY}>{t("business.newCategory")}</option>
             </select>
             {isNewCategory && (
               <input
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="Nama kategori baru"
+                placeholder={t("business.newCategoryPlaceholder")}
                 className={`${inputClass} mt-2`}
               />
             )}
@@ -179,23 +193,10 @@ export function AddProductModal({
 
           <div>
             <span className="mb-1.5 block text-sm text-white/70">
-              Tipe tracking
+              {t("business.trackingType")}
             </span>
             <div className="grid grid-cols-2 gap-2">
-              {(
-                [
-                  {
-                    value: "bulk",
-                    label: "Stok Biasa",
-                    hint: "dihitung per jumlah",
-                  },
-                  {
-                    value: "serial",
-                    label: "Serial Number",
-                    hint: "per unit, cth. IMEI",
-                  },
-                ] as const
-              ).map((opt) => (
+              {trackingOptions.map((opt) => (
                 <label
                   key={opt.value}
                   className={`rounded-lg border px-3 py-2.5 text-sm transition ${
@@ -224,8 +225,7 @@ export function AddProductModal({
             </div>
             {isEdit && (
               <p className="mt-1.5 text-xs text-white/40">
-                Tipe tracking tidak bisa diubah setelah produk dibuat karena
-                akan merusak konsistensi data stok yang sudah tercatat.
+                {t("business.trackingLocked")}
               </p>
             )}
           </div>
@@ -235,14 +235,15 @@ export function AddProductModal({
               htmlFor="product-description"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Deskripsi <span className="text-white/40">(opsional)</span>
+              {t("business.descriptionLabel")}{" "}
+              <span className="text-white/40">({t("business.optional")})</span>
             </label>
             <textarea
               id="product-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder="Deskripsi singkat produk..."
+              placeholder={t("business.productDescPlaceholder")}
               className={`${inputClass} resize-none`}
             />
           </div>
@@ -253,7 +254,7 @@ export function AddProductModal({
                 htmlFor="buy-price"
                 className="mb-1.5 block text-sm text-white/70"
               >
-                Harga beli
+                {t("business.buyPrice")}
               </label>
               <input
                 id="buy-price"
@@ -270,7 +271,7 @@ export function AddProductModal({
                 htmlFor="sell-price"
                 className="mb-1.5 block text-sm text-white/70"
               >
-                Harga jual
+                {t("business.sellPrice")}
               </label>
               <input
                 id="sell-price"
@@ -293,14 +294,14 @@ export function AddProductModal({
               onClick={onClose}
               disabled={submitting}
             >
-              Batal
+              {t("business.cancel")}
             </Button>
             <Button type="submit" disabled={!name.trim() || submitting}>
               {submitting
-                ? "Menyimpan..."
+                ? t("business.saving")
                 : isEdit
-                ? "Simpan Perubahan"
-                : "Simpan Produk"}
+                  ? t("business.saveChanges")
+                  : t("business.saveProduct")}
             </Button>
           </div>
         </form>

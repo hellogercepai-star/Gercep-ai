@@ -3,13 +3,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { Product } from "@/types";
 
 interface DeleteProductModalProps {
-  /** produk target; null berarti modal tertutup */
   product: Product | null;
   onClose: () => void;
-  /** teruskan deleteProduct dari useProducts() milik parent */
   onDelete: (productId: string) => Promise<unknown>;
 }
 
@@ -18,6 +17,7 @@ export function DeleteProductModal({
   onClose,
   onDelete,
 }: DeleteProductModalProps) {
+  const { t } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,9 +38,7 @@ export function DeleteProductModal({
       handleClose();
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal menghapus produk. Coba lagi."
+        err instanceof Error ? err.message : t("business.deleteProductError")
       );
     } finally {
       setSubmitting(false);
@@ -49,12 +47,12 @@ export function DeleteProductModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070711]/80 p-4 backdrop-blur-sm">
-      <Card title="Hapus Produk" className="w-full max-w-sm bg-[#070711]">
+      <Card
+        title={t("business.deleteProductTitle")}
+        className="w-full max-w-sm bg-[#070711]"
+      >
         <p className="text-sm text-white/70">
-          Yakin hapus{" "}
-          <span className="font-medium text-white">{product.name}</span>?
-          Semua data stok dan unit terkait ikut terhapus. Tindakan ini tidak
-          bisa dibatalkan.
+          {t("business.deleteProductConfirm", { name: product.name })}
         </p>
 
         {error && <p className="mt-3 text-sm text-[#F472B6]">{error}</p>}
@@ -66,7 +64,7 @@ export function DeleteProductModal({
             onClick={handleClose}
             disabled={submitting}
           >
-            Batal
+            {t("business.cancel")}
           </Button>
           <Button
             type="button"
@@ -74,7 +72,7 @@ export function DeleteProductModal({
             onClick={handleDelete}
             disabled={submitting}
           >
-            {submitting ? "Menghapus..." : "Hapus Produk"}
+            {submitting ? t("business.deleting") : t("business.deleteProductBtn")}
           </Button>
         </div>
       </Card>

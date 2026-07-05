@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { SHOWCASE_MODELS, type ShowcaseModel } from "@/lib/gateway/marketing-models";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 function ModelCard({ model }: { model: ShowcaseModel }) {
+  const { t } = useLanguage();
+
   const inner = (
     <>
       <div className="flex items-center justify-between">
@@ -12,10 +17,10 @@ function ModelCard({ model }: { model: ShowcaseModel }) {
               : "bg-white/5 text-white/40"
           }`}
         >
-          {model.status === "live" ? "Live" : "Soon"}
+          {model.status === "live" ? t("common.live") : t("common.soon")}
         </span>
         <span className="text-[9px] uppercase tracking-wider text-white/30">
-          Chat
+          {t("common.chat")}
         </span>
       </div>
       <p className="font-[family-name:var(--font-display)] text-sm font-semibold leading-tight">
@@ -37,7 +42,7 @@ function ModelCard({ model }: { model: ShowcaseModel }) {
 
   return (
     <div
-      title="Coming soon — belum tersedia di gateway"
+      title={t("marquee.comingSoonTooltip")}
       className="mx-2 flex w-44 shrink-0 cursor-not-allowed flex-col gap-2 rounded-xl border border-white/5 bg-white/[0.02] p-4 opacity-60"
     >
       {inner}

@@ -1,31 +1,102 @@
 "use client";
 
-import { LOCALES } from "@/lib/i18n/types";
+import { useEffect, useRef, useState } from "react";
+import { getLocaleMeta, LOCALES, type Locale } from "@/lib/i18n/types";
 import { useLanguage } from "./LanguageProvider";
 
 export function LanguageToggle({ className = "" }: { className?: string }) {
-  const { locale, setLocale } = useLanguage();
+  const { locale, setLocale, t } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const current = getLocaleMeta(locale);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  function pick(next: Locale) {
+    setLocale(next);
+    setOpen(false);
+  }
 
   return (
-    <div
-      className={`inline-flex rounded-full border border-white/10 bg-white/[0.04] p-0.5 ${className}`}
-      role="group"
-      aria-label="Language"
-    >
-      {LOCALES.map(({ code, label }) => (
-        <button
-          key={code}
-          type="button"
-          onClick={() => setLocale(code)}
-          className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-            locale === code
-              ? "bg-white text-[#070711]"
-              : "text-white/50 hover:text-white"
-          }`}
+    <div ref={rootRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={t("common.language")}
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] font-medium text-white/80 transition hover:border-white/20 hover:text-white"
+      >
+        <span className="text-sm leading-none" aria-hidden>
+          {current.flag}
+        </span>
+        <span className="max-w-[5.5rem] truncate">{current.nativeName}</span>
+        <svg
+          className={`h-3 w-3 shrink-0 opacity-60 transition ${open ? "rotate-180" : ""}`}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden
         >
-          {label}
-        </button>
-      ))}
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+
+      {open ? (
+        <div
+          role="listbox"
+          aria-label={t("common.selectLanguage")}
+          className="absolute right-0 z-50 mt-2 max-h-72 w-52 overflow-y-auto rounded-xl border border-white/10 bg-[#0c0c18] py-1 shadow-xl shadow-black/40"
+        >
+          {LOCALES.map(({ code, flag, nativeName }) => {
+            const active = locale === code;
+            return (
+              <button
+                key={code}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => pick(code)}
+                className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-[12px] transition ${
+                  active
+                    ? "bg-white/10 text-white"
+                    : "text-white/70 hover:bg-white/[0.06] hover:text-white"
+                }`}
+              >
+                <span className="text-base leading-none" aria-hidden>
+                  {flag}
+                </span>
+                <span className="min-w-0 flex-1 truncate">{nativeName}</span>
+                {active ? (
+                  <span className="text-[10px] text-emerald-400">✓</span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
