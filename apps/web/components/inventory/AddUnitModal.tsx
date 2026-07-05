@@ -14,7 +14,12 @@ interface AddUnitModalProps {
   onAddUnit: (input: NewUnitInput) => Promise<unknown>;
 }
 
-const CONDITIONS = ["Baru", "Bekas Like New", "Bekas Baik", "Bekas Cukup"];
+const CONDITIONS: { value: string; label: string }[] = [
+  { value: "new", label: "Baru" },
+  { value: "used_like_new", label: "Bekas Like New" },
+  { value: "used_good", label: "Bekas Baik" },
+  { value: "used_fair", label: "Bekas Cukup" },
+];
 
 const inputClass =
   "w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#2DD4BF]/50";
@@ -25,7 +30,7 @@ export function AddUnitModal({
   onAddUnit,
 }: AddUnitModalProps) {
   const [serialNumber, setSerialNumber] = useState("");
-  const [condition, setCondition] = useState(CONDITIONS[0]);
+  const [condition, setCondition] = useState(CONDITIONS[0].value);
   const [buyPrice, setBuyPrice] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -35,7 +40,7 @@ export function AddUnitModal({
 
   const handleClose = () => {
     setSerialNumber("");
-    setCondition(CONDITIONS[0]);
+    setCondition(CONDITIONS[0].value);
     setBuyPrice("");
     setNotes("");
     setError(null);
@@ -107,8 +112,8 @@ export function AddUnitModal({
               className={`${inputClass} bg-[#070711]`}
             >
               {CONDITIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+                <option key={c.value} value={c.value}>
+                  {c.label}
                 </option>
               ))}
             </select>
