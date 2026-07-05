@@ -202,7 +202,7 @@ export default function DevelopersPage() {
               Kamu belum login. Masuk dulu untuk API keys, usage, dan wallet.
             </p>
             <Link
-              href="/login?next=/developers"
+              href="/login?next=/developers&wallet=1"
               className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-medium text-[#070711]"
             >
               Masuk / Daftar

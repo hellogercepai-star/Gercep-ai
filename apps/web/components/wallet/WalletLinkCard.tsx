@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { buildWalletLinkMessage } from "@/lib/wallet/solana";
 import {
-  getPhantomBrowseUrl,
+  getPhantomDevelopersUrl,
   hasInjectedSolanaWallet,
   isMobileBrowser,
   PHANTOM_EXTENSION_URL,
@@ -37,12 +37,12 @@ export function WalletLinkCard() {
   const [needsLogin, setNeedsLogin] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
-  const [pageUrl, setPageUrl] = useState("");
+  const [siteOrigin, setSiteOrigin] = useState("");
 
   useEffect(() => {
     setIsMobile(isMobileBrowser());
     setHasWallet(hasInjectedSolanaWallet());
-    setPageUrl(window.location.href);
+    setSiteOrigin(window.location.origin);
   }, []);
 
   const loadWallet = useCallback(async () => {
@@ -123,7 +123,9 @@ export function WalletLinkCard() {
     await loadWallet();
   };
 
-  const phantomBrowseUrl = pageUrl ? getPhantomBrowseUrl(pageUrl) : "#";
+  const phantomBrowseUrl = siteOrigin
+    ? getPhantomDevelopersUrl(siteOrigin)
+    : "#";
 
   return (
     <Card
@@ -133,14 +135,20 @@ export function WalletLinkCard() {
     >
       {needsLogin ? (
         <div className="rounded-lg border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-4">
+          {hasWallet && (
+            <p className="mb-2 text-xs font-medium text-[#2DD4BF]">
+              ✓ Phantom terhubung — tapi belum login akun Gercep
+            </p>
+          )}
           <p className="text-sm text-white/70">
-            Login dulu untuk link wallet ke akun Gercep kamu.
+            Wallet Phantom ≠ akun Gercep. Masuk/daftar email dulu, baru link
+            wallet ke akun kamu.
           </p>
           <Link
-            href="/login?next=/developers"
+            href="/login?next=/developers&wallet=1"
             className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-medium text-[#070711]"
           >
-            Masuk / Daftar
+            Step 1: Masuk / Daftar
           </Link>
         </div>
       ) : loading ? (
@@ -186,7 +194,7 @@ export function WalletLinkCard() {
                 Buka di Phantom App
               </a>
               <p className="text-[11px] text-white/40">
-                Setelah terbuka di Phantom: login Gercep → Connect Wallet → Sign
+                Step 1: daftar/masuk Gercep → Step 2: Connect Wallet → Sign
                 &amp; Link
               </p>
             </div>
