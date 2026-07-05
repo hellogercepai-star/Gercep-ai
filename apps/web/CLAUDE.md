@@ -14,7 +14,8 @@ apps/web/app - routes App Router
 apps/web/components/ui - Button, Card
 apps/web/components/shared - Sidebar, Header
 apps/web/components/auth - LogoutButton
-apps/web/hooks - useUser sudah pakai Supabase asli, useBusiness dan useDashboardStats masih mock
+apps/web/components/business - CreateBusinessModal
+apps/web/hooks - useUser, useBusiness, useDashboardStats sudah pakai Supabase asli
 apps/web/lib/supabase - client.ts, server.ts, middleware.ts
 apps/web/types - User, Business, Transaction, Order
 apps/web/middleware.ts - protect dashboard routes
@@ -33,7 +34,7 @@ public.users terhubung ke auth.users via trigger, jangan insert manual dari fron
 1. Jangan overwrite file yang sudah ada tanpa konfirmasi eksplisit
 2. Jangan bikin ulang struktur folder yang sudah ada
 3. Jangan ganti useUser.ts balik ke mock data
-4. useBusiness dan useDashboardStats masih mock, memang disengaja
+4. useBusiness dan useDashboardStats sudah terhubung Supabase, jangan dikembalikan ke mock
 5. Tunjukkan diff dulu sebelum apply perubahan besar
 6. Jangan hardcode environment variables ke dalam kode
 7. Commit kecil dan sering, satu perubahan logis per commit
