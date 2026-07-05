@@ -1,5 +1,11 @@
 import Link from "next/link";
 import { GERCEP_TIERS } from "@/lib/wallet/tiers";
+import {
+  GERCEP_ALLOCATION,
+  GERCEP_SUPPLY,
+  GERCEP_VESTING,
+  formatTokenAmount,
+} from "@/lib/tokenomics/gercep";
 
 const sections = [
   { id: "abstract", label: "Abstract" },
@@ -8,6 +14,7 @@ const sections = [
   { id: "solution", label: "Solution" },
   { id: "architecture", label: "Architecture" },
   { id: "token", label: "$GERCEP" },
+  { id: "tokenomics", label: "Tokenomics" },
   { id: "tiers", label: "Quota Tiers" },
   { id: "roadmap", label: "Roadmap" },
 ];
@@ -99,7 +106,7 @@ export default function WhitepaperPage() {
       {/* Hero */}
       <header className="relative z-10 mx-auto max-w-6xl px-6 pb-16 pt-20 text-center md:pt-28">
         <span className="mb-6 inline-block rounded-full border border-[#A78BFA]/40 bg-[#A78BFA]/10 px-4 py-1.5 text-xs font-medium tracking-widest text-[#A78BFA] uppercase">
-          Whitepaper v0.1
+          Whitepaper v0.2
         </span>
         <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl lg:text-7xl">
           DEVELOPER GATEWAY
@@ -290,7 +297,158 @@ export default function WhitepaperPage() {
             </p>
           </Section>
 
-          <Section id="tiers" title="7. Quota Tiers">
+          <Section id="tokenomics" title="7. Tokenomics">
+            <div className="rounded-xl border border-[#F472B6]/20 bg-[#F472B6]/5 p-4 text-sm text-white/60">
+              <strong className="text-[#F472B6]">Proposed model</strong> —
+              figures below are draft allocations for community review. Final
+              numbers may change before token generation event (TGE).
+            </div>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                {
+                  label: "Total supply",
+                  value: formatTokenAmount(GERCEP_SUPPLY.total),
+                  sub: "Fixed — no inflation mint",
+                },
+                {
+                  label: "Decimals",
+                  value: String(GERCEP_SUPPLY.decimals),
+                  sub: GERCEP_SUPPLY.standard,
+                },
+                {
+                  label: "Chain",
+                  value: "Solana",
+                  sub: GERCEP_SUPPLY.chain,
+                },
+                {
+                  label: "TGE unlock (circ.)",
+                  value: "~12%",
+                  sub: "Community slice + LP only",
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-xl border border-white/10 bg-white/[0.02] p-4"
+                >
+                  <p className="text-xs uppercase text-white/40">{stat.label}</p>
+                  <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold text-[#2DD4BF]">
+                    {stat.value}
+                  </p>
+                  <p className="mt-1 text-xs text-white/45">{stat.sub}</p>
+                </div>
+              ))}
+            </div>
+
+            <h3 className="mt-10 text-lg font-semibold text-white">
+              Allocation
+            </h3>
+            <div className="mt-3 flex h-4 overflow-hidden rounded-full">
+              {GERCEP_ALLOCATION.map((bucket, i) => {
+                const colors = [
+                  "bg-[#2DD4BF]",
+                  "bg-[#A78BFA]",
+                  "bg-[#F472B6]",
+                  "bg-[#60A5FA]",
+                  "bg-[#FBBF24]",
+                  "bg-[#94A3B8]",
+                ];
+                return (
+                  <div
+                    key={bucket.id}
+                    className={colors[i % colors.length]}
+                    style={{ width: `${bucket.percent}%` }}
+                    title={`${bucket.label} ${bucket.percent}%`}
+                  />
+                );
+              })}
+            </div>
+            <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+              <table className="w-full min-w-[480px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/[0.03] text-xs uppercase text-white/40">
+                    <th className="px-4 py-3 font-medium">Bucket</th>
+                    <th className="px-4 py-3 font-medium text-right">%</th>
+                    <th className="px-4 py-3 font-medium text-right">Tokens</th>
+                    <th className="px-4 py-3 font-medium">Purpose</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {GERCEP_ALLOCATION.map((bucket) => (
+                    <tr key={bucket.id} className="text-white/75">
+                      <td className="px-4 py-3 font-medium">{bucket.label}</td>
+                      <td className="px-4 py-3 text-right tabular-nums">
+                        {bucket.percent}%
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums text-[#A78BFA]">
+                        {formatTokenAmount(bucket.tokens)}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-white/50">
+                        {bucket.purpose}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <h3 className="mt-10 text-lg font-semibold text-white">
+              Vesting schedule
+            </h3>
+            <p className="text-sm text-white/50">
+              Designed to limit sell pressure at launch and align long-term
+              contributors with gateway adoption.
+            </p>
+            <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/[0.03] text-xs uppercase text-white/40">
+                    <th className="px-4 py-3 font-medium">Bucket</th>
+                    <th className="px-4 py-3 font-medium">TGE unlock</th>
+                    <th className="px-4 py-3 font-medium">Cliff</th>
+                    <th className="px-4 py-3 font-medium">Vesting</th>
+                    <th className="px-4 py-3 font-medium">Release notes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {GERCEP_VESTING.map((row) => (
+                    <tr key={row.bucket} className="text-white/70">
+                      <td className="px-4 py-3 font-medium text-[#2DD4BF]">
+                        {row.bucket}
+                      </td>
+                      <td className="px-4 py-3 text-xs">{row.tgeUnlock}</td>
+                      <td className="px-4 py-3 text-xs">{row.cliff}</td>
+                      <td className="px-4 py-3 text-xs">{row.vestingDuration}</td>
+                      <td className="px-4 py-3 text-xs text-white/45">
+                        {row.release}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-[#2DD4BF]/20 bg-[#2DD4BF]/5 p-4">
+                <p className="text-xs uppercase text-[#2DD4BF]">Deflationary levers</p>
+                <ul className="mt-2 space-y-1 text-sm text-white/60">
+                  <li>• Optional gateway fee buyback (future governance)</li>
+                  <li>• No mint authority after TGE</li>
+                  <li>• LP lock 6 months minimum</li>
+                </ul>
+              </div>
+              <div className="rounded-xl border border-[#A78BFA]/20 bg-[#A78BFA]/5 p-4">
+                <p className="text-xs uppercase text-[#A78BFA]">Early access priority</p>
+                <ul className="mt-2 space-y-1 text-sm text-white/60">
+                  <li>• Wallet linked before TGE → airdrop eligibility</li>
+                  <li>• Active API keys weighted in snapshot</li>
+                  <li>• Beta tier holders grandfathered into Holder min.</li>
+                </ul>
+              </div>
+            </div>
+          </Section>
+
+          <Section id="tiers" title="8. Quota Tiers">
             <p className="mb-4 text-white/60">
               Daily request limits per linked wallet, based on $GERCEP balance:
             </p>
@@ -326,7 +484,7 @@ export default function WhitepaperPage() {
             </div>
           </Section>
 
-          <Section id="roadmap" title="8. Roadmap">
+          <Section id="roadmap" title="9. Roadmap">
             <div className="space-y-6">
               {roadmap.map((block) => (
                 <div
@@ -374,8 +532,8 @@ export default function WhitepaperPage() {
           </div>
 
           <p className="text-center text-[10px] text-white/25">
-            Gercep AI Whitepaper v0.1 · July 2026 · Subject to change before
-            token launch
+            Gercep AI Whitepaper v0.2 · July 2026 · Tokenomics draft — subject
+            to change before TGE
           </p>
         </article>
       </div>
