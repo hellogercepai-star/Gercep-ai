@@ -312,7 +312,7 @@ export const sections = {
     intro:
       "OpenAI-compatible inference gateway. One base URL, one sk-gercep- API key — same request shape as OpenAI.",
     quickStart: "Quick start",
-    step1: "Create account & sign in → Create API Key",
+    step1: "Create account & sign in →",
     step2: "Test in Playground or hit the API directly",
     step3: "Set baseURL to /api/v1 in the OpenAI SDK",
     authentication: "Authentication",
@@ -331,9 +331,9 @@ export const sections = {
     usageBillingDesc:
       "Every completion is logged to the Developers dashboard. Token usage (prompt, completion, total) is available per request and per API key. Billing credits & $GERCEP — coming soon.",
     errors: "Errors",
-    error401: "401 — Missing or invalid API key",
-    error400: "400 — Invalid request body (model, messages)",
-    error502: "502 — Upstream provider error",
+    error401: "Missing or invalid API key",
+    error400: "Invalid request body (model, messages)",
+    error502: "Upstream provider error",
   },
   legal: {
     privacyTitle: "Privacy Policy",
