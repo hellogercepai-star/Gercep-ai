@@ -7,40 +7,50 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { CreateBusinessModal } from "@/components/business/CreateBusinessModal";
 import { useBusiness } from "@/hooks/useBusiness";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
-interface StatItem {
-  label: string;
-  value: string;
-  change: string;
-  accent: string;
+function formatRupiah(value: number): string {
+  if (value >= 1_000_000_000)
+    return `Rp ${(value / 1_000_000_000).toLocaleString("id-ID", {
+      maximumFractionDigits: 1,
+    })}M`;
+  if (value >= 1_000_000)
+    return `Rp ${(value / 1_000_000).toLocaleString("id-ID", {
+      maximumFractionDigits: 1,
+    })}jt`;
+  if (value >= 1_000)
+    return `Rp ${(value / 1_000).toLocaleString("id-ID", {
+      maximumFractionDigits: 1,
+    })}rb`;
+  return `Rp ${value.toLocaleString("id-ID")}`;
 }
-
-// masih hardcoded — akan diganti useDashboardStats di tugas terpisah
-const stats: StatItem[] = [
-  {
-    label: "Total Revenue",
-    value: "Rp 42.8jt",
-    change: "+12.4%",
-    accent: "#2DD4BF",
-  },
-  {
-    label: "Active Businesses",
-    value: "3",
-    change: "+1 bulan ini",
-    accent: "#A78BFA",
-  },
-  {
-    label: "Pending Orders",
-    value: "18",
-    change: "-4 dari kemarin",
-    accent: "#F472B6",
-  },
-];
 
 export default function DashboardPage() {
   const { businesses, activeBusiness, loading, createBusiness } =
     useBusiness();
+  const { stats, loading: statsLoading } = useDashboardStats(activeBusiness);
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const statItems = [
+    {
+      label: "Total Revenue",
+      value: formatRupiah(stats.revenue),
+      change: `margin ${stats.margin.toFixed(1)}%`,
+      accent: "#2DD4BF",
+    },
+    {
+      label: "Active Businesses",
+      value: String(businesses.filter((b) => b.isActive).length),
+      change: "dalam satu akun",
+      accent: "#A78BFA",
+    },
+    {
+      label: "Pending Orders",
+      value: String(stats.pendingOrders),
+      change: "menunggu diproses",
+      accent: "#F472B6",
+    },
+  ];
 
   return (
     <div className="flex min-h-screen bg-[#070711]">
@@ -71,7 +81,7 @@ export default function DashboardPage() {
           ) : (
             <>
               <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {stats.map((stat) => (
+                {statItems.map((stat) => (
                   <Card key={stat.label}>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-white/50">
@@ -83,9 +93,11 @@ export default function DashboardPage() {
                       />
                     </div>
                     <p className="mt-4 font-[family-name:var(--font-display)] text-3xl font-semibold">
-                      {stat.value}
+                      {statsLoading ? "—" : stat.value}
                     </p>
-                    <p className="mt-1 text-xs text-white/40">{stat.change}</p>
+                    <p className="mt-1 text-xs text-white/40">
+                      {statsLoading ? "" : stat.change}
+                    </p>
                   </Card>
                 ))}
               </section>
