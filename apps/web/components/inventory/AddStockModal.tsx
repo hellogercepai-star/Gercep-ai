@@ -3,13 +3,12 @@
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { Product } from "@/types";
 
 interface AddStockModalProps {
-  /** produk target; null berarti modal tertutup */
   product: Product | null;
   onClose: () => void;
-  /** teruskan addStock dari useProducts() milik parent */
   onAddStock: (
     productId: string,
     quantity: number,
@@ -25,6 +24,7 @@ export function AddStockModal({
   onClose,
   onAddStock,
 }: AddStockModalProps) {
+  const { t } = useLanguage();
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -55,7 +55,7 @@ export function AddStockModal({
       handleClose();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Gagal menambah stok. Coba lagi."
+        err instanceof Error ? err.message : t("business.stockAddError")
       );
     } finally {
       setSubmitting(false);
@@ -65,7 +65,7 @@ export function AddStockModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070711]/80 p-4 backdrop-blur-sm">
       <Card
-        title="Tambah Stok"
+        title={t("business.addStockTitle")}
         description={product.name}
         className="w-full max-w-sm bg-[#070711]"
       >
@@ -75,7 +75,8 @@ export function AddStockModal({
               htmlFor="stock-quantity"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Jumlah <span className="text-[#F472B6]">*</span>
+              {t("business.quantity")}{" "}
+              <span className="text-[#F472B6]">*</span>
             </label>
             <input
               id="stock-quantity"
@@ -85,7 +86,7 @@ export function AddStockModal({
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               required
-              placeholder="cth. 20"
+              placeholder={t("business.quantityPlaceholder")}
               className={inputClass}
             />
           </div>
@@ -95,13 +96,14 @@ export function AddStockModal({
               htmlFor="stock-reason"
               className="mb-1.5 block text-sm text-white/70"
             >
-              Keterangan <span className="text-white/40">(opsional)</span>
+              {t("business.notes")}{" "}
+              <span className="text-white/40">({t("business.optional")})</span>
             </label>
             <input
               id="stock-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder='cth. "Restok dari supplier"'
+              placeholder={t("business.stockReasonPlaceholder")}
               className={inputClass}
             />
           </div>
@@ -115,10 +117,10 @@ export function AddStockModal({
               onClick={handleClose}
               disabled={submitting}
             >
-              Batal
+              {t("business.cancel")}
             </Button>
             <Button type="submit" disabled={!isValidQuantity || submitting}>
-              {submitting ? "Menyimpan..." : "Tambah Stok"}
+              {submitting ? t("business.saving") : t("business.addStockBtn")}
             </Button>
           </div>
         </form>

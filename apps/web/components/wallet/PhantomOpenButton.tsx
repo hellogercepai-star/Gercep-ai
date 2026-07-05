@@ -6,6 +6,7 @@ import {
   hasInjectedSolanaWallet,
   isMobileBrowser,
 } from "@/lib/wallet/device";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface PhantomOpenButtonProps {
   className?: string;
@@ -15,10 +16,12 @@ interface PhantomOpenButtonProps {
 /** Tombol buka Gercep di Phantom app — untuk HP yang belum di in-app browser. */
 export function PhantomOpenButton({
   className = "inline-block rounded-full bg-[#AB9FF2] px-5 py-2.5 text-sm font-medium text-[#070711]",
-  label = "Buka di Phantom App",
+  label,
 }: PhantomOpenButtonProps) {
+  const { t } = useLanguage();
   const [href, setHref] = useState("#");
   const [hidden, setHidden] = useState(true);
+  const displayLabel = label ?? t("wallet.openPhantom");
 
   useEffect(() => {
     const inPhantom = hasInjectedSolanaWallet();
@@ -31,7 +34,7 @@ export function PhantomOpenButton({
 
   return (
     <a href={href} className={className}>
-      {label}
+      {displayLabel}
     </a>
   );
 }

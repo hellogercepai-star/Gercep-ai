@@ -9,34 +9,41 @@ import {
   Factory,
   Settings,
 } from "lucide-react";
+import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, match: "/dashboard" },
   {
-    label: "Inventory",
+    key: "sidebar.dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    match: "/dashboard",
+  },
+  {
+    key: "sidebar.inventory",
     href: "/dashboard/inventory",
     icon: Package,
     match: "/dashboard/inventory",
   },
   {
-    label: "Keuangan",
+    key: "sidebar.finance",
     href: "/dashboard/transactions",
     icon: Wallet,
     match: "/dashboard/transactions",
   },
   {
-    label: "Produksi",
+    key: "sidebar.production",
     href: "/dashboard/produksi",
     icon: Factory,
     match: "/dashboard/produksi",
   },
   {
-    label: "Pengaturan",
+    key: "sidebar.settings",
     href: "/dashboard/settings",
     icon: Settings,
     match: "/dashboard/settings",
   },
-];
+] as const;
 
 function isActive(pathname: string, match: string) {
   if (match === "/dashboard") return pathname === "/dashboard";
@@ -45,6 +52,7 @@ function isActive(pathname: string, match: string) {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="group sticky top-0 flex h-screen w-16 shrink-0 flex-col items-center gap-1 border-r border-white/10 bg-[#070711] py-6 transition-all duration-200 hover:w-56">
@@ -68,19 +76,20 @@ export function Sidebar() {
             >
               <Icon size={18} className="shrink-0" />
               <span className="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                {item.label}
+                {t(item.key)}
               </span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto hidden w-full px-3 pb-2 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="mt-auto hidden w-full flex-col gap-2 px-3 pb-2 opacity-0 transition-opacity group-hover:opacity-100">
+        <LanguageToggle className="w-full [&>button]:w-full [&>button]:justify-center" />
         <Link
           href="/developers"
           className="block rounded-lg border border-[#2DD4BF]/20 px-3 py-2 text-xs text-[#2DD4BF]"
         >
-          Gateway →
+          {t("sidebar.gateway")}
         </Link>
       </div>
     </aside>

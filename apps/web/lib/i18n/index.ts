@@ -1,8 +1,6 @@
+import { catalogs } from "./messages/catalog";
 import type { Locale } from "./types";
-import { messages as en } from "./messages/en";
-import { messages as id } from "./messages/id";
-
-const catalogs = { id, en } as const;
+import { LOCALE_TAGS } from "./types";
 
 export type MessageKey = string;
 
@@ -20,14 +18,16 @@ export function translate(
   key: MessageKey,
   vars?: Record<string, string | number>
 ): string {
-  const raw = getNested(catalogs[locale] as Record<string, unknown>, key);
-  const fallback = getNested(catalogs.id as Record<string, unknown>, key);
-  let text =
-    typeof raw === "string"
-      ? raw
-      : typeof fallback === "string"
-        ? fallback
-        : key;
+  const fallbackChain: Locale[] = [locale, "en", "id"];
+  let text = key;
+
+  for (const code of fallbackChain) {
+    const raw = getNested(catalogs[code] as Record<string, unknown>, key);
+    if (typeof raw === "string") {
+      text = raw;
+      break;
+    }
+  }
 
   if (vars) {
     for (const [k, v] of Object.entries(vars)) {
@@ -38,5 +38,5 @@ export function translate(
 }
 
 export function localeTag(locale: Locale): string {
-  return locale === "id" ? "id-ID" : "en-US";
+  return LOCALE_TAGS[locale] ?? "en-US";
 }

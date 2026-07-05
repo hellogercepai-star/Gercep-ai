@@ -7,6 +7,7 @@ import { Header } from "@/components/shared/Header";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { AddTransactionModal } from "@/components/transactions/AddTransactionModal";
+import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useTransactions } from "@/hooks/useTransactions";
 
@@ -14,8 +15,8 @@ function formatRupiah(value: number): string {
   return `Rp ${value.toLocaleString("id-ID")}`;
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("id-ID", {
+function formatDate(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -23,6 +24,7 @@ function formatDate(date: Date): string {
 }
 
 export default function TransactionsPage() {
+  const { t, dateLocale } = useLanguage();
   const { activeBusiness, loading: businessLoading } = useBusiness();
   const {
     transactions,
@@ -36,17 +38,17 @@ export default function TransactionsPage() {
 
   const summaryCards = [
     {
-      label: "Kas Saat Ini",
+      label: t("transactions.currentCash"),
       value: formatRupiah(kasBalance),
       accent: "#A78BFA",
     },
     {
-      label: "Total Pemasukan",
+      label: t("transactions.totalIncome"),
       value: formatRupiah(totalIncome),
       accent: "#2DD4BF",
     },
     {
-      label: "Total Pengeluaran",
+      label: t("transactions.totalExpense"),
       value: formatRupiah(totalExpense),
       accent: "#F472B6",
     },
@@ -58,24 +60,26 @@ export default function TransactionsPage() {
 
       <div className="min-w-0 flex-1">
         <Header
-          title="Keuangan"
-          subtitle="Catat pemasukan, pengeluaran, dan pantau kas bisnis."
-          businessName={activeBusiness?.name ?? "Bisnis Saya"}
+          title={t("transactions.title")}
+          subtitle={t("transactions.subtitle")}
+          businessName={activeBusiness?.name}
         />
 
         <main className="px-8 py-8 pb-20">
           {businessLoading ? (
             <Card>
-              <p className="text-sm text-white/50">Memuat data bisnis...</p>
+              <p className="text-sm text-white/50">
+                {t("transactions.loadingBusiness")}
+              </p>
             </Card>
           ) : !activeBusiness ? (
             <Card
-              title="Belum ada bisnis"
-              description="Buat bisnis dulu di dashboard sebelum mencatat transaksi."
+              title={t("transactions.noBusiness")}
+              description={t("transactions.noBusinessDesc")}
               className="mx-auto max-w-lg"
             >
               <Link href="/dashboard">
-                <Button>Ke Dashboard</Button>
+                <Button>{t("transactions.goToDashboard")}</Button>
               </Link>
             </Card>
           ) : (
@@ -102,25 +106,29 @@ export default function TransactionsPage() {
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm text-white/50">
                   {loading
-                    ? "Memuat transaksi..."
-                    : `${transactions.length} transaksi`}
+                    ? t("transactions.loadingTransactions")
+                    : t("transactions.transactionCount", {
+                        count: transactions.length,
+                      })}
                 </p>
                 <Button onClick={() => setShowAddModal(true)}>
-                  + Catat Transaksi
+                  {t("transactions.addTransaction")}
                 </Button>
               </div>
 
               {loading ? (
                 <Card>
-                  <p className="text-sm text-white/50">Memuat transaksi...</p>
+                  <p className="text-sm text-white/50">
+                    {t("transactions.loadingTransactions")}
+                  </p>
                 </Card>
               ) : transactions.length === 0 ? (
                 <Card
-                  title="Belum ada transaksi"
-                  description="Catat pemasukan atau pengeluaran pertamamu untuk mulai melacak kas."
+                  title={t("transactions.noTransactions")}
+                  description={t("transactions.noTransactionsDesc")}
                 >
                   <Button onClick={() => setShowAddModal(true)}>
-                    + Catat Transaksi Pertama
+                    {t("transactions.addFirstTransaction")}
                   </Button>
                 </Card>
               ) : (
@@ -128,12 +136,20 @@ export default function TransactionsPage() {
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="text-xs uppercase tracking-wide text-white/40">
-                        <th className="px-6 py-4 font-medium">Tanggal</th>
-                        <th className="px-6 py-4 font-medium">Tipe</th>
-                        <th className="px-6 py-4 font-medium">Kategori</th>
-                        <th className="px-6 py-4 font-medium">Keterangan</th>
+                        <th className="px-6 py-4 font-medium">
+                          {t("transactions.table.date")}
+                        </th>
+                        <th className="px-6 py-4 font-medium">
+                          {t("transactions.table.type")}
+                        </th>
+                        <th className="px-6 py-4 font-medium">
+                          {t("transactions.table.category")}
+                        </th>
+                        <th className="px-6 py-4 font-medium">
+                          {t("transactions.table.description")}
+                        </th>
                         <th className="px-6 py-4 text-right font-medium">
-                          Jumlah
+                          {t("transactions.table.amount")}
                         </th>
                       </tr>
                     </thead>
@@ -144,16 +160,16 @@ export default function TransactionsPage() {
                           className="border-t border-white/5 transition hover:bg-white/[0.02]"
                         >
                           <td className="px-6 py-4 text-white/60">
-                            {formatDate(tx.createdAt)}
+                            {formatDate(tx.createdAt, dateLocale)}
                           </td>
                           <td className="px-6 py-4">
                             {tx.type === "income" ? (
                               <span className="rounded-full border border-[#2DD4BF]/30 bg-[#2DD4BF]/10 px-2.5 py-1 text-xs text-[#2DD4BF]">
-                                Pemasukan
+                                {t("transactions.type.income")}
                               </span>
                             ) : (
                               <span className="rounded-full border border-[#F472B6]/30 bg-[#F472B6]/10 px-2.5 py-1 text-xs text-[#F472B6]">
-                                Pengeluaran
+                                {t("transactions.type.expense")}
                               </span>
                             )}
                           </td>

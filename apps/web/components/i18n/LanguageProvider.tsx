@@ -13,6 +13,7 @@ import { translate, localeTag } from "@/lib/i18n";
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
+  isLocale,
   type Locale,
 } from "@/lib/i18n/types";
 
@@ -28,7 +29,7 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 function readStoredLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
   const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-  return stored === "en" || stored === "id" ? stored : DEFAULT_LOCALE;
+  return isLocale(stored) ? stored : DEFAULT_LOCALE;
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -39,7 +40,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    document.documentElement.lang = locale === "id" ? "id" : "en";
+    document.documentElement.lang = localeTag(locale).split("-")[0] ?? "id";
   }, [locale]);
 
   const setLocale = useCallback((next: Locale) => {

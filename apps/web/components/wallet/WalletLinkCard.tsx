@@ -86,7 +86,7 @@ export function WalletLinkCard() {
         setQuota(data.quota ?? null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal load wallet.");
+      setError(err instanceof Error ? err.message : t("wallet.loadError"));
     } finally {
       setLoading(false);
     }
@@ -174,7 +174,7 @@ export function WalletLinkCard() {
   };
 
   const handleUnlink = async () => {
-    if (!confirm("Unlink wallet Solana dari akun ini?")) return;
+    if (!confirm(t("wallet.unlinkConfirm"))) return;
     await fetch("/api/v1/wallet", { method: "DELETE" });
     setLinked(null);
     await loadWallet();
@@ -293,12 +293,10 @@ export function WalletLinkCard() {
             </div>
           ) : (
             <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
-              <p className="text-sm text-white/70">
-                Browser ini belum punya wallet extension. Pilih salah satu:
-              </p>
+              <p className="text-sm text-white/70">{t("wallet.noExtension")}</p>
               <ul className="list-inside list-disc space-y-1 text-xs text-white/50">
                 <li>
-                  Install{" "}
+                  {t("wallet.installPhantom")}{" "}
                   <a
                     href={PHANTOM_EXTENSION_URL}
                     target="_blank"
@@ -306,16 +304,14 @@ export function WalletLinkCard() {
                     className="text-[#AB9FF2] underline"
                   >
                     Phantom extension
-                  </a>{" "}
-                  di Chrome / Brave, refresh halaman ini
+                  </a>
                 </li>
                 <li>
-                  Atau pakai HP — tap{" "}
                   <a
                     href={phantomBrowseUrl}
                     className="text-[#2DD4BF] underline"
                   >
-                    Buka di Phantom App
+                    {t("wallet.openPhantom")}
                   </a>
                 </li>
               </ul>
