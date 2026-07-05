@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { Category, Product, TrackingType } from "@/types";
-import type { NewProductInput, UpdateProductInput } from "@/hooks/useProducts";
+import type { NewProductInput, UpdateProductInput } from "@/types/inventory";
 
 interface AddProductModalProps {
   open: boolean;

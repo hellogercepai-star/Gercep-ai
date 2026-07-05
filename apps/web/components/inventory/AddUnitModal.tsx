@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { Product } from "@/types";
-import type { NewUnitInput } from "@/hooks/useProducts";
+import type { NewUnitInput } from "@/types/inventory";
 
 interface AddUnitModalProps {
   /** produk target; null berarti modal tertutup */

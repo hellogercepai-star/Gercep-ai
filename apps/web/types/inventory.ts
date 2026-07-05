@@ -57,3 +57,29 @@ export interface ProductUnit {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface NewProductInput {
+  name: string;
+  categoryId?: string;
+  trackingType: TrackingType;
+  buyPrice: number;
+  sellPrice: number;
+  sku?: string;
+  description?: string;
+}
+
+export interface NewUnitInput {
+  productId: string;
+  serialNumber: string;
+  condition: string;
+  buyPrice?: number;
+  notes?: string;
+}
+
+export interface UpdateProductInput {
+  name: string;
+  categoryId?: string;
+  buyPrice: number;
+  sellPrice: number;
+  description?: string;
+}
