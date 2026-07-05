@@ -39,7 +39,12 @@ export default function PlaygroundPage() {
         const data = await r.json();
         const list = (data.data ?? []) as ModelInfo[];
         setModels(list);
-        if (list[0]) setModel(list[0].id);
+        const fromUrl = new URLSearchParams(window.location.search).get("model");
+        if (fromUrl && list.some((m) => m.id === fromUrl)) {
+          setModel(fromUrl);
+        } else if (list[0]) {
+          setModel(list[0].id);
+        }
       } catch {
         // models endpoint optional saat offline
       }

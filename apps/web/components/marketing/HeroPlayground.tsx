@@ -31,7 +31,12 @@ export function HeroPlayground() {
         const list = (data.data ?? []) as ModelInfo[];
         const live = list.filter((m) => m.status === "live");
         setModels(live);
-        if (live[0]) setModel(live[0].id);
+        const fromUrl = new URLSearchParams(window.location.search).get("model");
+        if (fromUrl && live.some((m) => m.id === fromUrl)) {
+          setModel(fromUrl);
+        } else if (live[0]) {
+          setModel(live[0].id);
+        }
       })
       .catch(() => {});
   }, []);

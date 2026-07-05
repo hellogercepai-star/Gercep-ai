@@ -23,8 +23,8 @@ const computeCards = [
   },
   {
     title: "$GERCEP-backed access",
-    desc: "Wallet holdings unlock daily request capacity while application keys stay scoped and revocable.",
-    tags: ["Wallet proof", "daily quota", "API keys"],
+    desc: "Wallet-linked daily quota on the roadmap. API keys live today via Developers.",
+    tags: ["Wallet proof — soon", "daily quota", "API keys — live"],
   },
   {
     title: "Private control plane",
@@ -40,27 +40,48 @@ const accessLanes = [
     desc: "Try prompts against hosted models before creating an application key.",
     cta: "Open Playground",
     href: "/playground",
+    live: true,
   },
   {
     tier: "Builder",
-    title: "$GERCEP-backed API key",
-    desc: "Connect a wallet, create a scoped gateway key, and track usage from the dashboard.",
+    title: "API key + usage dashboard",
+    desc: "Create a scoped sk-gercep- key and track token usage per request.",
     cta: "Create Key",
     href: "/developers",
+    live: true,
   },
   {
     tier: "Network",
     title: "Reserved capacity",
-    desc: "Route heavier workloads through private pools, custom quotas, or dedicated lanes.",
-    cta: "Contact sales",
-    href: "#",
+    desc: "Private pools and dedicated lanes — on the roadmap.",
+    cta: "Coming soon",
+    href: null,
+    live: false,
+  },
+];
+
+const featureCards = [
+  {
+    title: "Multi-model routing",
+    desc: "DeepSeek today — more providers tomorrow. One base URL, one key.",
+    href: "/playground",
+  },
+  {
+    title: "Your API key",
+    desc: "Developers hold sk-gercep- keys. Usage logged per request.",
+    href: "/developers",
+  },
+  {
+    title: "Business OS (dogfood)",
+    desc: "Inventory, keuangan, dashboard — built on our own gateway.",
+    href: "/dashboard",
   },
 ];
 
 const gatewayEndpoints = [
-  { label: "Realtime chat", path: "/v1/chat/completions", desc: "Standard messages request shape." },
-  { label: "Model discovery", path: "/v1/models", desc: "List models available to your key." },
-  { label: "Usage tracking", path: "/v1/usage", desc: "Token stats per key from dashboard session." },
+  { label: "Realtime chat", path: "/api/v1/chat/completions", desc: "Standard messages request shape.", href: "/docs" },
+  { label: "Model discovery", path: "/api/v1/models", desc: "List models available to your key.", href: "/docs" },
+  { label: "Usage tracking", path: "/developers", desc: "Token stats per key from dashboard session.", href: "/developers" },
 ];
 
 const faqs = [
@@ -184,26 +205,20 @@ export default function HomePage() {
 
       {/* Core value props — copy asli Gercep, tetap di homepage */}
       <section className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-6 md:mx-6 lg:mx-auto lg:grid-cols-3 lg:px-0">
-        {[
-          {
-            title: "Multi-model routing",
-            desc: "DeepSeek today — more providers tomorrow. One base URL, one key.",
-          },
-          {
-            title: "Your API key",
-            desc: "Developers hold sk-gercep- keys. Usage logged per request.",
-          },
-          {
-            title: "Business OS (dogfood)",
-            desc: "Inventory, keuangan, dashboard — built on our own gateway.",
-          },
-        ].map((f) => (
-          <div key={f.title} className="bg-[#070711] p-8">
+        {featureCards.map((f) => (
+          <Link
+            key={f.title}
+            href={f.href}
+            className="bg-[#070711] p-8 transition hover:bg-white/[0.03]"
+          >
             <h3 className="font-[family-name:var(--font-display)] text-base font-semibold">
               {f.title}
             </h3>
             <p className="mt-2 text-sm text-white/50">{f.desc}</p>
-          </div>
+            <span className="mt-3 inline-block text-xs text-[#2DD4BF]">
+              Explore →
+            </span>
+          </Link>
         ))}
       </section>
 
@@ -261,9 +276,10 @@ export default function HomePage() {
         <ModelMarquee />
         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {SHOWCASE_MODELS.filter((m) => m.status === "live").map((m) => (
-            <div
+            <Link
               key={m.id}
-              className="rounded-xl border border-[#2DD4BF]/20 bg-[#2DD4BF]/5 p-4"
+              href={`/playground?model=${m.id}`}
+              className="rounded-xl border border-[#2DD4BF]/20 bg-[#2DD4BF]/5 p-4 transition hover:border-[#2DD4BF]/40 hover:bg-[#2DD4BF]/10"
             >
               <span className="text-[9px] font-bold uppercase tracking-wider text-[#2DD4BF]">
                 Live
@@ -272,7 +288,10 @@ export default function HomePage() {
                 {m.label}
               </p>
               <p className="mt-1 font-mono text-[10px] text-white/40">{m.id}</p>
-            </div>
+              <span className="mt-2 inline-block text-[10px] text-[#2DD4BF]">
+                Test in Playground →
+              </span>
+            </Link>
           ))}
         </div>
       </section>
@@ -339,12 +358,18 @@ export default function HomePage() {
                 {lane.title}
               </h3>
               <p className="mt-2 flex-1 text-sm text-white/50">{lane.desc}</p>
-              <Link
-                href={lane.href}
-                className="mt-6 inline-block text-sm font-medium text-[#2DD4BF] transition hover:text-[#2DD4BF]/80"
-              >
-                {lane.cta} →
-              </Link>
+              {lane.live && lane.href ? (
+                <Link
+                  href={lane.href}
+                  className="mt-6 inline-block text-sm font-medium text-[#2DD4BF] transition hover:text-[#2DD4BF]/80"
+                >
+                  {lane.cta} →
+                </Link>
+              ) : (
+                <span className="mt-6 inline-block text-sm font-medium text-white/30">
+                  {lane.cta}
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -371,14 +396,15 @@ export default function HomePage() {
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {gatewayEndpoints.map((ep) => (
-              <div
+              <Link
                 key={ep.path}
-                className="rounded-xl border border-white/5 bg-white/[0.02] p-4"
+                href={ep.href}
+                className="rounded-xl border border-white/5 bg-white/[0.02] p-4 transition hover:border-[#2DD4BF]/20 hover:bg-white/[0.04]"
               >
                 <p className="text-sm font-medium">{ep.label}</p>
                 <p className="mt-1 font-mono text-xs text-[#2DD4BF]">{ep.path}</p>
                 <p className="mt-2 text-xs text-white/40">{ep.desc}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -463,8 +489,8 @@ export default function HomePage() {
             {
               title: "Legal",
               links: [
-                { l: "Privacy", h: "#" },
-                { l: "Status", h: "#" },
+                { l: "Privacy", h: "/docs", soon: true },
+                { l: "API status", h: "/api/v1/models", soon: false },
               ],
             },
           ].map((col) => (
@@ -478,8 +504,14 @@ export default function HomePage() {
                     <Link
                       href={link.h}
                       className="text-sm text-white/40 transition hover:text-white"
+                      {...("soon" in link && link.soon
+                        ? { title: "Privacy policy — coming soon" }
+                        : {})}
                     >
                       {link.l}
+                      {"soon" in link && link.soon ? (
+                        <span className="ml-1 text-[10px] text-white/25">(soon)</span>
+                      ) : null}
                     </Link>
                   </li>
                 ))}
