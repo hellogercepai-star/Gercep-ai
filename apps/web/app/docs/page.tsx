@@ -65,6 +65,12 @@ export default function DocsPage() {
               Playground
             </Link>
             <Link
+              href="/whitepaper"
+              className="text-sm text-white/60 transition hover:text-white"
+            >
+              Whitepaper
+            </Link>
+            <Link
               href="/developers"
               className="rounded-full border border-white/10 px-3 py-1.5 text-sm text-white/80 transition hover:border-white/30"
             >
