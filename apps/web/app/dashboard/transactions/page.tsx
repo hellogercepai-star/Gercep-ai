@@ -56,14 +56,14 @@ export default function TransactionsPage() {
     <div className="flex min-h-screen bg-[#070711]">
       <Sidebar />
 
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <Header
           title="Keuangan"
           subtitle="Catat pemasukan, pengeluaran, dan pantau kas bisnis."
           businessName={activeBusiness?.name ?? "Bisnis Saya"}
         />
 
-        <main className="px-8 py-8">
+        <main className="px-8 py-8 pb-20">
           {businessLoading ? (
             <Card>
               <p className="text-sm text-white/50">Memuat data bisnis...</p>

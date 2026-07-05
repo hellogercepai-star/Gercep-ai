@@ -1,7 +1,7 @@
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#070711]">
-      <div className="pointer-events-none absolute inset-0">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#070711]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-[#2DD4BF]/10 blur-[120px]" />
         <div className="absolute top-20 right-0 h-[400px] w-[400px] rounded-full bg-[#A78BFA]/10 blur-[120px]" />
         <div className="absolute bottom-0 left-0 h-[350px] w-[350px] rounded-full bg-[#F472B6]/10 blur-[120px]" />
@@ -75,7 +75,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-6 md:mx-12 md:grid-cols-3 md:px-0">
+      <section className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-6 pb-8 md:mx-12 md:grid-cols-3 md:px-0">
         {[
           {
             title: "Multi-model routing",

@@ -161,7 +161,7 @@ export default function DevelopersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070711] text-white">
+    <div className="bg-[#070711] text-white">
       <header className="border-b border-white/10 px-6 py-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div>
@@ -189,7 +189,7 @@ export default function DevelopersPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-6 py-8">
+      <main className="mx-auto max-w-4xl px-6 py-8 pb-20">
         {/* Usage summary */}
         <section className="mb-8">
           <h2 className="mb-4 font-[family-name:var(--font-display)] text-lg font-semibold">

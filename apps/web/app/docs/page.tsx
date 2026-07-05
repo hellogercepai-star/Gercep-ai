@@ -45,7 +45,7 @@ export default function DocsPage() {
   const models = listPublicModels();
 
   return (
-    <div className="min-h-screen bg-[#070711] text-white">
+    <div className="bg-[#070711] text-white">
       <header className="border-b border-white/10 px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div>
@@ -74,7 +74,7 @@ export default function DocsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-3xl px-6 py-10 pb-20">
         <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold">
           Gercep Gateway API
         </h1>
