@@ -13,6 +13,12 @@ export default function HomePage() {
         </span>
         <div className="flex items-center gap-3">
           <a
+            href="/docs"
+            className="text-sm text-white/70 transition hover:text-white"
+          >
+            Docs
+          </a>
+          <a
             href="/playground"
             className="text-sm text-white/70 transition hover:text-white"
           >

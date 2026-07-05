@@ -173,11 +173,19 @@ export default function DevelopersPage() {
             </Link>
             <p className="text-sm text-white/50">Developers — API Keys & Usage</p>
           </div>
-          <Link href="/playground">
-            <Button variant="secondary" size="sm">
-              Open Playground
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/docs"
+              className="text-sm text-white/60 transition hover:text-white"
+            >
+              Docs
+            </Link>
+            <Link href="/playground">
+              <Button variant="secondary" size="sm">
+                Open Playground
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 

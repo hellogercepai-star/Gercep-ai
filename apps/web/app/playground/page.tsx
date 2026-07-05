@@ -108,6 +108,11 @@ export default function PlaygroundPage() {
             <p className="text-sm text-white/50">Playground</p>
           </div>
           <div className="flex gap-2">
+            <Link href="/docs">
+              <Button variant="ghost" size="sm">
+                Docs
+              </Button>
+            </Link>
             <Link href="/developers">
               <Button variant="secondary" size="sm">
                 API Keys
