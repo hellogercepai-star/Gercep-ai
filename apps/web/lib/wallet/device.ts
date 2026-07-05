@@ -12,6 +12,10 @@ export function hasInjectedSolanaWallet(): boolean {
   );
 }
 
+export function isPhantomInAppBrowser(): boolean {
+  return hasInjectedSolanaWallet();
+}
+
 /** Buka halaman ini di Phantom mobile in-app browser (wallet connect jalan di sana). */
 export function getPhantomBrowseUrl(pageUrl: string): string {
   const encoded = encodeURIComponent(pageUrl);
@@ -24,8 +28,8 @@ export function getPhantomBrowseUrl(pageUrl: string): string {
 export const PHANTOM_EXTENSION_URL =
   "https://phantom.app/download";
 
-/** URL untuk buka di Phantom mobile — login dulu, baru link wallet. */
+/** Buka /developers langsung di Phantom mobile (tanpa token $GERCEP). */
 export function getPhantomDevelopersUrl(siteOrigin: string): string {
-  const loginUrl = `${siteOrigin}/login?next=${encodeURIComponent("/developers")}&wallet=1`;
-  return getPhantomBrowseUrl(loginUrl);
+  const developersUrl = `${siteOrigin}/developers?phantom=1`;
+  return getPhantomBrowseUrl(developersUrl);
 }

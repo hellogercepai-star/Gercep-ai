@@ -56,9 +56,9 @@ export async function getWalletQuotaForUser(
 
   let note: string;
   if (!walletLinked) {
-    note = "Link wallet Phantom untuk tier $GERCEP.";
+    note = "Connect Phantom → Sign & Link. Token $GERCEP belum launch — tier Beta tetap aktif.";
   } else if (!mintConfigured) {
-    note = "Token $GERCEP mint belum dikonfigurasi di server.";
+    note = "Token $GERCEP belum launch — tier Beta (1.000 req/hari) aktif untuk wallet kamu.";
   } else if (gercepBalance === null) {
     note = "Gagal baca balance — coba refresh nanti.";
   } else if (upcoming) {

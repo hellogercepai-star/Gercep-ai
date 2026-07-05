@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { WalletLinkCard } from "@/components/wallet/WalletLinkCard";
+import { PhantomOpenButton } from "@/components/wallet/PhantomOpenButton";
 
 interface ApiKeyItem {
   id: string;
@@ -180,6 +181,10 @@ export default function DevelopersPage() {
             <p className="text-sm text-white/50">Developers — API Keys & Usage</p>
           </div>
           <div className="flex items-center gap-2">
+            <PhantomOpenButton
+              className="rounded-full bg-[#AB9FF2] px-3 py-1.5 text-xs font-medium text-[#070711]"
+              label="Phantom"
+            />
             <Link
               href="/docs"
               className="text-sm text-white/60 transition hover:text-white"
