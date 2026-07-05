@@ -9,9 +9,9 @@ import { Card } from "@/components/ui/Card";
 import { buildWalletLinkMessage } from "@/lib/wallet/solana";
 import {
   bytesToBase64,
-  normalizeSignatureBytes,
-  signWithPhantom,
+  signWalletMessage,
 } from "@/lib/wallet/sign";
+import { readJsonResponse } from "@/lib/wallet/fetch-json";
 import {
   getPhantomDevelopersUrl,
   hasInjectedSolanaWallet,
@@ -51,19 +51,26 @@ export function WalletLinkCard() {
 
   const loadWallet = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/v1/wallet");
-    if (res.status === 401) {
-      setNeedsLogin(true);
+    try {
+      const res = await fetch("/api/v1/wallet", { credentials: "same-origin" });
+      if (res.status === 401) {
+        setNeedsLogin(true);
+        return;
+      }
+      setNeedsLogin(false);
+      const data = await readJsonResponse<{
+        wallet?: LinkedWallet | null;
+        quota?: WalletQuota | null;
+      }>(res, "Load wallet");
+      if (res.ok) {
+        setLinked(data.wallet ?? null);
+        setQuota(data.quota ?? null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal load wallet.");
+    } finally {
       setLoading(false);
-      return;
     }
-    setNeedsLogin(false);
-    const data = await res.json();
-    if (res.ok) {
-      setLinked(data.wallet ?? null);
-      setQuota(data.quota ?? null);
-    }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -71,8 +78,8 @@ export function WalletLinkCard() {
   }, [loadWallet]);
 
   const handleLink = async () => {
-    if (!publicKey || !signMessage) {
-      setError("Wallet tidak support sign message. Coba Phantom atau Solflare.");
+    if (!publicKey) {
+      setError("Connect wallet dulu.");
       return;
     }
 
@@ -80,15 +87,14 @@ export function WalletLinkCard() {
     setError(null);
 
     try {
-      const challengeRes = await fetch("/api/v1/wallet/challenge");
-      let challengeData: { nonce?: string; expiresAt?: string; error?: string };
-      try {
-        challengeData = await challengeRes.json();
-      } catch {
-        throw new Error(
-          "Gagal baca response server. Pastikan migration wallet sudah di-run di Supabase."
-        );
-      }
+      const challengeRes = await fetch("/api/v1/wallet/challenge", {
+        credentials: "same-origin",
+      });
+      const challengeData = await readJsonResponse<{
+        nonce?: string;
+        expiresAt?: string;
+        error?: string;
+      }>(challengeRes, "Minta challenge");
       if (!challengeRes.ok) {
         throw new Error(
           challengeData.error ??
@@ -106,27 +112,23 @@ export function WalletLinkCard() {
 
       let signatureBytes: Uint8Array;
       try {
-        if (hasInjectedSolanaWallet()) {
-          signatureBytes = await signWithPhantom(message);
-        } else if (signMessage) {
-          signatureBytes = normalizeSignatureBytes(
-            await signMessage(new TextEncoder().encode(message))
-          );
-        } else {
-          throw new Error("Wallet tidak support sign message.");
-        }
+        signatureBytes = await signWalletMessage(
+          message,
+          signMessage ?? undefined
+        );
       } catch (signErr) {
         const msg =
           signErr instanceof Error ? signErr.message : "Sign message gagal.";
         throw new Error(
-          msg.includes("pattern")
-            ? "Phantom gagal sign — coba disconnect wallet, connect lagi, lalu ulangi."
-            : msg
+          msg.toLowerCase().includes("pattern")
+            ? "Phantom gagal sign — disconnect wallet, connect lagi, lalu ulangi."
+            : `Sign gagal: ${msg}`
         );
       }
 
       const verifyRes = await fetch("/api/v1/wallet", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           address,
@@ -135,12 +137,15 @@ export function WalletLinkCard() {
         }),
       });
 
-      const verifyData = await verifyRes.json();
+      const verifyData = await readJsonResponse<{
+        wallet?: LinkedWallet;
+        error?: string;
+      }>(verifyRes, "Verifikasi wallet");
       if (!verifyRes.ok) {
         throw new Error(verifyData.error ?? "Verifikasi gagal.");
       }
 
-      setLinked(verifyData.wallet);
+      setLinked(verifyData.wallet ?? null);
       await loadWallet();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal link wallet.");
