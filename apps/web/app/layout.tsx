@@ -14,9 +14,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Gercep AI — Business OS for Growing Companies",
+  title: "Gercep AI — OpenAI-compatible inference gateway",
   description:
-    "The AI-powered operating system for modern businesses. Dashboards, automation, and multi-business management in one platform.",
+    "Multi-model LLM gateway for developers. Test in the playground, create sk-gercep API keys, and ship with one compatible request shape.",
 };
 
 export default function RootLayout({
