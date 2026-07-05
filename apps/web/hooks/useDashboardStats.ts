@@ -13,9 +13,9 @@ export function useDashboardStats() {
   const { activeBusiness, businesses } = useBusiness();
 
   const stats = useMemo(() => {
-    const revenue = activeBusiness.totalRevenue;
-    const expense = activeBusiness.totalExpense;
-    const profit = activeBusiness.profit;
+    const revenue = activeBusiness?.totalRevenue ?? 0;
+    const expense = activeBusiness?.totalExpense ?? 0;
+    const profit = activeBusiness?.profit ?? 0;
 
     return {
       revenue,
