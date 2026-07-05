@@ -38,6 +38,14 @@ export interface NewProductInput {
   description?: string;
 }
 
+export interface NewUnitInput {
+  productId: string;
+  serialNumber: string;
+  condition: string;
+  buyPrice?: number;
+  notes?: string;
+}
+
 function mapCategoryRow(row: CategoryRow): Category {
   return {
     id: row.id,
@@ -265,6 +273,36 @@ export function useProducts(activeBusiness: Business | null) {
     await loadInventory();
   };
 
+  const addUnit = async (input: NewUnitInput): Promise<void> => {
+    if (!businessId) throw new Error("Pilih bisnis dulu.");
+
+    const serialNumber = input.serialNumber.trim();
+    if (!serialNumber) throw new Error("Serial number wajib diisi.");
+
+    const { error } = await supabase.from("product_units").insert({
+      product_id: input.productId,
+      business_id: businessId,
+      serial_number: serialNumber,
+      condition: input.condition,
+      buy_price: input.buyPrice ?? null,
+      status: "available",
+      notes: input.notes?.trim() || null,
+    });
+
+    if (error) {
+      // 23505 = unique violation: serial number harus unik per business
+      if (error.code === "23505") {
+        throw new Error(
+          `Serial number "${serialNumber}" sudah terdaftar di bisnis ini. Cek lagi, mungkin unit ini sudah pernah diinput.`
+        );
+      }
+      throw new Error(error.message);
+    }
+
+    // refresh supaya kolom stok ter-update (+1)
+    await loadInventory();
+  };
+
   return {
     products,
     categories,
@@ -274,6 +312,7 @@ export function useProducts(activeBusiness: Business | null) {
     createProduct,
     createCategory,
     addStock,
+    addUnit,
     refreshInventory: loadInventory,
   };
 }

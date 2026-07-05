@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { AddProductModal } from "@/components/inventory/AddProductModal";
 import { AddStockModal } from "@/components/inventory/AddStockModal";
+import { AddUnitModal } from "@/components/inventory/AddUnitModal";
 import { useBusiness } from "@/hooks/useBusiness";
 import { useProducts } from "@/hooks/useProducts";
 import type { Product } from "@/types";
@@ -26,9 +27,11 @@ export default function InventoryPage() {
     createProduct,
     createCategory,
     addStock,
+    addUnit,
   } = useProducts(activeBusiness);
   const [showAddModal, setShowAddModal] = useState(false);
   const [stockProduct, setStockProduct] = useState<Product | null>(null);
+  const [unitProduct, setUnitProduct] = useState<Product | null>(null);
 
   return (
     <div className="flex min-h-screen bg-[#070711]">
@@ -136,13 +139,21 @@ export default function InventoryPage() {
                             {formatRupiah(product.sellPrice)}
                           </td>
                           <td className="px-6 py-4 text-right">
-                            {product.trackingType === "bulk" && (
+                            {product.trackingType === "bulk" ? (
                               <Button
                                 variant="secondary"
                                 size="sm"
                                 onClick={() => setStockProduct(product)}
                               >
                                 + Stok
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setUnitProduct(product)}
+                              >
+                                + Unit
                               </Button>
                             )}
                           </td>
@@ -169,6 +180,12 @@ export default function InventoryPage() {
         product={stockProduct}
         onClose={() => setStockProduct(null)}
         onAddStock={addStock}
+      />
+
+      <AddUnitModal
+        product={unitProduct}
+        onClose={() => setUnitProduct(null)}
+        onAddUnit={addUnit}
       />
     </div>
   );
