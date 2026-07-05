@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { Card } from "@/components/ui/Card";
@@ -28,10 +29,12 @@ export default function InventoryPage() {
     createCategory,
     addStock,
     addUnit,
+    updateProduct,
   } = useProducts(activeBusiness);
   const [showAddModal, setShowAddModal] = useState(false);
   const [stockProduct, setStockProduct] = useState<Product | null>(null);
   const [unitProduct, setUnitProduct] = useState<Product | null>(null);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
 
   return (
     <div className="flex min-h-screen bg-[#070711]">
@@ -139,23 +142,33 @@ export default function InventoryPage() {
                             {formatRupiah(product.sellPrice)}
                           </td>
                           <td className="px-6 py-4 text-right">
-                            {product.trackingType === "bulk" ? (
+                            <div className="flex items-center justify-end gap-1.5">
+                              {product.trackingType === "bulk" ? (
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => setStockProduct(product)}
+                                >
+                                  + Stok
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => setUnitProduct(product)}
+                                >
+                                  + Unit
+                                </Button>
+                              )}
                               <Button
-                                variant="secondary"
+                                variant="ghost"
                                 size="sm"
-                                onClick={() => setStockProduct(product)}
+                                onClick={() => setEditProduct(product)}
+                                aria-label={`Edit ${product.name}`}
                               >
-                                + Stok
+                                <Pencil size={14} />
                               </Button>
-                            ) : (
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => setUnitProduct(product)}
-                              >
-                                + Unit
-                              </Button>
-                            )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -169,11 +182,17 @@ export default function InventoryPage() {
       </div>
 
       <AddProductModal
-        open={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        key={editProduct?.id ?? "new"}
+        open={showAddModal || !!editProduct}
+        editProduct={editProduct}
+        onClose={() => {
+          setShowAddModal(false);
+          setEditProduct(null);
+        }}
         categories={categories}
         onCreateProduct={createProduct}
         onCreateCategory={createCategory}
+        onUpdateProduct={updateProduct}
       />
 
       <AddStockModal

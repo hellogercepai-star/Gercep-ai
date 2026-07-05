@@ -3,16 +3,22 @@
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import type { Category, TrackingType } from "@/types";
-import type { NewProductInput } from "@/hooks/useProducts";
+import type { Category, Product, TrackingType } from "@/types";
+import type { NewProductInput, UpdateProductInput } from "@/hooks/useProducts";
 
 interface AddProductModalProps {
   open: boolean;
+  /** jika diisi, form jadi mode edit; parent wajib memberi key={editProduct?.id ?? "new"} */
+  editProduct?: Product | null;
   onClose: () => void;
   categories: Category[];
   /** teruskan createProduct & createCategory dari useProducts() milik parent */
   onCreateProduct: (input: NewProductInput) => Promise<unknown>;
   onCreateCategory: (name: string) => Promise<Category>;
+  onUpdateProduct?: (
+    productId: string,
+    input: UpdateProductInput
+  ) => Promise<unknown>;
 }
 
 const NEW_CATEGORY = "__new__";
@@ -22,17 +28,29 @@ const inputClass =
 
 export function AddProductModal({
   open,
+  editProduct,
   onClose,
   categories,
   onCreateProduct,
   onCreateCategory,
+  onUpdateProduct,
 }: AddProductModalProps) {
-  const [name, setName] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const isEdit = !!editProduct;
+  const [name, setName] = useState(editProduct?.name ?? "");
+  const [categoryId, setCategoryId] = useState(editProduct?.categoryId ?? "");
   const [newCategoryName, setNewCategoryName] = useState("");
-  const [trackingType, setTrackingType] = useState<TrackingType>("bulk");
-  const [buyPrice, setBuyPrice] = useState("");
-  const [sellPrice, setSellPrice] = useState("");
+  const [trackingType, setTrackingType] = useState<TrackingType>(
+    editProduct?.trackingType ?? "bulk"
+  );
+  const [buyPrice, setBuyPrice] = useState(
+    editProduct ? String(editProduct.buyPrice) : ""
+  );
+  const [sellPrice, setSellPrice] = useState(
+    editProduct ? String(editProduct.sellPrice) : ""
+  );
+  const [description, setDescription] = useState(
+    editProduct?.description ?? ""
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,6 +65,7 @@ export function AddProductModal({
     setTrackingType("bulk");
     setBuyPrice("");
     setSellPrice("");
+    setDescription("");
     setError(null);
   };
 
@@ -70,13 +89,24 @@ export function AddProductModal({
         finalCategoryId = created.id;
       }
 
-      await onCreateProduct({
-        name: name.trim(),
-        categoryId: finalCategoryId,
-        trackingType,
-        buyPrice: Number(buyPrice) || 0,
-        sellPrice: Number(sellPrice) || 0,
-      });
+      if (isEdit && onUpdateProduct) {
+        await onUpdateProduct(editProduct.id, {
+          name: name.trim(),
+          categoryId: finalCategoryId,
+          buyPrice: Number(buyPrice) || 0,
+          sellPrice: Number(sellPrice) || 0,
+          description: description.trim() || undefined,
+        });
+      } else {
+        await onCreateProduct({
+          name: name.trim(),
+          categoryId: finalCategoryId,
+          trackingType,
+          buyPrice: Number(buyPrice) || 0,
+          sellPrice: Number(sellPrice) || 0,
+          description: description.trim() || undefined,
+        });
+      }
 
       resetForm();
       onClose();
@@ -92,8 +122,10 @@ export function AddProductModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070711]/80 p-4 backdrop-blur-sm">
       <Card
-        title="Tambah Produk"
-        description="Produk baru untuk bisnis aktif kamu."
+        title={isEdit ? "Edit Produk" : "Tambah Produk"}
+        description={
+          isEdit ? editProduct.name : "Produk baru untuk bisnis aktif kamu."
+        }
         className="max-h-[90vh] w-full max-w-md overflow-y-auto bg-[#070711]"
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -166,7 +198,9 @@ export function AddProductModal({
               ).map((opt) => (
                 <label
                   key={opt.value}
-                  className={`cursor-pointer rounded-lg border px-3 py-2.5 text-sm transition ${
+                  className={`rounded-lg border px-3 py-2.5 text-sm transition ${
+                    isEdit ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                  } ${
                     trackingType === opt.value
                       ? "border-[#2DD4BF]/60 bg-[#2DD4BF]/10 text-white"
                       : "border-white/10 bg-white/[0.03] text-white/60 hover:border-white/30"
@@ -178,6 +212,7 @@ export function AddProductModal({
                     value={opt.value}
                     checked={trackingType === opt.value}
                     onChange={() => setTrackingType(opt.value)}
+                    disabled={isEdit}
                     className="sr-only"
                   />
                   <span className="block font-medium">{opt.label}</span>
@@ -187,6 +222,29 @@ export function AddProductModal({
                 </label>
               ))}
             </div>
+            {isEdit && (
+              <p className="mt-1.5 text-xs text-white/40">
+                Tipe tracking tidak bisa diubah setelah produk dibuat karena
+                akan merusak konsistensi data stok yang sudah tercatat.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="product-description"
+              className="mb-1.5 block text-sm text-white/70"
+            >
+              Deskripsi <span className="text-white/40">(opsional)</span>
+            </label>
+            <textarea
+              id="product-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              placeholder="Deskripsi singkat produk..."
+              className={`${inputClass} resize-none`}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -238,7 +296,11 @@ export function AddProductModal({
               Batal
             </Button>
             <Button type="submit" disabled={!name.trim() || submitting}>
-              {submitting ? "Menyimpan..." : "Simpan Produk"}
+              {submitting
+                ? "Menyimpan..."
+                : isEdit
+                ? "Simpan Perubahan"
+                : "Simpan Produk"}
             </Button>
           </div>
         </form>

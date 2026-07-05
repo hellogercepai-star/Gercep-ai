@@ -46,6 +46,14 @@ export interface NewUnitInput {
   notes?: string;
 }
 
+export interface UpdateProductInput {
+  name: string;
+  categoryId?: string;
+  buyPrice: number;
+  sellPrice: number;
+  description?: string;
+}
+
 function mapCategoryRow(row: CategoryRow): Category {
   return {
     id: row.id,
@@ -303,6 +311,29 @@ export function useProducts(activeBusiness: Business | null) {
     await loadInventory();
   };
 
+  const updateProduct = async (
+    productId: string,
+    input: UpdateProductInput
+  ): Promise<void> => {
+    if (!businessId) throw new Error("Pilih bisnis dulu.");
+
+    // tracking_type sengaja tidak bisa diubah agar data stok tetap konsisten
+    const { error } = await supabase
+      .from("products")
+      .update({
+        name: input.name.trim(),
+        category_id: input.categoryId ?? null,
+        buy_price: input.buyPrice,
+        sell_price: input.sellPrice,
+        description: input.description?.trim() || null,
+      })
+      .eq("id", productId);
+
+    if (error) throw new Error(error.message);
+
+    await loadInventory();
+  };
+
   return {
     products,
     categories,
@@ -313,6 +344,7 @@ export function useProducts(activeBusiness: Business | null) {
     createCategory,
     addStock,
     addUnit,
+    updateProduct,
     refreshInventory: loadInventory,
   };
 }
