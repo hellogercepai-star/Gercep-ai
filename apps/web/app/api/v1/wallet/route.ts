@@ -128,7 +128,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Signature invalid." }, { status: 401 });
   }
 
-  const admin = createAdminClient();
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch (err) {
+    const msg =
+      err instanceof Error ? err.message : "Server config error.";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 
   const { data: existingAddress } = await admin
     .from("wallet_links")
