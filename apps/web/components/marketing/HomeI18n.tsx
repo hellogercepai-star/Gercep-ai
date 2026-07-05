@@ -16,7 +16,7 @@ export function HomeNavBar() {
   const { t } = useLanguage();
 
   return (
-    <nav className="relative z-20 border-b border-white/5">
+    <nav className="relative z-20 border-b border-[#00fff0]/10 bg-[#030308]/60 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link
           href="/"

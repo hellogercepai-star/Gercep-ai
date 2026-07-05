@@ -48,6 +48,329 @@ body {
   animation: marquee 60s linear infinite;
 }
 
+/* Cyberpunk atmosphere */
+@keyframes cyber-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes cyber-pulse-slow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes cyber-drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(30px, -20px);
+  }
+}
+
+@keyframes cyber-grid-scroll {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 80px;
+  }
+}
+
+@keyframes cyber-scan {
+  0% {
+    top: -6rem;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+.animate-cyber-pulse {
+  animation: cyber-pulse 6s ease-in-out infinite;
+}
+
+.animate-cyber-pulse-slow {
+  animation: cyber-pulse-slow 10s ease-in-out infinite;
+}
+
+.animate-cyber-drift {
+  animation: cyber-drift 14s ease-in-out infinite;
+}
+
+.animate-cyber-grid-scroll {
+  animation: cyber-grid-scroll 4s linear infinite;
+}
+
+.animate-cyber-scan {
+  animation: cyber-scan 8s linear infinite;
+}
+
+.cyber-panel {
+  border: 1px solid rgba(0, 255, 240, 0.2);
+  background: rgba(3, 3, 8, 0.75);
+  box-shadow:
+    0 0 30px -10px rgba(0, 255, 240, 0.25),
+    inset 0 0 30px rgba(0, 255, 240, 0.03);
+  backdrop-filter: blur(12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ship-fly,
+  .animate-ship-trail,
+  .animate-orbit-slow,
+  .animate-orbit-reverse,
+  .animate-orbit-sat,
+  .animate-swarm,
+  .animate-dash-flow,
+  .animate-data-stream,
+  .animate-neural-pulse,
+  .animate-warp-ship,
+  .animate-warp-streak,
+  .animate-landing-ship,
+  .animate-cyber-pulse,
+  .animate-cyber-pulse-slow,
+  .animate-cyber-drift,
+  .animate-cyber-grid-scroll,
+  .animate-cyber-scan {
+    animation: none !important;
+  }
+}
+
+@keyframes ship-fly {
+  0% {
+    transform: translateX(-10vw) translateY(0) rotate(-2deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(110vw) translateY(-20px) rotate(2deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ship-trail {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scaleX(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes orbit-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbit-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes orbit-sat {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes swarm {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -15px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 10px) scale(0.95);
+  }
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes data-stream {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(200%);
+    opacity: 0;
+  }
+}
+
+@keyframes neural-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(0, 255, 240, 0);
+    border-color: rgba(45, 212, 191, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 240, 0.3);
+    border-color: rgba(0, 255, 240, 0.5);
+  }
+}
+
+@keyframes warp-ship {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.15) translateY(-10px);
+  }
+}
+
+@keyframes warp-streak {
+  0% {
+    transform: rotate(var(--r, 0deg)) scaleX(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--r, 0deg)) scaleX(1);
+    opacity: 0;
+  }
+}
+
+@keyframes landing-ship {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.animate-ship-fly {
+  animation: ship-fly 14s linear infinite;
+}
+
+.animate-ship-trail {
+  animation: ship-trail 3s ease-in-out infinite;
+}
+
+.animate-orbit-slow {
+  animation: orbit-slow 30s linear infinite;
+}
+
+.animate-orbit-reverse {
+  animation: orbit-reverse 20s linear infinite;
+}
+
+.animate-orbit-sat {
+  animation: orbit-sat 20s linear infinite;
+}
+
+.animate-swarm {
+  animation: swarm 8s ease-in-out infinite;
+}
+
+.animate-dash-flow {
+  stroke-dasharray: 4 8;
+  animation: dash-flow 2s linear infinite;
+}
+
+.animate-data-stream {
+  animation: data-stream 3s linear infinite;
+}
+
+.animate-neural-pulse {
+  animation: neural-pulse 2.5s ease-in-out infinite;
+}
+
+.animate-warp-ship {
+  animation: warp-ship 4s ease-in-out infinite;
+}
+
+.animate-warp-streak {
+  animation: warp-streak 1.5s ease-out infinite;
+}
+
+.animate-landing-ship {
+  animation: landing-ship 5s ease-in-out infinite;
+}
+
+[data-journey="hero"].journey-section-active {
+  --journey-glow: rgba(0, 255, 240, 0.08);
+}
+
+[data-journey="ecosystem"].journey-section-active {
+  --journey-glow: rgba(167, 139, 250, 0.08);
+}
+
+[data-journey="models"].journey-section-active {
+  --journey-glow: rgba(96, 165, 250, 0.08);
+}
+
+[data-journey="compute"].journey-section-active {
+  --journey-glow: rgba(45, 212, 191, 0.08);
+}
+
+[data-journey="pricing"].journey-section-active {
+  --journey-glow: rgba(255, 0, 170, 0.08);
+}
+
+[data-journey="horizon"].journey-section-active {
+  --journey-glow: rgba(251, 191, 36, 0.06);
+}
+
+.journey-section-active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 40% at 50% 0%,
+    var(--journey-glow, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
 /* Solana wallet adapter — dark theme */
 .wallet-adapter-button {
   background-color: rgba(255, 255, 255, 0.06) !important;

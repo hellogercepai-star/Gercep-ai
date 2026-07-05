@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ModelMarquee } from "@/components/marketing/ModelMarquee";
+import { JourneySection } from "@/components/marketing/scroll-journey/JourneySection";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { SHOWCASE_MODELS, TRUSTED_BY } from "@/lib/gateway/marketing-models";
 
@@ -152,12 +153,13 @@ export function HomeSections() {
 
   return (
     <>
-      <section className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-6 md:mx-6 lg:mx-auto lg:grid-cols-3 lg:px-0">
+      <JourneySection chapter="ecosystem" className="relative z-10 pt-4">
+      <section className="mx-auto grid max-w-5xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[#00fff0]/15 bg-[#00fff0]/5 px-6 md:mx-6 lg:mx-auto lg:grid-cols-3 lg:px-0">
         {featureCards.map((f) => (
           <Link
             key={f.titleKey}
             href={f.href}
-            className="bg-[#070711] p-8 transition hover:bg-white/[0.03]"
+            className="bg-[#030308]/90 p-8 transition hover:bg-[#00fff0]/5"
           >
             <h3 className="font-[family-name:var(--font-display)] text-base font-semibold">
               {t(f.titleKey)}
@@ -170,7 +172,7 @@ export function HomeSections() {
         ))}
       </section>
 
-      <section className="relative z-10 border-y border-white/5 py-6">
+      <section className="border-y border-[#A78BFA]/10 py-6">
         <p className="mb-4 text-center text-[10px] font-semibold uppercase tracking-[0.25em] text-white/30">
           {t("homeSections.trustedBy")}
         </p>
@@ -187,8 +189,9 @@ export function HomeSections() {
           </div>
         </div>
       </section>
+      </JourneySection>
 
-      <section id="models" className="relative z-10 mx-auto max-w-6xl px-6 py-20">
+      <JourneySection chapter="models" id="models" className="relative z-10 mx-auto max-w-6xl px-6 py-20">
         <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
@@ -239,9 +242,9 @@ export function HomeSections() {
             </Link>
           ))}
         </div>
-      </section>
+      </JourneySection>
 
-      <section className="relative z-10 border-t border-white/5 bg-white/[0.02] py-20">
+      <JourneySection chapter="compute" className="relative z-10 border-t border-[#2DD4BF]/10 bg-[#2DD4BF]/[0.02] py-20">
         <div className="mx-auto max-w-6xl px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
             {t("homeSections.computeNetwork")}
@@ -278,9 +281,9 @@ export function HomeSections() {
             ))}
           </div>
         </div>
-      </section>
+      </JourneySection>
 
-      <section id="pricing" className="relative z-10 mx-auto max-w-6xl px-6 py-20">
+      <JourneySection chapter="pricing" id="pricing" className="relative z-10 mx-auto max-w-6xl px-6 py-20">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
           {t("homeSections.pricingAccess")}
         </p>
@@ -352,9 +355,10 @@ export function HomeSections() {
             ))}
           </div>
         </div>
-      </section>
+      </JourneySection>
 
-      <section className="relative z-10 border-t border-white/5 py-20">
+      <JourneySection chapter="horizon" className="relative z-10 border-t border-[#fbbf24]/10">
+      <section className="py-20">
         <div className="mx-auto max-w-3xl px-6">
           <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             {t("homeSections.faqTitle")}
@@ -372,7 +376,7 @@ export function HomeSections() {
         </div>
       </section>
 
-      <section className="relative z-10 border-t border-white/5 py-20">
+      <section className="border-t border-white/5 py-20">
         <div className="mx-auto max-w-3xl px-6 text-center">
           <h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold">
             {t("homeSections.ctaTitle")}
@@ -395,7 +399,7 @@ export function HomeSections() {
         </div>
       </section>
 
-      <footer className="relative z-10 border-t border-white/5 py-12">
+      <footer className="border-t border-white/5 py-12">
         <div className="mx-auto grid max-w-6xl gap-8 px-6 md:grid-cols-4">
           <div>
             <p className="font-[family-name:var(--font-display)] font-semibold">
@@ -429,6 +433,7 @@ export function HomeSections() {
           {t("homeSections.footerVersion")}
         </p>
       </footer>
+      </JourneySection>
     </>
   );
 }
