@@ -23,3 +23,9 @@ export function getPhantomBrowseUrl(pageUrl: string): string {
 
 export const PHANTOM_EXTENSION_URL =
   "https://phantom.app/download";
+
+/** URL untuk buka di Phantom mobile — login dulu, baru link wallet. */
+export function getPhantomDevelopersUrl(siteOrigin: string): string {
+  const loginUrl = `${siteOrigin}/login?next=${encodeURIComponent("/developers")}&wallet=1`;
+  return getPhantomBrowseUrl(loginUrl);
+}

@@ -10,6 +10,8 @@ export default function LoginForm() {
   const supabase = createClient();
 
   const nextPath = searchParams.get("next") || "/dashboard";
+  const fromWallet = searchParams.get("wallet") === "1";
+  const isDevelopersFlow = nextPath === "/developers" || fromWallet;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,10 +45,25 @@ export default function LoginForm() {
           Masuk ke Gercep AI
         </h1>
         <p className="mt-1 text-sm text-white/50">
-          {nextPath === "/developers"
-            ? "Login dulu untuk API keys & wallet."
+          {isDevelopersFlow
+            ? "Step 1 dari 2 — buat akun Gercep dulu."
             : "Lanjutkan kelola bisnis kamu."}
         </p>
+
+        {isDevelopersFlow && (
+          <div className="mt-4 rounded-lg border border-[#AB9FF2]/30 bg-[#AB9FF2]/10 p-3 text-xs leading-relaxed text-white/70">
+            <p className="font-medium text-[#AB9FF2]">
+              Phantom connect ≠ login Gercep
+            </p>
+            <p className="mt-1">
+              Wallet Phantom buat verifikasi &amp; $GERCEP nanti. Akun email/password
+              wajib untuk API keys &amp; usage.
+            </p>
+            <p className="mt-2 text-white/50">
+              Setelah masuk → Connect Wallet → Sign &amp; Link
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-4">
           <div>
@@ -85,7 +102,7 @@ export default function LoginForm() {
         <p className="mt-6 text-center text-xs text-white/50">
           Belum punya akun?{" "}
           <a
-            href={`/register${nextPath !== "/dashboard" ? `?next=${encodeURIComponent(nextPath)}` : ""}`}
+            href={`/register${isDevelopersFlow ? `?next=${encodeURIComponent(nextPath)}&wallet=1` : nextPath !== "/dashboard" ? `?next=${encodeURIComponent(nextPath)}` : ""}`}
             className="text-white underline"
           >
             Daftar

@@ -4,12 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import bs58 from "bs58";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { buildWalletLinkMessage } from "@/lib/wallet/solana";
 import {
-  getPhantomBrowseUrl,
+  bytesToBase64,
+  normalizeSignatureBytes,
+  signWithPhantom,
+} from "@/lib/wallet/sign";
+import {
+  getPhantomDevelopersUrl,
   hasInjectedSolanaWallet,
   isMobileBrowser,
   PHANTOM_EXTENSION_URL,
@@ -37,12 +41,12 @@ export function WalletLinkCard() {
   const [needsLogin, setNeedsLogin] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
-  const [pageUrl, setPageUrl] = useState("");
+  const [siteOrigin, setSiteOrigin] = useState("");
 
   useEffect(() => {
     setIsMobile(isMobileBrowser());
     setHasWallet(hasInjectedSolanaWallet());
-    setPageUrl(window.location.href);
+    setSiteOrigin(window.location.origin);
   }, []);
 
   const loadWallet = useCallback(async () => {
@@ -77,27 +81,56 @@ export function WalletLinkCard() {
 
     try {
       const challengeRes = await fetch("/api/v1/wallet/challenge");
-      const challengeData = await challengeRes.json();
+      let challengeData: { nonce?: string; expiresAt?: string; error?: string };
+      try {
+        challengeData = await challengeRes.json();
+      } catch {
+        throw new Error(
+          "Gagal baca response server. Pastikan migration wallet sudah di-run di Supabase."
+        );
+      }
       if (!challengeRes.ok) {
-        throw new Error(challengeData.error ?? "Gagal minta challenge.");
+        throw new Error(
+          challengeData.error ??
+            "Gagal minta challenge. Cek migration 002_wallet_links.sql di Supabase."
+        );
       }
 
       const address = publicKey.toBase58();
-      const expiresAt = new Date(challengeData.expiresAt);
+      const expiresAt = new Date(challengeData.expiresAt!);
       const message = buildWalletLinkMessage({
         address,
-        nonce: challengeData.nonce,
+        nonce: challengeData.nonce!,
         expiresAt,
       });
 
-      const signature = await signMessage(new TextEncoder().encode(message));
+      let signatureBytes: Uint8Array;
+      try {
+        if (hasInjectedSolanaWallet()) {
+          signatureBytes = await signWithPhantom(message);
+        } else if (signMessage) {
+          signatureBytes = normalizeSignatureBytes(
+            await signMessage(new TextEncoder().encode(message))
+          );
+        } else {
+          throw new Error("Wallet tidak support sign message.");
+        }
+      } catch (signErr) {
+        const msg =
+          signErr instanceof Error ? signErr.message : "Sign message gagal.";
+        throw new Error(
+          msg.includes("pattern")
+            ? "Phantom gagal sign — coba disconnect wallet, connect lagi, lalu ulangi."
+            : msg
+        );
+      }
 
       const verifyRes = await fetch("/api/v1/wallet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           address,
-          signature: bs58.encode(signature),
+          signatureBase64: bytesToBase64(signatureBytes),
           nonce: challengeData.nonce,
         }),
       });
@@ -123,7 +156,9 @@ export function WalletLinkCard() {
     await loadWallet();
   };
 
-  const phantomBrowseUrl = pageUrl ? getPhantomBrowseUrl(pageUrl) : "#";
+  const phantomBrowseUrl = siteOrigin
+    ? getPhantomDevelopersUrl(siteOrigin)
+    : "#";
 
   return (
     <Card
@@ -133,14 +168,20 @@ export function WalletLinkCard() {
     >
       {needsLogin ? (
         <div className="rounded-lg border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-4">
+          {hasWallet && (
+            <p className="mb-2 text-xs font-medium text-[#2DD4BF]">
+              ✓ Phantom terhubung — tapi belum login akun Gercep
+            </p>
+          )}
           <p className="text-sm text-white/70">
-            Login dulu untuk link wallet ke akun Gercep kamu.
+            Wallet Phantom ≠ akun Gercep. Masuk/daftar email dulu, baru link
+            wallet ke akun kamu.
           </p>
           <Link
-            href="/login?next=/developers"
+            href="/login?next=/developers&wallet=1"
             className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-medium text-[#070711]"
           >
-            Masuk / Daftar
+            Step 1: Masuk / Daftar
           </Link>
         </div>
       ) : loading ? (
@@ -186,7 +227,7 @@ export function WalletLinkCard() {
                 Buka di Phantom App
               </a>
               <p className="text-[11px] text-white/40">
-                Setelah terbuka di Phantom: login Gercep → Connect Wallet → Sign
+                Step 1: daftar/masuk Gercep → Step 2: Connect Wallet → Sign
                 &amp; Link
               </p>
             </div>
