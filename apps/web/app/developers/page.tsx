@@ -93,6 +93,7 @@ export default function DevelopersPage() {
   const [newKeyName, setNewKeyName] = useState("");
   const [plainKey, setPlainKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
   const [origin, setOrigin] = useState("https://your-domain");
 
   const loadData = useCallback(async () => {
@@ -105,9 +106,13 @@ export default function DevelopersPage() {
     ]);
 
     if (keysRes.status === 401 || usageRes.status === 401) {
-      router.push("/login?next=/developers");
+      setNeedsLogin(true);
+      setError("Login dulu untuk kelola API keys dan usage.");
+      setLoading(false);
       return;
     }
+
+    setNeedsLogin(false);
 
     const keysData = await keysRes.json();
     const usageData = await usageRes.json();
@@ -191,6 +196,19 @@ export default function DevelopersPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-6 py-8 pb-20">
+        {needsLogin && (
+          <div className="mb-6 rounded-xl border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-4">
+            <p className="text-sm text-white/80">
+              Kamu belum login. Masuk dulu untuk API keys, usage, dan wallet.
+            </p>
+            <Link
+              href="/login?next=/developers"
+              className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-xs font-medium text-[#070711]"
+            >
+              Masuk / Daftar
+            </Link>
+          </div>
+        )}
         {/* Usage summary */}
         <section className="mb-8">
           <h2 className="mb-4 font-[family-name:var(--font-display)] text-lg font-semibold">
