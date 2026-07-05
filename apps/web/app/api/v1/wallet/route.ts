@@ -73,15 +73,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { address?: string; signature?: string; nonce?: string };
+  let body: { address?: string; signature?: string; signatureBase64?: string; nonce?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { address, signature, nonce } = body;
-  if (!address?.trim() || !signature?.trim() || !nonce?.trim()) {
+  const { address, signature, signatureBase64, nonce } = body;
+  if (
+    !address?.trim() ||
+    (!signature?.trim() && !signatureBase64?.trim()) ||
+    !nonce?.trim()
+  ) {
     return NextResponse.json(
       { error: "address, signature, dan nonce wajib." },
       { status: 400 }
@@ -116,7 +120,8 @@ export async function POST(request: NextRequest) {
   const valid = verifySolanaSignature({
     address: address.trim(),
     message,
-    signatureBase58: signature.trim(),
+    signatureBase58: signature?.trim(),
+    signatureBase64: signatureBase64?.trim(),
   });
 
   if (!valid) {

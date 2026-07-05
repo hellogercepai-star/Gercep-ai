@@ -4,10 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import bs58 from "bs58";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { buildWalletLinkMessage } from "@/lib/wallet/solana";
+import {
+  bytesToBase64,
+  normalizeSignatureBytes,
+  signWithPhantom,
+} from "@/lib/wallet/sign";
 import {
   getPhantomDevelopersUrl,
   hasInjectedSolanaWallet,
@@ -77,27 +81,56 @@ export function WalletLinkCard() {
 
     try {
       const challengeRes = await fetch("/api/v1/wallet/challenge");
-      const challengeData = await challengeRes.json();
+      let challengeData: { nonce?: string; expiresAt?: string; error?: string };
+      try {
+        challengeData = await challengeRes.json();
+      } catch {
+        throw new Error(
+          "Gagal baca response server. Pastikan migration wallet sudah di-run di Supabase."
+        );
+      }
       if (!challengeRes.ok) {
-        throw new Error(challengeData.error ?? "Gagal minta challenge.");
+        throw new Error(
+          challengeData.error ??
+            "Gagal minta challenge. Cek migration 002_wallet_links.sql di Supabase."
+        );
       }
 
       const address = publicKey.toBase58();
-      const expiresAt = new Date(challengeData.expiresAt);
+      const expiresAt = new Date(challengeData.expiresAt!);
       const message = buildWalletLinkMessage({
         address,
-        nonce: challengeData.nonce,
+        nonce: challengeData.nonce!,
         expiresAt,
       });
 
-      const signature = await signMessage(new TextEncoder().encode(message));
+      let signatureBytes: Uint8Array;
+      try {
+        if (hasInjectedSolanaWallet()) {
+          signatureBytes = await signWithPhantom(message);
+        } else if (signMessage) {
+          signatureBytes = normalizeSignatureBytes(
+            await signMessage(new TextEncoder().encode(message))
+          );
+        } else {
+          throw new Error("Wallet tidak support sign message.");
+        }
+      } catch (signErr) {
+        const msg =
+          signErr instanceof Error ? signErr.message : "Sign message gagal.";
+        throw new Error(
+          msg.includes("pattern")
+            ? "Phantom gagal sign — coba disconnect wallet, connect lagi, lalu ulangi."
+            : msg
+        );
+      }
 
       const verifyRes = await fetch("/api/v1/wallet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           address,
-          signature: bs58.encode(signature),
+          signatureBase64: bytesToBase64(signatureBytes),
           nonce: challengeData.nonce,
         }),
       });
