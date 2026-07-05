@@ -334,6 +334,27 @@ export function useProducts(activeBusiness: Business | null) {
     await loadInventory();
   };
 
+  const deleteProduct = async (productId: string): Promise<void> => {
+    if (!businessId) throw new Error("Pilih bisnis dulu.");
+
+    // .select() untuk mendeteksi delete yang diblok RLS (0 baris, tanpa error)
+    const { data, error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", productId)
+      .select("id");
+
+    if (error) throw new Error(error.message);
+    if (!data || data.length === 0) {
+      throw new Error(
+        "Produk tidak terhapus. Hanya owner bisnis yang bisa menghapus produk."
+      );
+    }
+
+    // stock_movements & product_units ikut terhapus via cascade di database
+    await loadInventory();
+  };
+
   return {
     products,
     categories,
@@ -345,6 +366,7 @@ export function useProducts(activeBusiness: Business | null) {
     addStock,
     addUnit,
     updateProduct,
+    deleteProduct,
     refreshInventory: loadInventory,
   };
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { Card } from "@/components/ui/Card";
@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/Button";
 import { AddProductModal } from "@/components/inventory/AddProductModal";
 import { AddStockModal } from "@/components/inventory/AddStockModal";
 import { AddUnitModal } from "@/components/inventory/AddUnitModal";
+import { DeleteProductModal } from "@/components/inventory/DeleteProductModal";
 import { useBusiness } from "@/hooks/useBusiness";
+import { useUser } from "@/hooks/useUser";
 import { useProducts } from "@/hooks/useProducts";
 import type { Product } from "@/types";
 
@@ -20,6 +22,7 @@ function formatRupiah(value: number): string {
 
 export default function InventoryPage() {
   const { activeBusiness, loading: businessLoading } = useBusiness();
+  const { user } = useUser();
   const {
     products,
     categories,
@@ -30,11 +33,17 @@ export default function InventoryPage() {
     addStock,
     addUnit,
     updateProduct,
+    deleteProduct,
   } = useProducts(activeBusiness);
   const [showAddModal, setShowAddModal] = useState(false);
   const [stockProduct, setStockProduct] = useState<Product | null>(null);
   const [unitProduct, setUnitProduct] = useState<Product | null>(null);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+
+  // tombol hapus hanya untuk owner, sesuai RLS products_delete_owner_only
+  const isOwner =
+    !!user && !!activeBusiness && activeBusiness.ownerId === user.id;
 
   return (
     <div className="flex min-h-screen bg-[#070711]">
@@ -168,6 +177,17 @@ export default function InventoryPage() {
                               >
                                 <Pencil size={14} />
                               </Button>
+                              {isOwner && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setDeleteTarget(product)}
+                                  aria-label={`Hapus ${product.name}`}
+                                  className="text-[#F472B6]/70 hover:text-[#F472B6]"
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -205,6 +225,12 @@ export default function InventoryPage() {
         product={unitProduct}
         onClose={() => setUnitProduct(null)}
         onAddUnit={addUnit}
+      />
+
+      <DeleteProductModal
+        product={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onDelete={deleteProduct}
       />
     </div>
   );
