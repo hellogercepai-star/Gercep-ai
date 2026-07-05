@@ -16,8 +16,10 @@ import {
   getPhantomDevelopersUrl,
   hasInjectedSolanaWallet,
   isMobileBrowser,
+  isPhantomInAppBrowser,
   PHANTOM_EXTENSION_URL,
 } from "@/lib/wallet/device";
+import { PhantomOpenButton } from "@/components/wallet/PhantomOpenButton";
 
 interface LinkedWallet {
   address: string;
@@ -54,11 +56,13 @@ export function WalletLinkCard() {
   const [needsLogin, setNeedsLogin] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
+  const [inPhantom, setInPhantom] = useState(false);
   const [siteOrigin, setSiteOrigin] = useState("");
 
   useEffect(() => {
     setIsMobile(isMobileBrowser());
     setHasWallet(hasInjectedSolanaWallet());
+    setInPhantom(isPhantomInAppBrowser());
     setSiteOrigin(window.location.origin);
   }, []);
 
@@ -181,9 +185,18 @@ export function WalletLinkCard() {
   return (
     <Card
       title="Solana Wallet"
-      description="Wallet Phantom ter-link ke akun Gercep. Tier quota naik otomatis sesuai balance $GERCEP."
+      description="Masuk lewat Phantom app — link wallet ke akun Gercep. Token $GERCEP belum perlu, tier Beta sudah aktif."
       className="mb-6"
     >
+      {inPhantom && !linked && (
+        <div className="mb-4 rounded-lg border border-[#2DD4BF]/30 bg-[#2DD4BF]/10 p-3 text-xs text-white/70">
+          <p className="font-medium text-[#2DD4BF]">✓ Kamu buka dari Phantom</p>
+          <p className="mt-1">
+            Wallet auto-connect → login Gercep → Sign &amp; Link. Token $GERCEP
+            belum launch, tier Beta tetap jalan.
+          </p>
+        </div>
+      )}
       {needsLogin ? (
         <div className="rounded-lg border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-4">
           {hasWallet && (
@@ -247,11 +260,6 @@ export function WalletLinkCard() {
                 />
               </div>
               <p className="text-xs text-white/50">{quota.note}</p>
-              {quota.mintConfigured === false && (
-                <p className="text-[11px] text-[#F472B6]">
-                  Mint $GERCEP belum diset di server — tier Beta sementara.
-                </p>
-              )}
             </div>
           )}
           <Button
@@ -275,19 +283,13 @@ export function WalletLinkCard() {
           {isMobile && !hasWallet ? (
             <div className="space-y-3 rounded-lg border border-[#2DD4BF]/20 bg-[#2DD4BF]/5 p-4">
               <p className="text-sm text-white/70">
-                Di HP, wallet connect jalan di{" "}
-                <strong className="text-white">Phantom app</strong> — bukan
-                Safari/Chrome biasa.
+                Di HP, buka halaman ini lewat{" "}
+                <strong className="text-white">Phantom app</strong> — wallet
+                connect otomatis di sana.
               </p>
-              <a
-                href={phantomBrowseUrl}
-                className="inline-block rounded-full bg-[#AB9FF2] px-5 py-2.5 text-sm font-medium text-[#070711]"
-              >
-                Buka di Phantom App
-              </a>
+              <PhantomOpenButton />
               <p className="text-[11px] text-white/40">
-                Step 1: daftar/masuk Gercep → Step 2: Connect Wallet → Sign
-                &amp; Link
+                1. Tap Buka di Phantom → 2. Login Gercep → 3. Sign &amp; Link
               </p>
             </div>
           ) : hasWallet ? (
