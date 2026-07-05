@@ -8,6 +8,7 @@ const navLinks = [
   { label: "Playground", href: "/playground" },
   { label: "Pricing", href: "#pricing" },
   { label: "Docs", href: "/docs" },
+  { label: "Whitepaper", href: "/whitepaper" },
 ];
 
 const computeCards = [
@@ -482,6 +483,7 @@ export default function HomePage() {
               title: "Developers",
               links: [
                 { l: "Docs", h: "/docs" },
+                { l: "Whitepaper", h: "/whitepaper" },
                 { l: "API quickstart", h: "/docs" },
                 { l: "Dashboard", h: "/dashboard" },
               ],
