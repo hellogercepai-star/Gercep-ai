@@ -181,6 +181,12 @@ export function DocsPageContent() {
               <code className="text-[#F472B6]">400</code> — {t("docs.error400")}
             </li>
             <li>
+              <code className="text-[#F472B6]">402</code> — {t("docs.error402")}
+            </li>
+            <li>
+              <code className="text-[#F472B6]">429</code> — {t("docs.error429")}
+            </li>
+            <li>
               <code className="text-[#F472B6]">502</code> — {t("docs.error502")}
             </li>
           </ul>

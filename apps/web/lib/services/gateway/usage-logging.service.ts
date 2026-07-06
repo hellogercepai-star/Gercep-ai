@@ -85,4 +85,19 @@ export class UsageLoggingService {
 
     return fields;
   }
+
+  async logBlockedRequest(input: {
+    apiKeyId: string;
+    userId: string;
+    model: string;
+    requestId: string;
+    blockedReason: string;
+    planSlug?: string;
+    estimatedPromptTokens?: number;
+    estimatedCompletionTokens?: number;
+    estimatedProviderCost?: number;
+    customerCharge?: number;
+  }): Promise<void> {
+    await this.repo.insertBlockedUsageLog(input);
+  }
 }

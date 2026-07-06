@@ -38,6 +38,20 @@ export async function executeChatPipeline(input: {
   );
 
   if (!preflight.allowed) {
+    const usageLogger = new UsageLoggingService(input.db);
+    await usageLogger.logBlockedRequest({
+      apiKeyId: input.apiKey.id,
+      userId: input.apiKey.userId,
+      model: input.body.model,
+      requestId: preflight.requestId,
+      blockedReason: preflight.code,
+      planSlug: preflight.planSlug,
+      estimatedPromptTokens: preflight.estimate?.promptTokens,
+      estimatedCompletionTokens: preflight.estimate?.completionTokens,
+      estimatedProviderCost: preflight.estimate?.providerCostUsd,
+      customerCharge: preflight.estimate?.customerChargeUsd,
+    });
+
     return {
       ok: false,
       error: {

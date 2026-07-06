@@ -285,6 +285,38 @@ export class GatewayRepository {
     return !error;
   }
 
+  async insertBlockedUsageLog(input: {
+    apiKeyId: string;
+    userId: string;
+    model: string;
+    requestId: string;
+    blockedReason: string;
+    planSlug?: string;
+    estimatedPromptTokens?: number;
+    estimatedCompletionTokens?: number;
+    estimatedProviderCost?: number;
+    customerCharge?: number;
+  }): Promise<boolean> {
+    const { error } = await this.db.from("usage_logs").insert({
+      api_key_id: input.apiKeyId,
+      user_id: input.userId,
+      model: input.model,
+      prompt_tokens: input.estimatedPromptTokens ?? 0,
+      completion_tokens: input.estimatedCompletionTokens ?? 0,
+      total_tokens:
+        (input.estimatedPromptTokens ?? 0) + (input.estimatedCompletionTokens ?? 0),
+      request_id: input.requestId,
+      status: "blocked",
+      blocked_reason: input.blockedReason,
+      plan_slug: input.planSlug ?? null,
+      estimated_prompt_tokens: input.estimatedPromptTokens ?? null,
+      estimated_completion_tokens: input.estimatedCompletionTokens ?? null,
+      estimated_provider_cost: input.estimatedProviderCost ?? null,
+      customer_charge: input.customerCharge ?? null,
+    });
+    return !error;
+  }
+
   async getAdminMetrics() {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);

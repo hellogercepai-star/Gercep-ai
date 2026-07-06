@@ -38,7 +38,7 @@ export async function GET() {
   const { data: logs, error: logsError } = await supabase
     .from("usage_logs")
     .select(
-      "id, api_key_id, model, prompt_tokens, completion_tokens, total_tokens, created_at"
+      "id, api_key_id, model, prompt_tokens, completion_tokens, total_tokens, customer_charge, plan_slug, created_at"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
