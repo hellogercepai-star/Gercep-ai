@@ -23,7 +23,15 @@ interface SubscriptionRow {
   user_id: string;
   plan_id: string;
   status: string;
-  plans: PlanRow;
+  plans: PlanRow | PlanRow[] | null;
+}
+
+function normalizePlanRow(
+  plans: PlanRow | PlanRow[] | null | undefined
+): PlanRow | null {
+  if (!plans) return null;
+  if (Array.isArray(plans)) return plans[0] ?? null;
+  return plans;
 }
 
 function mapPlan(row: PlanRow): GatewayPlan {
@@ -89,14 +97,15 @@ export class GatewayRepository {
 
     if (error || !data) return null;
     const row = data as unknown as SubscriptionRow;
-    if (!row.plans) return null;
+    const planRow = normalizePlanRow(row.plans);
+    if (!planRow) return null;
 
     return {
       id: row.id,
       userId: row.user_id,
       planId: row.plan_id,
       status: row.status as GatewaySubscription["status"],
-      plan: mapPlan(row.plans),
+      plan: mapPlan(planRow),
     };
   }
 
@@ -120,12 +129,15 @@ export class GatewayRepository {
 
     if (error || !data) return null;
     const row = data as unknown as SubscriptionRow;
+    const planRow = normalizePlanRow(row.plans);
+    if (!planRow) return null;
+
     return {
       id: row.id,
       userId: row.user_id,
       planId: row.plan_id,
       status: row.status as GatewaySubscription["status"],
-      plan: mapPlan(row.plans),
+      plan: mapPlan(planRow),
     };
   }
 
