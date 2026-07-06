@@ -127,6 +127,10 @@ export default function DevelopersPage() {
   const [newKeyName, setNewKeyName] = useState("");
   const [plainKey, setPlainKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [billingNotice, setBillingNotice] = useState<"success" | "cancel" | null>(
+    null
+  );
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [needsLogin, setNeedsLogin] = useState(false);
   const [origin, setOrigin] = useState("https://your-domain");
 
@@ -165,6 +169,29 @@ export default function DevelopersPage() {
 
   useEffect(() => {
     setOrigin(window.location.origin);
+
+    const params = new URLSearchParams(window.location.search);
+    const billing = params.get("billing");
+    if (billing === "success") {
+      setBillingNotice("success");
+      params.delete("billing");
+      const next = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}${next ? `?${next}` : ""}`
+      );
+    } else if (billing === "cancel") {
+      setBillingNotice("cancel");
+      params.delete("billing");
+      const next = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}${next ? `?${next}` : ""}`
+      );
+    }
+
     loadData();
   }, [loadData]);
 
@@ -233,6 +260,16 @@ export default function DevelopersPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-6 py-8 pb-20">
+        {billingNotice === "success" && (
+          <div className="mb-6 rounded-xl border border-[#2DD4BF]/30 bg-[#2DD4BF]/10 px-4 py-3 text-sm text-[#2DD4BF]">
+            {t("developers.billingSuccess")}
+          </div>
+        )}
+        {billingNotice === "cancel" && (
+          <div className="mb-6 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white/70">
+            {t("developers.billingCancel")}
+          </div>
+        )}
         {needsLogin && (
           <div className="mb-6 rounded-xl border border-[#A78BFA]/30 bg-[#A78BFA]/10 p-4">
             <p className="text-sm text-white/80">{t("developers.needsLogin")}</p>
@@ -304,18 +341,30 @@ export default function DevelopersPage() {
                           key={amt}
                           size="sm"
                           variant="secondary"
+                          disabled={checkoutLoading}
                           onClick={async () => {
-                            const res = await fetch("/api/v1/billing/checkout", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ amountUsd: amt }),
-                            });
-                            const data = await res.json();
-                            if (data.url) window.location.href = data.url;
-                            else setError(data.error ?? "Checkout failed");
+                            setCheckoutLoading(true);
+                            setError(null);
+                            try {
+                              const res = await fetch("/api/v1/billing/checkout", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ amountUsd: amt }),
+                              });
+                              const data = await res.json();
+                              if (data.url) {
+                                window.location.href = data.url;
+                                return;
+                              }
+                              setError(data.error ?? "Checkout failed");
+                            } catch {
+                              setError("Checkout failed");
+                            } finally {
+                              setCheckoutLoading(false);
+                            }
                           }}
                         >
-                          ${amt}
+                          {checkoutLoading ? t("developers.checkoutLoading") : `$${amt}`}
                         </Button>
                       ))}
                     </div>

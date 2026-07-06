@@ -322,6 +322,30 @@ export class AdminRepository {
     note: string,
     createdBy = "admin"
   ) {
+    if (createdBy === "stripe" && note) {
+      const { data: existingTx } = await this.db
+        .from("billing_transactions")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("type", "topup")
+        .eq("note", note)
+        .maybeSingle();
+
+      if (existingTx) {
+        const { data: balance } = await this.db
+          .from("account_balances")
+          .select("balance_usd")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        return {
+          ok: true as const,
+          balanceUsd: balance ? Number(balance.balance_usd) : 0,
+          duplicate: true as const,
+        };
+      }
+    }
+
     const { data: existing } = await this.db
       .from("account_balances")
       .select("balance_usd")

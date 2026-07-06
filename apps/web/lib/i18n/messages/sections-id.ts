@@ -109,6 +109,9 @@ export const sections = {
     addCredits: "Tambah saldo",
     addCreditsDesc: "Top-up via Stripe (USD) — otomatis aktifkan Pay As You Go.",
     addCreditsBtn: "Checkout Stripe",
+    billingSuccess: "Pembayaran berhasil. Saldo akan terupdate dalam beberapa detik.",
+    billingCancel: "Checkout dibatalkan. Saldo tidak berubah.",
+    checkoutLoading: "Membuka Stripe...",
   },
   playground: {
     subtitle: "Playground",

@@ -109,6 +109,9 @@ export const sections = {
     addCredits: "Add credits",
     addCreditsDesc: "Top up via Stripe (USD) — automatically enables Pay As You Go.",
     addCreditsBtn: "Stripe checkout",
+    billingSuccess: "Payment successful. Balance updates in a few seconds.",
+    billingCancel: "Checkout canceled. Balance unchanged.",
+    checkoutLoading: "Opening Stripe...",
   },
   playground: {
     subtitle: "Playground",
