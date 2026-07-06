@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminAuthorized } from "@/lib/gateway/admin-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { GatewayRepository } from "@/lib/repositories/gateway.repository";
 
-function isAuthorized(request: NextRequest): boolean {
-  const secret = process.env.GATEWAY_ADMIN_SECRET?.trim();
-  if (!secret) return false;
-  return request.headers.get("x-admin-secret") === secret;
-}
-
 // GET /api/v1/admin/metrics — revenue, cost, profit (admin only)
 export async function GET(request: NextRequest) {
-  if (!isAuthorized(request)) {
+  if (!isAdminAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
