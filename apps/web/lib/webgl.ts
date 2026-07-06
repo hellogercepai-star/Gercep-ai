@@ -14,13 +14,14 @@ export function canUseWebGL(): boolean {
 export function prefersReducedEffects(): boolean {
   if (typeof window === "undefined") return false;
 
-  const reducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
-  const safari =
+export function isSafariBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+
+  return (
     /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-    /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-  return reducedMotion || safari;
+    /iPad|iPhone|iPod/.test(navigator.userAgent)
+  );
 }

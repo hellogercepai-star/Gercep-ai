@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Float, Sparkles } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
-import { prefersReducedEffects } from "@/lib/webgl";
+import { isSafariBrowser, prefersReducedEffects } from "@/lib/webgl";
 import {
   holoVertex,
   holoFragment,
@@ -382,7 +382,7 @@ export function GatewayScene() {
   const [skipPostFx, setSkipPostFx] = useState(true);
 
   useEffect(() => {
-    setSkipPostFx(prefersReducedEffects());
+    setSkipPostFx(prefersReducedEffects() || isSafariBrowser());
   }, []);
 
   return (
