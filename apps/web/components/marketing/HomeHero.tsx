@@ -11,7 +11,7 @@ const HeroGateway3D = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-[380px] w-full animate-pulse rounded-2xl border border-[#00fff0]/20 bg-[#030308]/80 md:h-[500px]" />
+      <div className="theme-dark-panel h-[380px] w-full animate-pulse rounded-2xl border border-[#00fff0]/20 bg-[#030308]/80 md:h-[500px]" />
     ),
   }
 );

@@ -66,7 +66,7 @@ function GatewayFrame({
     <div className={`relative h-[380px] w-full md:h-[500px] ${className}`}>
       <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-br from-[#00fff0]/30 via-[#A78BFA]/20 to-[#ff00aa]/25 blur-xl opacity-70" />
 
-      <div className="relative h-full overflow-hidden rounded-2xl border border-[#00fff0]/25 bg-[#030308]/90 shadow-[0_0_60px_-10px_rgba(0,255,240,0.45),inset_0_0_40px_rgba(0,255,240,0.05)]">
+      <div className="theme-dark-panel relative h-full overflow-hidden rounded-2xl border border-[#00fff0]/25 bg-[#030308]/90 shadow-[0_0_60px_-10px_rgba(0,255,240,0.45),inset_0_0_40px_rgba(0,255,240,0.05)]">
         <HudCorner className="left-3 top-3 border-l-2 border-t-2" />
         <HudCorner className="right-3 top-3 border-r-2 border-t-2" />
         <HudCorner className="bottom-3 left-3 border-b-2 border-l-2" />
