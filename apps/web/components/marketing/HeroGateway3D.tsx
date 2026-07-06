@@ -2,6 +2,8 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
+import { ClientErrorBoundary } from "@/components/ui/ClientErrorBoundary";
+import { canUseWebGL, prefersReducedEffects } from "@/lib/webgl";
 import { GatewayScene } from "./hero-gateway/GatewayScene";
 
 function HudCorner({ className }: { className: string }) {
@@ -33,12 +35,22 @@ function GatewayFallback() {
 
 export function HeroGateway3D({ className = "" }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
+  const [webglReady, setWebglReady] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    setWebglReady(canUseWebGL() && !prefersReducedEffects());
   }, []);
 
   if (!mounted) {
+    return (
+      <div className={`relative min-h-[340px] md:min-h-[460px] ${className}`}>
+        <GatewayFallback />
+      </div>
+    );
+  }
+
+  if (!webglReady) {
     return (
       <div className={`relative min-h-[340px] md:min-h-[460px] ${className}`}>
         <GatewayFallback />
@@ -63,20 +75,25 @@ export function HeroGateway3D({ className = "" }: { className?: string }) {
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-[#00fff0]/60 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-px bg-gradient-to-r from-transparent via-[#ff00aa]/50 to-transparent" />
 
-        <Suspense fallback={<GatewayFallback />}>
-          <Canvas
-            className="!h-full !w-full"
-            camera={{ position: [0, 0.3, 5.5], fov: 48 }}
-            dpr={[1, 2]}
-            gl={{
-              antialias: true,
-              alpha: false,
-              powerPreference: "high-performance",
-            }}
-          >
-            <GatewayScene />
-          </Canvas>
-        </Suspense>
+        <ClientErrorBoundary fallback={<GatewayFallback />}>
+          <Suspense fallback={<GatewayFallback />}>
+            <Canvas
+              className="!h-full !w-full"
+              camera={{ position: [0, 0.3, 5.5], fov: 48 }}
+              dpr={[1, 1.5]}
+              gl={{
+                antialias: true,
+                alpha: false,
+                powerPreference: "default",
+              }}
+              onCreated={({ gl }) => {
+                gl.setClearColor("#030308");
+              }}
+            >
+              <GatewayScene />
+            </Canvas>
+          </Suspense>
+        </ClientErrorBoundary>
 
         {/* HUD readouts */}
         <div className="pointer-events-none absolute left-4 top-4 z-20 font-mono text-[9px] uppercase tracking-[0.25em] text-[#00fff0]/70">

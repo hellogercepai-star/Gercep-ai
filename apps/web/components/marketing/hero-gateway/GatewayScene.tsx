@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Float, Sparkles } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
+import { prefersReducedEffects } from "@/lib/webgl";
 import {
   holoVertex,
   holoFragment,
@@ -378,6 +379,11 @@ function SceneRig({ reducedMotion }: { reducedMotion: boolean }) {
 
 export function GatewayScene() {
   const reducedMotion = useReducedMotion();
+  const [skipPostFx, setSkipPostFx] = useState(true);
+
+  useEffect(() => {
+    setSkipPostFx(prefersReducedEffects());
+  }, []);
 
   return (
     <>
@@ -406,7 +412,7 @@ export function GatewayScene() {
       />
       <SceneRig reducedMotion={reducedMotion} />
 
-      {!reducedMotion && (
+      {!reducedMotion && !skipPostFx && (
         <EffectComposer multisampling={0}>
           <Bloom
             luminanceThreshold={0.15}
