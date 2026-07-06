@@ -1,8 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #070711;
+  --foreground: #f8fafc;
+  --bg-page: #070711;
+  --bg-surface: rgba(255, 255, 255, 0.02);
+  --bg-elevated: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(45, 212, 191, 0.3);
+  --text-primary: #f8fafc;
+  --text-secondary: rgba(248, 250, 252, 0.5);
+  --text-muted: rgba(248, 250, 252, 0.3);
+  --nav-bg: rgba(3, 3, 8, 0.72);
+  --nav-border: rgba(0, 255, 240, 0.1);
+  --home-bg: #030308;
+  --scanline: rgba(255, 255, 255, 0.035);
+  --accent-teal: #2dd4bf;
+  --accent-purple: #a78bfa;
+  --accent-pink: #f472b6;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --background: #fafafa;
+  --foreground: #0f172a;
+  --bg-page: #fafafa;
+  --bg-surface: #ffffff;
+  --bg-elevated: rgba(15, 23, 42, 0.04);
+  --border-default: rgba(15, 23, 42, 0.08);
+  --border-hover: rgba(45, 212, 191, 0.45);
+  --text-primary: #0f172a;
+  --text-secondary: rgba(15, 23, 42, 0.65);
+  --text-muted: rgba(15, 23, 42, 0.4);
+  --nav-bg: rgba(255, 255, 255, 0.88);
+  --nav-border: rgba(15, 23, 42, 0.08);
+  --home-bg: #f4f4f5;
+  --scanline: rgba(15, 23, 42, 0.02);
+  --accent-teal: #0d9488;
+  --accent-purple: #7c3aed;
+  --accent-pink: #db2777;
 }
 
 @theme inline {
@@ -12,23 +53,176 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 html {
   overflow-y: auto;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   overflow-y: auto;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ===== LIGHT MODE — global surface overrides ===== */
+[data-theme="light"] .home-shell .cyber-fx {
+  display: none !important;
+}
+
+[data-theme="light"] .theme-surface {
+  background-color: var(--bg-page);
+}
+
+[data-theme="light"] .home-shell {
+  background-color: var(--home-bg) !important;
+}
+
+/* Dark HUD widgets stay neon-on-black in light mode */
+[data-theme="light"] .theme-dark-panel,
+[data-theme="light"] .cyber-panel {
+  color: #f8fafc;
+}
+
+[data-theme="light"] .home-shell .cyber-panel {
+  background: rgba(3, 3, 8, 0.88) !important;
+  border-color: rgba(0, 255, 240, 0.22) !important;
+}
+
+/* Flip hardcoded dark card backgrounds → light surfaces */
+[data-theme="light"] .home-shell [class*="bg-black"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="030308"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="050508"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="070711"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="0c0c18"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="bg-white/"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *) {
+  background-color: var(--bg-surface) !important;
+}
+
+[data-theme="light"] .theme-surface [class*="bg-black"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="030308"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="050508"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="070711"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="0c0c18"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="bg-white/"]:not(.theme-dark-panel):not(.theme-dark-panel *):not(.cyber-panel):not(.cyber-panel *) {
+  background-color: var(--bg-surface) !important;
+}
+
+/* Flip white/muted text outside dark HUD panels */
+[data-theme="light"] .home-shell [class*="text-white/9"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="text-white/9"]:not(.theme-dark-panel *):not(.cyber-panel *) {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .home-shell [class*="text-white/8"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="text-white/7"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="text-white/8"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="text-white/7"]:not(.theme-dark-panel *):not(.cyber-panel *) {
+  color: rgba(15, 23, 42, 0.82) !important;
+}
+
+[data-theme="light"] .home-shell [class*="text-white/6"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="text-white/5"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="text-white/6"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="text-white/5"]:not(.theme-dark-panel *):not(.cyber-panel *) {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .home-shell [class*="text-white/4"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="text-white/3"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .home-shell [class*="text-white/2"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .home-shell .text-white:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="text-white/4"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="text-white/3"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="text-white/2"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface .text-white:not(.theme-dark-panel *):not(.cyber-panel *) {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .home-shell [class*="border-white"]:not(.theme-dark-panel *):not(.cyber-panel *),
+[data-theme="light"] .theme-surface [class*="border-white"]:not(.theme-dark-panel *):not(.cyber-panel *) {
+  border-color: var(--border-default) !important;
+}
+
+[data-theme="light"] .home-shell [class*="divide-white"] > :not([hidden]) ~ :not([hidden]),
+[data-theme="light"] .theme-surface [class*="divide-white"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--border-default) !important;
+}
+
+[data-theme="light"] .theme-nav {
+  background: var(--nav-bg) !important;
+  border-color: var(--nav-border) !important;
+  backdrop-filter: blur(12px);
+}
+
+[data-theme="light"] .theme-nav a:not([class*="bg-"]) {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .theme-nav a:not([class*="bg-"]):hover {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .dev-terminal {
+  background: var(--bg-page) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-scanline {
+  opacity: 0 !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-card {
+  background: var(--bg-surface) !important;
+  border-color: var(--border-default) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .dev-terminal .dev-header {
+  background: var(--nav-bg) !important;
+  border-color: var(--border-default) !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-balance-inner {
+  background: #ffffff !important;
+  box-shadow: inset 0 0 0 1px var(--border-default);
+}
+
+[data-theme="light"] .dev-terminal .dev-topup-panel {
+  background: rgba(45, 212, 191, 0.07) !important;
+  border-color: rgba(13, 148, 136, 0.22) !important;
+}
+
+[data-theme="light"] .dev-terminal [class*="F8FAFC"],
+[data-theme="light"] .dev-terminal .dev-text-primary {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .dev-terminal [class*="248,250,252,0.8"],
+[data-theme="light"] .dev-terminal [class*="248,250,252,0.7"],
+[data-theme="light"] .dev-terminal [class*="248,250,252,0.55"],
+[data-theme="light"] .dev-terminal [class*="248,250,252,0.5"],
+[data-theme="light"] .dev-terminal [class*="248,250,252,0.45"],
+[data-theme="light"] .dev-terminal .dev-text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .dev-terminal [class*="248,250,252,0.4"],
+[data-theme="light"] .dev-terminal [class*="248,250,252,0.35"],
+[data-theme="light"] .dev-terminal [class*="248,250,252,0.3"] {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .dev-terminal [class*="050508"]:not(.dev-balance-inner),
+[data-theme="light"] .dev-terminal [class*="rgba(0,0,0"],
+[data-theme="light"] .dev-terminal [class*="rgba(255,255,255,0.02)"] {
+  background-color: var(--bg-surface) !important;
+}
+
+[data-theme="light"] .dev-terminal [class*="rgba(255,255,255"] {
+  border-color: var(--border-default) !important;
 }
 
 @keyframes marquee {

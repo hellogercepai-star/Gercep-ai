@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface ModelInfo {
@@ -103,8 +104,8 @@ export default function PlaygroundPage() {
   };
 
   return (
-    <div className="bg-[#070711] text-white">
-      <header className="border-b border-white/10 px-6 py-4">
+    <div className="theme-surface bg-[#070711] text-white">
+      <header className="theme-nav border-b border-white/10 px-6 py-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div>
             <Link
@@ -116,6 +117,7 @@ export default function PlaygroundPage() {
             <p className="text-sm text-white/50">{t("playground.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <LanguageToggle />
             <Link href="/docs">
               <Button variant="ghost" size="sm">

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function RegisterForm() {
@@ -57,8 +58,9 @@ export default function RegisterForm() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-[#070711] px-6">
-      <div className="absolute right-6 top-6">
+    <main className="theme-surface relative flex min-h-screen items-center justify-center bg-[#070711] px-6">
+      <div className="absolute right-6 top-6 flex items-center gap-2">
+        <ThemeToggle />
         <LanguageToggle />
       </div>
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.03] p-8">

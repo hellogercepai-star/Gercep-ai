@@ -24,8 +24,12 @@ export function HeroPlayground() {
   const [tokens, setTokens] = useState<number | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("gercep_api_key");
-    if (saved) setApiKey(saved);
+    try {
+      const saved = localStorage.getItem("gercep_api_key");
+      if (saved) setApiKey(saved);
+    } catch {
+      // Safari private mode / blocked storage
+    }
 
     fetch("/api/v1/models")
       .then((r) => r.json())
@@ -50,7 +54,11 @@ export function HeroPlayground() {
       return;
     }
 
-    localStorage.setItem("gercep_api_key", apiKey.trim());
+    try {
+      localStorage.setItem("gercep_api_key", apiKey.trim());
+    } catch {
+      // ignore blocked storage
+    }
     setLoading(true);
     setError(null);
     setReply(null);

@@ -44,7 +44,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
         aria-expanded={open}
         aria-label={t("common.language")}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] font-medium text-white/80 transition hover:border-white/20 hover:text-white"
+        className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--text-primary)] transition hover:border-[var(--border-hover)]"
       >
         <span className="text-sm leading-none" aria-hidden>
           {current.flag}
@@ -68,7 +68,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
         <div
           role="listbox"
           aria-label={t("common.selectLanguage")}
-          className="absolute right-0 z-50 mt-2 max-h-72 w-52 overflow-y-auto rounded-xl border border-white/10 bg-[#0c0c18] py-1 shadow-xl shadow-black/40"
+          className="absolute right-0 z-50 mt-2 max-h-72 w-52 overflow-y-auto rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] py-1 shadow-xl"
         >
           {LOCALES.map(({ code, flag, nativeName }) => {
             const active = locale === code;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { GERCEP_TIERS } from "@/lib/wallet/tiers";
 import {
@@ -94,14 +95,14 @@ export function WhitepaperPageContent() {
   const { t } = useLanguage();
 
   return (
-    <div className="relative min-h-screen bg-[#070711] text-white">
+    <div className="theme-surface relative min-h-screen bg-[#070711] text-white">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 left-1/3 h-[600px] w-[600px] rounded-full bg-[#A78BFA]/12 blur-[140px]" />
         <div className="absolute top-1/2 right-0 h-[400px] w-[400px] rounded-full bg-[#2DD4BF]/8 blur-[120px]" />
         <div className="absolute bottom-0 left-0 h-[500px] w-full bg-gradient-to-t from-[#0a0a18] to-transparent" />
       </div>
 
-      <nav className="relative z-20 border-b border-white/5">
+      <nav className="theme-nav relative z-20 border-b border-white/5">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link
             href="/"
@@ -123,6 +124,7 @@ export function WhitepaperPageContent() {
             ))}
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <LanguageToggle />
             <Link
               href="/developers"

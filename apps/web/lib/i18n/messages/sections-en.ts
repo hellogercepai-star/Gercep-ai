@@ -37,6 +37,9 @@ export const sections = {
     lastUpdated: "Last updated",
     language: "Language",
     selectLanguage: "Select language",
+    theme: "Theme",
+    lightMode: "Light mode",
+    darkMode: "Dark mode",
     chat: "Chat",
     live: "Live",
     soon: "Soon",
@@ -109,6 +112,20 @@ export const sections = {
     addCredits: "Add credits",
     addCreditsDesc: "Top up via Stripe (USD) — automatically enables Pay As You Go.",
     addCreditsBtn: "Stripe checkout",
+    addCreditsKicker: "TOP UP · STRIPE",
+    addCreditsStepPick: "Pick amount",
+    addCreditsStepPay: "Pay on Stripe",
+    addCreditsStepDone: "Balance credited instantly",
+    addCreditsSecure: "Secure payment · credit/debit card",
+    addCreditsPopular: "Most popular",
+    addCreditsTierStarter: "Starter",
+    addCreditsTierPopular: "Growth",
+    addCreditsTierPro: "Scale",
+    addCreditsUsdCredits: "USD credits",
+    addCreditsInstant: "Instant Pay As You Go activation",
+    billingSuccess: "Payment successful. Balance updates in a few seconds.",
+    billingCancel: "Checkout canceled. Balance unchanged.",
+    checkoutLoading: "Opening Stripe...",
   },
   playground: {
     subtitle: "Playground",
@@ -353,54 +370,156 @@ export const sections = {
   },
   legal: {
     privacyTitle: "Privacy Policy",
-    termsTitle: "Terms of Service",
+    privacySubtitle:
+      "This policy explains how Gercep AI handles information for Gercep AI Gateway, including API requests, service metadata, user information, and operational data.",
+    privacyUpdated: "6 July 2026",
     privacyIntro:
-      'Gercep AI ("we", "us") operates the inference gateway at gercep.ai and related subdomains. This policy describes how we handle data when you use our developer platform.',
-    privacyCollectTitle: "Data we collect",
-    privacyCollect1: "Account email and password (Supabase Auth)",
-    privacyCollect2: "API key metadata (hashed keys, prefixes, usage timestamps)",
-    privacyCollect3: "Usage logs: model, token counts, API key ID, timestamps",
-    privacyCollect4:
-      "Linked Solana wallet address (if you choose to connect Phantom)",
-    privacyCollect5:
-      "Prompt and completion content sent through the gateway (processed to fulfill API requests)",
-    privacyUseTitle: "How we use data",
-    privacyUse1: "Authenticate API requests and enforce daily quotas",
-    privacyUse2: "Route inference to model providers (e.g. DeepSeek)",
-    privacyUse3: "Display usage statistics on your Developers dashboard",
-    privacyUse4: "Improve reliability and prevent abuse",
-    privacyThirdTitle: "Third parties",
-    privacyThirdBody:
-      "We use Supabase (database & auth), Vercel (hosting), DeepSeek (model inference), and Solana RPC providers when reading wallet balances. Provider keys are stored server-side only — never exposed to clients.",
+      "Gercep AI Gateway is an OpenAI-compatible multi-model inference service we operate at gercep.ai and related subdomains.",
+    privacyDocsNote:
+      "For technical details on endpoints, authentication, and usage limits, see the API documentation at /docs.",
+    privacyOverviewTitle: "Overview",
+    privacyOverview1:
+      "This Privacy Policy explains how Gercep AI collects, uses, processes, and protects information when you use Gercep AI Gateway, our website, Developers dashboard, API, playground, and related services.",
+    privacyOverview2:
+      "Gercep AI Gateway routes requests through supported third-party AI services to provide model access, reliability, usage metering, and quota management.",
+    privacyAiTitle: "AI Request Processing",
+    privacyAi1:
+      "Your API requests, including instructions, messages, files, and model outputs, may be processed by Gercep AI Gateway and third-party inference providers to generate responses and operate the service.",
+    privacyAi2:
+      "Request processing may include model routing, retries, abuse prevention, security checks, reliability monitoring, quota enforcement, billing support, and usage analytics.",
+    privacyNoTrainingTitle: "No Training by Gercep AI",
+    privacyNoTrainingBody:
+      "Gercep AI does not use customer API request content to train our own foundation models. Data handling, retention, and model-improvement controls at third-party inference providers may vary by provider and service configuration.",
+    privacyCollectTitle: "Information We Collect",
+    privacyCollect1:
+      "We may collect account information such as name, email address, hashed password, organization details (if provided), support messages, and authentication information managed through Supabase Auth.",
+    privacyCollect2:
+      "We may collect operational metadata such as API key identifiers (hashes and prefixes), requested models, timestamps, latency, request status, token counts, estimated costs, IP addresses, error information, and Stripe billing and transaction data (if you purchase credits).",
+    privacyCollect3:
+      "We may collect website and dashboard usage information, including browser type, device information, pages visited, referral information, and approximate location derived from IP address. If you choose to connect a Solana wallet (e.g. via Phantom), we may store the public wallet address linked to your account.",
+    privacyPromptsTitle: "Prompts and Output Storage",
+    privacyPrompts1:
+      "We do not intentionally store raw instructions or outputs in standard operational logs. In limited cases, request content may be temporarily processed or reviewed for debugging, abuse prevention, security, customer support, or incident investigation.",
+    privacyPrompts2:
+      "If you submit files, messages, or outputs through the service, that content may be temporarily processed as needed to provide the requested functionality. Third-party inference providers may process request content under their own policies.",
+    privacyUseTitle: "How We Use Information",
+    privacyUse1:
+      "We use information to provide, maintain, secure, debug, monitor, and improve Gercep AI Gateway and your Developers experience.",
+    privacyUse2:
+      "We also use information to manage API access, enforce usage limits and quotas, calculate usage and costs, process payments, respond to support requests, prevent abuse, comply with legal obligations, and communicate service updates.",
+    privacyProvidersTitle: "Service Providers",
+    privacyProviders1:
+      "We use third-party service providers to operate the service, including Supabase (authentication and database), Vercel (hosting), DeepSeek and other model inference providers (AI request processing), Stripe (payments and billing), and Solana RPC providers when reading wallet balances.",
+    privacyProviders2:
+      "These providers may process information only as needed to provide their services to Gercep AI, subject to applicable terms and data-handling practices.",
+    privacyProviders3:
+      "Inference provider API keys are stored server-side and are never exposed to clients. Data handling, retention, and model-improvement controls may vary by provider, service type, and configuration.",
+    privacySensitiveTitle: "Sensitive Data Warning",
+    privacySensitive1:
+      "Do not submit sensitive personal data, confidential business data, regulated health or financial data, production credentials, or trade secrets through the service unless you have reviewed and accepted applicable data-handling requirements.",
+    privacySensitive2:
+      "You are responsible for ensuring that your use of Gercep AI Gateway complies with applicable laws, contracts, and internal policies for data you submit through the API or playground.",
+    privacyCrossBorderTitle: "Cross-Border Processing",
+    privacyCrossBorder1:
+      "Data may be processed in countries outside your location, including where our infrastructure and service providers operate (e.g. the United States, European Union, or Singapore, depending on provider).",
+    privacyCrossBorder2:
+      "By using Gercep AI Gateway, you understand that information may be transferred to and processed in jurisdictions that may have different data-protection laws than your country, including Indonesia's Personal Data Protection Law (UU PDP) where applicable.",
     privacyRetentionTitle: "Retention",
-    privacyRetentionBody:
-      "Usage logs are retained while your account is active. You may revoke API keys or unlink your wallet from the Developers page. Contact us to request account deletion.",
+    privacyRetention1:
+      "We retain account, billing, support, security, and operational records as needed to operate the service, meet legal obligations, resolve disputes, prevent abuse, and enforce agreements.",
+    privacyRetention2:
+      "Operational metadata may be retained for analytics, billing, security, and reliability purposes. We aim to limit handling of raw request content to what is needed to provide and protect the service. You may revoke API keys or unlink wallets from the Developers page.",
+    privacySecurityTitle: "Security",
+    privacySecurity1:
+      "We use reasonable technical and organizational measures designed to protect information from unauthorized access, loss, misuse, or alteration.",
+    privacySecurity2:
+      "No internet service can guarantee absolute security. You are responsible for protecting your API keys, account credentials, devices, and access permissions.",
+    privacyRightsTitle: "Your Choices and Rights",
+    privacyRights1:
+      "Depending on your location, you may have rights to access, correct, delete, restrict, or export certain personal information, including rights under Indonesia's Personal Data Protection Law (UU PDP).",
+    privacyRights2:
+      "You may contact us at privacy@gercep.ai for help with privacy rights, user information, or service data requests. We may need to verify your identity before fulfilling a request.",
+    privacyChangesTitle: "Changes to This Policy",
+    privacyChangesBody:
+      "We may update this Privacy Policy from time to time. When we make material changes, we will update the date above and may provide additional notice through the service or other communication channels.",
     privacyContactTitle: "Contact",
     privacyContactBody:
-      "Questions: reach out via your Gercep account channel or project GitHub repository. This is a draft policy and may be updated before public launch.",
+      "For privacy questions, support, or data requests, contact privacy@gercep.ai. For terms of service or billing matters, contact legal@gercep.ai.",
+
+    termsTitle: "Terms of Service",
+    termsSubtitle:
+      "These terms govern your use of Gercep AI Gateway, including the website, API, Developers dashboard, playground, and related services.",
+    termsUpdated: "6 July 2026",
     termsIntro:
-      "These terms govern your use of Gercep AI. Please read them carefully before using the Service.",
+      "Please read these Terms of Service carefully before using the service. By accessing or using the service, you agree to these terms.",
+    termsOverviewTitle: "Overview",
+    termsOverviewBody:
+      "Gercep AI Gateway provides model inference access through an OpenAI-compatible API, API key management, usage metering, credit-based billing, and optional Solana wallet linking for quota tiers. Inference models are provided by third-party providers.",
     termsAcceptTitle: "Acceptance",
     termsAcceptBody:
-      'By using Gercep AI ("Service"), you agree to these terms. If you do not agree, do not use the Service.',
-    termsServiceTitle: "Service description",
+      'By using Gercep AI (the "Service"), you agree to these Terms of Service and our Privacy Policy. If you do not agree, do not use the Service. If you use the Service on behalf of an organization, you represent that you have authority to bind that organization.',
+    termsServiceTitle: "Service Description",
     termsServiceBody:
-      "Gercep AI provides an OpenAI-compatible API gateway for LLM inference, API key management, usage metering, and optional Solana wallet linking for quota tiers. Models are provided by third-party inference providers.",
-    termsAccountTitle: "Your responsibilities",
-    termsAccountBody:
-      "Keep your account credentials and API keys secure. Do not share plain API keys publicly or commit them to git. Comply with applicable laws and provider acceptable-use policies. Do not abuse the gateway (spam, illegal content, credential stuffing).",
-    termsApiTitle: "API keys & quotas",
-    termsApiBody:
-      "API keys are personal to your account. Daily request limits apply per tier (see Whitepaper). We may suspend keys or accounts that violate these terms or exceed fair use.",
-    termsTokenTitle: "$GERCEP token",
-    termsTokenBody:
-      "References to $GERCEP describe planned ecosystem utility. Token launch, allocation, and vesting are described in our Whitepaper and are subject to change. Nothing here is financial advice or an offer of securities.",
-    termsLimitTitle: "Disclaimer",
-    termsLimitBody:
-      'The Service is provided "as is" without warranties. We are not liable for model output accuracy, provider outages, or indirect damages. Inference results may be incorrect — verify before production use.',
-    termsContactTitle: "Changes",
+      "The Service includes the API gateway, playground, Developers dashboard, documentation, and related features we provide from time to time. We may add, modify, suspend, or discontinue features with reasonable notice where practicable. Availability of specific models may change without prior notice.",
+    termsAccountTitle: "Account and Security",
+    termsAccount1:
+      "You are responsible for keeping your account credentials and API keys confidential. Do not share plain-text API keys publicly, in code repositories, or in places accessible to unauthorized parties.",
+    termsAccount2:
+      "You must provide accurate account information and promptly notify us if you become aware of unauthorized use of your account or API keys.",
+    termsAcceptableUseTitle: "Acceptable Use",
+    termsAcceptableUseIntro: "You agree not to:",
+    termsAcceptableUse1:
+      "Use the Service for illegal activity, violations of applicable law, or infringement of third-party rights.",
+    termsAcceptableUse2:
+      "Send spam, malware, unlawful content, or engage in credential stuffing, excessive scraping, or attacks against our infrastructure.",
+    termsAcceptableUse3:
+      "Attempt to access other systems, data, or accounts without authorization, or circumvent usage limits and quotas.",
+    termsAcceptableUse4:
+      "Use the Service in ways that harm the reliability, security, or performance of the Service or third-party providers.",
+    termsAcceptableUse5:
+      "Violate acceptable-use policies of underlying model inference providers.",
+    termsApiTitle: "API Keys and Quotas",
+    termsApiBody1:
+      "API keys are personal to your account and must not be shared with third parties unless you expressly authorize it. Request limits, daily quotas, and access tiers may apply per your account configuration and our documentation.",
+    termsApiBody2:
+      "We may suspend, restrict, or revoke API keys or accounts that violate these terms, abuse the Service, exceed fair use, or pose security or operational risk.",
+    termsBillingTitle: "Billing, Payments, and Refunds",
+    termsBilling1:
+      "Certain services require credit balance or payment through Stripe. Prices, per-token costs, and top-up packages are shown in the Developers dashboard or related pages before payment.",
+    termsBilling2:
+      "Payments are processed by Stripe under their terms. Unless required by applicable law, payments for credits already applied to your account are final and non-refundable.",
+    termsBilling3:
+      "We may correct billing errors, adjust balances, or suspend access in cases of payment disputes, chargebacks, or suspicious billing activity.",
+    termsTokenTitle: "$GERCEP Token",
+    termsTokenBody1:
+      "References to the $GERCEP token describe planned ecosystem utility, including quota or access mechanisms described in our Whitepaper. Launch details, allocation, vesting, and utility are subject to change.",
+    termsTokenBody2:
+      "Nothing in the Service or documentation constitutes financial advice, a securities offering, or a solicitation to purchase crypto assets. You are responsible for complying with applicable laws regarding digital assets in your jurisdiction.",
+    termsIpTitle: "Intellectual Property",
+    termsIpBody:
+      "The Service, our brand, documentation, and website content are protected by intellectual property laws. You retain rights to content you submit through the Service. You grant us a limited license to process that content solely to provide the Service.",
+    termsLimitTitle: "Disclaimer and Limitation of Liability",
+    termsLimitBody1:
+      'The Service is provided "as is" and "as available" without warranties of any kind, express or implied. We do not warrant the accuracy, completeness, or reliability of model outputs, third-party provider availability, or fitness for a particular purpose.',
+    termsLimitBody2:
+      "To the fullest extent permitted by applicable law, Gercep AI is not liable for indirect, incidental, special, consequential, or lost profits, data, or goodwill. You are responsible for verifying model outputs before production use.",
+    termsIndemnityTitle: "Indemnification",
+    termsIndemnityBody:
+      "You agree to defend, indemnify, and hold harmless Gercep AI from claims, losses, liabilities, and expenses arising from your use of the Service, content you submit, or your violation of these terms or applicable law.",
+    termsTerminationTitle: "Suspension and Termination",
+    termsTermination1:
+      "You may stop using the Service at any time by revoking API keys and closing your account per instructions in the Developers dashboard or by contacting us.",
+    termsTermination2:
+      "We may suspend or terminate your access if you violate these terms, create legal or security risk, or if required by law. Provisions that reasonably should survive termination will remain in effect.",
+    termsGoverningTitle: "Governing Law",
+    termsGoverningBody:
+      "These terms are governed by and construed in accordance with the laws of the Republic of Indonesia, without regard to conflict-of-law principles. Disputes not resolved amicably shall be submitted to competent courts in Indonesia, unless otherwise required by applicable law.",
+    termsChangesTitle: "Changes to Terms",
+    termsChangesBody:
+      "We may update these Terms of Service from time to time. Continued use after changes take effect constitutes your acceptance. Material changes will be noted by updating the date above and, where appropriate, notice through the service or email.",
+    termsContactTitle: "Contact",
     termsContactBody:
-      "We may update these terms. Continued use after changes constitutes acceptance. Material changes will be noted on this page.",
+      "For questions about terms of service, billing, or legal matters, contact legal@gercep.ai. For privacy and data questions, contact privacy@gercep.ai.",
   },
   homeSections: {
     trustedBy: "Trusted by",
