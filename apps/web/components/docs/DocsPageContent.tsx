@@ -50,8 +50,8 @@ export function DocsPageContent() {
   const models = listPublicModels();
 
   return (
-    <div className="bg-[#070711] text-white">
-      <header className="border-b border-white/10 px-6 py-4">
+    <div className="theme-surface bg-[#070711] text-white">
+      <header className="theme-nav border-b border-white/10 px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div>
             <Link

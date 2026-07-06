@@ -17,7 +17,7 @@ export function Card({
 }: CardProps) {
   return (
     <div
-      className={`rounded-2xl border border-white/10 bg-white/[0.03] p-6 ${className}`}
+      className={`rounded-[20px] border border-[var(--border-default)] bg-[var(--bg-surface)] p-6 transition-colors ${className}`}
       {...props}
     >
       {(title || action) && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import { useTheme } from "@/components/theme/ThemeProvider";
 
@@ -47,6 +48,20 @@ function MoonIcon({ className = "" }: { className?: string }) {
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   const { t } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div
+        className={`inline-flex h-8 w-[4.25rem] rounded-full border border-[var(--border-default)] bg-[var(--bg-elevated)] ${className}`}
+        aria-hidden
+      />
+    );
+  }
 
   return (
     <div

@@ -48,7 +48,7 @@ export function HomePageClient() {
   return (
     <ClientErrorBoundary fallback={<HomePageFallback />}>
       <ScrollJourneyProvider>
-        <div className="relative min-h-screen bg-[var(--home-bg)] text-[var(--text-primary)] transition-colors duration-300 home-shell">
+        <div className="theme-surface home-shell relative min-h-screen bg-[var(--home-bg)] text-[var(--text-primary)] transition-[background-color,color] duration-300">
           <CyberBackdrop />
           <EcosystemSky />
           <JourneyProgressRail />

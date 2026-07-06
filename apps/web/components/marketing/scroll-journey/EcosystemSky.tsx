@@ -126,7 +126,7 @@ export function EcosystemSky() {
   const parallax = scrollProgress * 120;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[1] overflow-hidden" aria-hidden>
+    <div className="cyber-fx pointer-events-none fixed inset-0 z-[1] overflow-hidden" aria-hidden>
       {/* Persistent flight path — connects all sectors */}
       <svg
         className="absolute inset-0 h-full w-full opacity-25"

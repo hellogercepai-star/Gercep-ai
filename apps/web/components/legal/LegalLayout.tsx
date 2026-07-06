@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export function LegalLayout({
@@ -17,8 +18,8 @@ export function LegalLayout({
   const { t } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-[#070711] text-white">
-      <header className="border-b border-white/10 px-6 py-4">
+    <div className="theme-surface min-h-screen bg-[#070711] text-white">
+      <header className="theme-nav border-b border-white/10 px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <Link
             href="/"
@@ -27,6 +28,7 @@ export function LegalLayout({
             Gercep AI
           </Link>
           <div className="flex items-center gap-3 text-sm">
+            <ThemeToggle />
             <LanguageToggle />
             <Link href="/privacy" className="text-white/60 hover:text-white">
               {t("common.privacy")}

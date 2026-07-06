@@ -25,13 +25,20 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function applyTheme(theme: Theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  document.documentElement.style.colorScheme = theme;
+  const root = document.documentElement;
+  root.setAttribute("data-theme", theme);
+  root.style.colorScheme = theme;
+  root.classList.toggle("dark", theme === "dark");
+  root.classList.toggle("light", theme === "light");
+  document.body.classList.toggle("theme-dark", theme === "dark");
+  document.body.classList.toggle("theme-light", theme === "light");
 }
 
 function readStoredTheme(): Theme {
   if (typeof window === "undefined") return DEFAULT_THEME;
   try {
+    const fromDom = document.documentElement.getAttribute("data-theme");
+    if (isTheme(fromDom)) return fromDom;
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
     return isTheme(stored) ? stored : DEFAULT_THEME;
   } catch {
