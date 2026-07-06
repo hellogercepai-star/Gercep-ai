@@ -395,6 +395,17 @@ function PricingPanel({
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl border border-[#fbbf24]/30 bg-[#fbbf24]/10 p-4 text-sm text-white/70">
+        <p className="font-medium text-[#fbbf24]">Cara verifikasi Save Pricing</p>
+        <ol className="mt-2 list-inside list-decimal space-y-1 text-xs">
+          <li>Save di sini → cek tabel Supabase <strong>model_pricing</strong> (bukan usage_logs)</li>
+          <li>Buka <strong>Playground</strong> → kirim 1 chat baru</li>
+          <li>Supabase <strong>usage_logs</strong> → sort <strong>created_at DESC</strong> → row paling atas harus punya customer_charge</li>
+        </ol>
+        <p className="mt-2 text-[11px] text-white/45">
+          Row lama dengan NULL tidak akan berubah — itu request sebelum billing pipeline.
+        </p>
+      </div>
       <Card title="Providers">
         {data.providers.map((p) => (
           <div key={String(p.id)} className="flex items-center justify-between py-2">
@@ -423,19 +434,15 @@ function PricingPanel({
 
       <Card title="Models · Pricing & Costs">
         <div className="space-y-6">
-          {models.map((m) => {
-            const pricing = (m.model_pricing as Record<string, unknown>[])?.[0];
-            const costs = (m.provider_model_costs as Record<string, unknown>[])?.[0];
-            return (
+          {models.map((m) => (
               <ModelPricingRow
                 key={String(m.id)}
                 model={m}
-                pricing={pricing}
-                costs={costs}
+                pricing={m.active_pricing as Record<string, unknown> | undefined}
+                costs={m.active_costs as Record<string, unknown> | undefined}
                 onSaved={onSaved}
               />
-            );
-          })}
+            ))}
         </div>
       </Card>
     </div>
@@ -457,6 +464,8 @@ function ModelPricingRow({
   const [outP, setOutP] = useState(String(pricing?.output_price_per_1m ?? ""));
   const [inC, setInC] = useState(String(costs?.input_cost_per_1m ?? ""));
   const [outC, setOutC] = useState(String(costs?.output_cost_per_1m ?? ""));
+  const [saving, setSaving] = useState(false);
+  const [rowMsg, setRowMsg] = useState<string | null>(null);
 
   return (
     <div className="rounded-xl border border-white/10 p-4">
@@ -502,32 +511,47 @@ function ModelPricingRow({
       <Button
         size="sm"
         className="mt-3"
+        disabled={saving}
         onClick={async () => {
-          await adminFetch("/api/v1/admin/pricing", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "update_pricing",
-              providerModelId: model.id,
-              inputPricePer1M: Number(inP),
-              outputPricePer1M: Number(outP),
-            }),
-          });
-          await adminFetch("/api/v1/admin/pricing", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "update_costs",
-              providerModelId: model.id,
-              inputCostPer1M: Number(inC),
-              outputCostPer1M: Number(outC),
-            }),
-          });
-          onSaved();
+          setSaving(true);
+          setRowMsg(null);
+          try {
+            await adminFetch("/api/v1/admin/pricing", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "update_pricing",
+                providerModelId: model.id,
+                inputPricePer1M: Number(inP),
+                outputPricePer1M: Number(outP),
+              }),
+            });
+            await adminFetch("/api/v1/admin/pricing", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "update_costs",
+                providerModelId: model.id,
+                inputCostPer1M: Number(inC),
+                outputCostPer1M: Number(outC),
+              }),
+            });
+            setRowMsg("Saved! Kirim chat baru di Playground untuk update usage_logs.");
+            onSaved();
+          } catch (err) {
+            setRowMsg(err instanceof Error ? err.message : "Save gagal.");
+          } finally {
+            setSaving(false);
+          }
         }}
       >
-        Save pricing
+        {saving ? "Saving..." : "Save pricing"}
       </Button>
+      {rowMsg && (
+        <p className={`mt-2 text-xs ${rowMsg.includes("gagal") ? "text-[#F472B6]" : "text-[#2DD4BF]"}`}>
+          {rowMsg}
+        </p>
+      )}
     </div>
   );
 }

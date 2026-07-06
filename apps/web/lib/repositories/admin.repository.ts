@@ -93,10 +93,34 @@ export class AdminRepository {
 
     const { data: models } = await this.db
       .from("provider_models")
-      .select("*, model_pricing(input_price_per_1m, output_price_per_1m), provider_model_costs(input_cost_per_1m, output_cost_per_1m)")
+      .select("*")
       .order("model_id");
 
-    return { providers: providers ?? [], models: models ?? [] };
+    const enriched = await Promise.all(
+      (models ?? []).map(async (model) => {
+        const { data: pricing } = await this.db
+          .from("model_pricing")
+          .select("input_price_per_1m, output_price_per_1m, effective_from")
+          .eq("provider_model_id", model.id)
+          .is("effective_until", null)
+          .order("effective_from", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const { data: costs } = await this.db
+          .from("provider_model_costs")
+          .select("input_cost_per_1m, output_cost_per_1m, effective_from")
+          .eq("provider_model_id", model.id)
+          .is("effective_until", null)
+          .order("effective_from", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        return { ...model, active_pricing: pricing, active_costs: costs };
+      })
+    );
+
+    return { providers: providers ?? [], models: enriched };
   }
 
   async toggleProvider(id: string, enabled: boolean) {
@@ -124,11 +148,12 @@ export class AdminRepository {
       .eq("provider_model_id", providerModelId)
       .is("effective_until", null);
 
-    return this.db.from("model_pricing").insert({
+    const { error } = await this.db.from("model_pricing").insert({
       provider_model_id: providerModelId,
       input_price_per_1m: inputPrice,
       output_price_per_1m: outputPrice,
     });
+    return { error };
   }
 
   async updateModelCosts(
@@ -142,11 +167,12 @@ export class AdminRepository {
       .eq("provider_model_id", providerModelId)
       .is("effective_until", null);
 
-    return this.db.from("provider_model_costs").insert({
+    const { error } = await this.db.from("provider_model_costs").insert({
       provider_model_id: providerModelId,
       input_cost_per_1m: inputCost,
       output_cost_per_1m: outputCost,
     });
+    return { error };
   }
 
   async getSetting<T>(key: string, fallback: T): Promise<T> {

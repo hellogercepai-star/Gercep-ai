@@ -37,11 +37,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (body.action === "update_pricing") {
-      await repo.updateModelPricing(
+      const { error } = await repo.updateModelPricing(
         body.providerModelId,
         Number(body.inputPricePer1M),
         Number(body.outputPricePer1M)
       );
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
       await logAdminAudit(db, {
         action: "pricing.update",
         resourceId: body.providerModelId,
@@ -51,11 +54,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (body.action === "update_costs") {
-      await repo.updateModelCosts(
+      const { error } = await repo.updateModelCosts(
         body.providerModelId,
         Number(body.inputCostPer1M),
         Number(body.outputCostPer1M)
       );
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
       await logAdminAudit(db, {
         action: "provider_cost.update",
         resourceId: body.providerModelId,
