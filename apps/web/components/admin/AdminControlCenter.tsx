@@ -122,10 +122,14 @@ export function AdminControlCenter() {
         );
         setPlans(d.plans);
       } else if (t === "customers") {
-        const d = await adminFetch<{ customers: Record<string, unknown>[] }>(
-          "/api/v1/admin/customers"
-        );
-        setCustomers(d.customers);
+        const [cust, pl] = await Promise.all([
+          adminFetch<{ customers: Record<string, unknown>[] }>(
+            "/api/v1/admin/customers"
+          ),
+          adminFetch<{ plans: Record<string, unknown>[] }>("/api/v1/admin/plans"),
+        ]);
+        setCustomers(cust.customers);
+        setPlans(pl.plans);
       } else if (t === "keys") {
         const d = await adminFetch<{ keys: Record<string, unknown>[] }>(
           "/api/v1/admin/keys"
@@ -310,6 +314,7 @@ export function AdminControlCenter() {
         {tab === "customers" && (
           <CustomersPanel
             customers={customers}
+            plans={plans}
             selectedId={selectedCustomer}
             detail={customerDetail}
             onSelect={async (id) => {
@@ -395,6 +400,17 @@ function PricingPanel({
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl border border-[#fbbf24]/30 bg-[#fbbf24]/10 p-4 text-sm text-white/70">
+        <p className="font-medium text-[#fbbf24]">Cara verifikasi Save Pricing</p>
+        <ol className="mt-2 list-inside list-decimal space-y-1 text-xs">
+          <li>Save di sini → cek tabel Supabase <strong>model_pricing</strong> (bukan usage_logs)</li>
+          <li>Buka <strong>Playground</strong> → kirim 1 chat baru</li>
+          <li>Supabase <strong>usage_logs</strong> → sort <strong>created_at DESC</strong> → row paling atas harus punya customer_charge</li>
+        </ol>
+        <p className="mt-2 text-[11px] text-white/45">
+          Row lama dengan NULL tidak akan berubah — itu request sebelum billing pipeline.
+        </p>
+      </div>
       <Card title="Providers">
         {data.providers.map((p) => (
           <div key={String(p.id)} className="flex items-center justify-between py-2">
@@ -423,19 +439,15 @@ function PricingPanel({
 
       <Card title="Models · Pricing & Costs">
         <div className="space-y-6">
-          {models.map((m) => {
-            const pricing = (m.model_pricing as Record<string, unknown>[])?.[0];
-            const costs = (m.provider_model_costs as Record<string, unknown>[])?.[0];
-            return (
+          {models.map((m) => (
               <ModelPricingRow
                 key={String(m.id)}
                 model={m}
-                pricing={pricing}
-                costs={costs}
+                pricing={m.active_pricing as Record<string, unknown> | undefined}
+                costs={m.active_costs as Record<string, unknown> | undefined}
                 onSaved={onSaved}
               />
-            );
-          })}
+            ))}
         </div>
       </Card>
     </div>
@@ -457,6 +469,8 @@ function ModelPricingRow({
   const [outP, setOutP] = useState(String(pricing?.output_price_per_1m ?? ""));
   const [inC, setInC] = useState(String(costs?.input_cost_per_1m ?? ""));
   const [outC, setOutC] = useState(String(costs?.output_cost_per_1m ?? ""));
+  const [saving, setSaving] = useState(false);
+  const [rowMsg, setRowMsg] = useState<string | null>(null);
 
   return (
     <div className="rounded-xl border border-white/10 p-4">
@@ -502,32 +516,47 @@ function ModelPricingRow({
       <Button
         size="sm"
         className="mt-3"
+        disabled={saving}
         onClick={async () => {
-          await adminFetch("/api/v1/admin/pricing", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "update_pricing",
-              providerModelId: model.id,
-              inputPricePer1M: Number(inP),
-              outputPricePer1M: Number(outP),
-            }),
-          });
-          await adminFetch("/api/v1/admin/pricing", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "update_costs",
-              providerModelId: model.id,
-              inputCostPer1M: Number(inC),
-              outputCostPer1M: Number(outC),
-            }),
-          });
-          onSaved();
+          setSaving(true);
+          setRowMsg(null);
+          try {
+            await adminFetch("/api/v1/admin/pricing", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "update_pricing",
+                providerModelId: model.id,
+                inputPricePer1M: Number(inP),
+                outputPricePer1M: Number(outP),
+              }),
+            });
+            await adminFetch("/api/v1/admin/pricing", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "update_costs",
+                providerModelId: model.id,
+                inputCostPer1M: Number(inC),
+                outputCostPer1M: Number(outC),
+              }),
+            });
+            setRowMsg("Saved! Kirim chat baru di Playground untuk update usage_logs.");
+            onSaved();
+          } catch (err) {
+            setRowMsg(err instanceof Error ? err.message : "Save gagal.");
+          } finally {
+            setSaving(false);
+          }
         }}
       >
-        Save pricing
+        {saving ? "Saving..." : "Save pricing"}
       </Button>
+      {rowMsg && (
+        <p className={`mt-2 text-xs ${rowMsg.includes("gagal") ? "text-[#F472B6]" : "text-[#2DD4BF]"}`}>
+          {rowMsg}
+        </p>
+      )}
     </div>
   );
 }
@@ -596,20 +625,41 @@ function PlanRow({
 
 function CustomersPanel({
   customers,
+  plans,
   selectedId,
   detail,
   onSelect,
   onSaved,
 }: {
   customers: Record<string, unknown>[];
+  plans: Record<string, unknown>[];
   selectedId: string | null;
   detail: Record<string, unknown> | null;
   onSelect: (id: string) => void;
   onSaved: () => void;
 }) {
   const [topup, setTopup] = useState("1.00");
+  const [custMsg, setCustMsg] = useState<string | null>(null);
+  const [planSlug, setPlanSlug] = useState("beta");
+
+  const subPlan = detail?.subscription as Record<string, unknown> | undefined;
+  const plansNested = subPlan?.plans as Record<string, unknown> | undefined;
+  const currentPlanSlug = String(plansNested?.slug ?? "beta");
+
+  useEffect(() => {
+    setPlanSlug(currentPlanSlug);
+  }, [currentPlanSlug, selectedId]);
 
   return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-[#2DD4BF]/30 bg-[#2DD4BF]/10 p-4 text-sm text-white/70">
+        <p className="font-medium text-[#2DD4BF]">Billing otomatis</p>
+        <ul className="mt-2 list-inside list-disc space-y-1 text-xs">
+          <li><strong>Top-up</strong> → saldo naik + user otomatis pindah ke plan <strong>Pay As You Go</strong></li>
+          <li><strong>Chat API</strong> → saldo dipotong otomatis + log <code className="text-white/60">charge</code> di billing_transactions</li>
+          <li>Plan <strong>Beta</strong> = gratis quota, saldo tidak dipotong</li>
+        </ul>
+      </div>
     <div className="grid gap-6 lg:grid-cols-2">
       <Card title="Customers">
         {customers.map((c) => (
@@ -635,11 +685,54 @@ function CustomersPanel({
         <Card title="Customer Detail">
           <p className="font-mono text-xs break-all text-white/50">{selectedId}</p>
           <p className="mt-2 text-sm">
+            Plan:{" "}
+            <span className="text-[#2DD4BF]">{currentPlanSlug}</span>
+          </p>
+          <p className="mt-2 text-sm">
             Balance:{" "}
             <span className="text-[#2DD4BF]">
               {formatUsd(Number(detail.balanceUsd ?? 0))}
             </span>
           </p>
+          <div className="mt-4 flex flex-wrap items-end gap-2">
+            <label className="text-xs text-white/50">
+              Plan
+              <select
+                value={planSlug}
+                onChange={(e) => setPlanSlug(e.target.value)}
+                className="mt-1 block rounded border border-white/10 bg-black/30 px-2 py-1 text-sm"
+              >
+                {plans.map((p) => (
+                  <option key={String(p.id)} value={String(p.slug)}>
+                    {String(p.name)} ({String(p.slug)})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button
+              size="sm"
+              onClick={async () => {
+                setCustMsg(null);
+                try {
+                  await adminFetch("/api/v1/admin/customers", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      action: "assign_plan",
+                      userId: selectedId,
+                      planSlug,
+                    }),
+                  });
+                  setCustMsg(`Plan diubah ke ${planSlug}.`);
+                  onSaved();
+                } catch (err) {
+                  setCustMsg(err instanceof Error ? err.message : "Gagal ubah plan.");
+                }
+              }}
+            >
+              Save plan
+            </Button>
+          </div>
           <div className="mt-4 flex gap-2">
             <input
               value={topup}
@@ -649,30 +742,44 @@ function CustomersPanel({
             <Button
               size="sm"
               onClick={async () => {
-                await adminFetch("/api/v1/admin/customers", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    action: "topup",
-                    userId: selectedId,
-                    amountUsd: Number(topup),
-                    note: "Admin manual top-up",
-                  }),
-                });
-                onSaved();
+                setCustMsg(null);
+                try {
+                  await adminFetch("/api/v1/admin/customers", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      action: "topup",
+                      userId: selectedId,
+                      amountUsd: Number(topup),
+                      note: "Admin manual top-up",
+                    }),
+                  });
+                  setCustMsg("Top-up OK — user otomatis ke Pay As You Go.");
+                  onSaved();
+                } catch (err) {
+                  setCustMsg(err instanceof Error ? err.message : "Top-up gagal.");
+                }
               }}
             >
               Top-up USD
             </Button>
           </div>
+          {custMsg && (
+            <p className={`mt-2 text-xs ${custMsg.includes("gagal") ? "text-[#F472B6]" : "text-[#2DD4BF]"}`}>
+              {custMsg}
+            </p>
+          )}
           <p className="mt-4 text-xs text-white/40">Recent transactions</p>
-          {(detail.transactions as Record<string, unknown>[])?.slice(0, 5).map((tx) => (
+          {(detail.transactions as Record<string, unknown>[])?.slice(0, 8).map((tx) => (
             <div key={String(tx.id)} className="text-xs text-white/50">
-              {String(tx.type)} {formatUsd(Number(tx.amount_usd))}
+              {String(tx.type)}{" "}
+              {tx.type === "charge" ? "−" : "+"}
+              {formatUsd(Number(tx.amount_usd))}
             </div>
           ))}
         </Card>
       )}
+    </div>
     </div>
   );
 }

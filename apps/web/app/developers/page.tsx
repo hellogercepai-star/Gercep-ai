@@ -54,6 +54,31 @@ interface UsageStats {
   recent: UsageRecentEntry[];
 }
 
+interface BillingInfo {
+  balanceUsd: number;
+  plan: {
+    slug: string;
+    name: string;
+    payAsYouGo: boolean;
+    requiresPositiveBalance: boolean;
+  } | null;
+  transactions: Array<{
+    id: string;
+    type: string;
+    amountUsd: number;
+    note: string | null;
+    createdAt: string;
+    createdBy: string;
+  }>;
+}
+
+function formatUsd(n: number) {
+  if (n === 0) return "$0.00";
+  if (n < 0.0001) return `$${n.toFixed(8)}`;
+  if (n < 0.01) return `$${n.toFixed(6)}`;
+  return `$${n.toFixed(4)}`;
+}
+
 function formatTokens(n: number, locale: string) {
   return n.toLocaleString(locale);
 }
@@ -92,6 +117,7 @@ export default function DevelopersPage() {
   const { t, dateLocale } = useLanguage();
   const [keys, setKeys] = useState<ApiKeyItem[]>([]);
   const [usage, setUsage] = useState<UsageStats | null>(null);
+  const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
@@ -104,9 +130,10 @@ export default function DevelopersPage() {
     setLoading(true);
     setError(null);
 
-    const [keysRes, usageRes] = await Promise.all([
+    const [keysRes, usageRes, billingRes] = await Promise.all([
       fetch("/api/v1/keys"),
       fetch("/api/v1/usage"),
+      fetch("/api/v1/billing"),
     ]);
 
     if (keysRes.status === 401 || usageRes.status === 401) {
@@ -126,6 +153,8 @@ export default function DevelopersPage() {
 
     if (usageRes.ok) setUsage(usageData);
     else setError((prev) => prev ?? usageData.error ?? t("developers.loadUsageError"));
+
+    if (billingRes.ok) setBilling(await billingRes.json());
 
     setLoading(false);
   }, [router]);
@@ -210,6 +239,61 @@ export default function DevelopersPage() {
               {t("developers.loginCta")}
             </Link>
           </div>
+        )}
+        {/* Billing */}
+        {!needsLogin && (
+          <section className="mb-8">
+            <h2 className="mb-4 font-[family-name:var(--font-display)] text-lg font-semibold">
+              {t("developers.billingTitle")}
+            </h2>
+            {loading ? (
+              <p className="text-sm text-white/50">{t("common.loading")}</p>
+            ) : billing ? (
+              <>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <StatBox
+                    label={t("developers.billingBalance")}
+                    value={formatUsd(billing.balanceUsd)}
+                  />
+                  <StatBox
+                    label={t("developers.billingPlan")}
+                    value={billing.plan?.name ?? "—"}
+                    sub={billing.plan?.slug}
+                  />
+                </div>
+                <p className="mt-3 text-xs text-white/45">
+                  {billing.plan?.payAsYouGo
+                    ? t("developers.billingPaygHint")
+                    : t("developers.billingBetaHint")}
+                </p>
+                {billing.transactions.length > 0 && (
+                  <Card className="mt-4">
+                    <ul className="divide-y divide-white/5 text-sm">
+                      {billing.transactions.slice(0, 8).map((tx) => (
+                        <li
+                          key={tx.id}
+                          className="flex items-center justify-between py-2 first:pt-0 last:pb-0"
+                        >
+                          <span className="text-white/60">
+                            {tx.type === "charge"
+                              ? t("developers.billingCharge")
+                              : t("developers.billingTopup")}
+                            {tx.note ? ` · ${tx.note.slice(0, 40)}` : ""}
+                          </span>
+                          <span className="font-mono text-[#2DD4BF]">
+                            {tx.type === "charge" ? "−" : "+"}
+                            {formatUsd(tx.amountUsd)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-white/50">{t("developers.billingNoTx")}</p>
+            )}
+          </section>
         )}
         {/* Usage summary */}
         <section className="mb-8">
