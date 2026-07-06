@@ -34,6 +34,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ balanceUsd: result.balanceUsd });
     }
 
+    if (body.action === "assign_plan") {
+      const result = await repo.assignPlan(body.userId, body.planSlug);
+      if (!result.ok) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
+      const { logAdminAudit } = await import("@/lib/gateway/audit-log");
+      await logAdminAudit(db, {
+        action: "customer.assign_plan",
+        resourceType: "user",
+        resourceId: body.userId,
+        metadata: { planSlug: body.planSlug },
+      });
+      return NextResponse.json({ ok: true });
+    }
+
     if (body.action === "rate_override") {
       await repo.setRateOverride(body.userId, {
         dailyRequestLimit: body.dailyRequestLimit,

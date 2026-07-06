@@ -74,7 +74,10 @@ export class UsageLoggingService {
 
     const subscription = await this.repo.getActiveSubscription(input.userId);
     if (subscription?.plan.payAsYouGo && costs.customerChargeUsd > 0) {
-      await this.repo.deductBalanceUsd(input.userId, costs.customerChargeUsd);
+      await this.repo.deductBalanceUsd(input.userId, costs.customerChargeUsd, {
+        requestId: input.requestId,
+        model: input.model,
+      });
     }
 
     return fields;

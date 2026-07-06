@@ -3,11 +3,13 @@ import { extractBearerToken } from "@/lib/gateway/api-key";
 import { openAiUnauthorized, validateApiKey } from "@/lib/gateway/auth";
 import { getModelById } from "@/lib/gateway/models";
 import { executeChatPipeline } from "@/lib/gateway/pipeline";
-import { logUsage } from "@/lib/gateway/usage";
+import { GatewayRepository } from "@/lib/repositories/gateway.repository";
+import { UsageLoggingService } from "@/lib/services/gateway/usage-logging.service";
 import { assertWithinDailyQuota } from "@/lib/gateway/quota";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ChatCompletionRequest } from "@/lib/ai-providers/types";
 import type { ValidatedApiKey } from "@/types/gateway";
+import { randomUUID } from "crypto";
 
 // POST /api/v1/chat/completions — OpenAI-compatible gateway
 // Auth: Authorization: Bearer sk-gercep-...
@@ -95,13 +97,21 @@ async function legacyCompletion(input: {
   if (!input.apiKey.id.startsWith("dev")) {
     try {
       const admin = createAdminClient();
-      await logUsage(admin, {
+      const repo = new GatewayRepository(admin);
+      const sub = await repo.ensureDefaultSubscription(input.apiKey.userId);
+      const usageLogger = new UsageLoggingService(admin);
+      await usageLogger.logCompletedRequest({
         apiKeyId: input.apiKey.id,
         userId: input.apiKey.userId,
         model: input.body.model,
         promptTokens: completion.usage.prompt_tokens,
         completionTokens: completion.usage.completion_tokens,
         totalTokens: completion.usage.total_tokens,
+        requestId: randomUUID(),
+        latencyMs: 0,
+        planSlug: sub?.plan.slug ?? "beta",
+        preEstimatePromptTokens: completion.usage.prompt_tokens,
+        preEstimateCompletionTokens: completion.usage.completion_tokens,
       });
     } catch (logErr) {
       console.error("Usage log skipped:", logErr);

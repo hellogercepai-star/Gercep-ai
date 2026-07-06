@@ -122,10 +122,14 @@ export function AdminControlCenter() {
         );
         setPlans(d.plans);
       } else if (t === "customers") {
-        const d = await adminFetch<{ customers: Record<string, unknown>[] }>(
-          "/api/v1/admin/customers"
-        );
-        setCustomers(d.customers);
+        const [cust, pl] = await Promise.all([
+          adminFetch<{ customers: Record<string, unknown>[] }>(
+            "/api/v1/admin/customers"
+          ),
+          adminFetch<{ plans: Record<string, unknown>[] }>("/api/v1/admin/plans"),
+        ]);
+        setCustomers(cust.customers);
+        setPlans(pl.plans);
       } else if (t === "keys") {
         const d = await adminFetch<{ keys: Record<string, unknown>[] }>(
           "/api/v1/admin/keys"
@@ -310,6 +314,7 @@ export function AdminControlCenter() {
         {tab === "customers" && (
           <CustomersPanel
             customers={customers}
+            plans={plans}
             selectedId={selectedCustomer}
             detail={customerDetail}
             onSelect={async (id) => {
@@ -620,20 +625,41 @@ function PlanRow({
 
 function CustomersPanel({
   customers,
+  plans,
   selectedId,
   detail,
   onSelect,
   onSaved,
 }: {
   customers: Record<string, unknown>[];
+  plans: Record<string, unknown>[];
   selectedId: string | null;
   detail: Record<string, unknown> | null;
   onSelect: (id: string) => void;
   onSaved: () => void;
 }) {
   const [topup, setTopup] = useState("1.00");
+  const [custMsg, setCustMsg] = useState<string | null>(null);
+  const [planSlug, setPlanSlug] = useState("beta");
+
+  const subPlan = detail?.subscription as Record<string, unknown> | undefined;
+  const plansNested = subPlan?.plans as Record<string, unknown> | undefined;
+  const currentPlanSlug = String(plansNested?.slug ?? "beta");
+
+  useEffect(() => {
+    setPlanSlug(currentPlanSlug);
+  }, [currentPlanSlug, selectedId]);
 
   return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-[#2DD4BF]/30 bg-[#2DD4BF]/10 p-4 text-sm text-white/70">
+        <p className="font-medium text-[#2DD4BF]">Billing otomatis</p>
+        <ul className="mt-2 list-inside list-disc space-y-1 text-xs">
+          <li><strong>Top-up</strong> → saldo naik + user otomatis pindah ke plan <strong>Pay As You Go</strong></li>
+          <li><strong>Chat API</strong> → saldo dipotong otomatis + log <code className="text-white/60">charge</code> di billing_transactions</li>
+          <li>Plan <strong>Beta</strong> = gratis quota, saldo tidak dipotong</li>
+        </ul>
+      </div>
     <div className="grid gap-6 lg:grid-cols-2">
       <Card title="Customers">
         {customers.map((c) => (
@@ -659,11 +685,54 @@ function CustomersPanel({
         <Card title="Customer Detail">
           <p className="font-mono text-xs break-all text-white/50">{selectedId}</p>
           <p className="mt-2 text-sm">
+            Plan:{" "}
+            <span className="text-[#2DD4BF]">{currentPlanSlug}</span>
+          </p>
+          <p className="mt-2 text-sm">
             Balance:{" "}
             <span className="text-[#2DD4BF]">
               {formatUsd(Number(detail.balanceUsd ?? 0))}
             </span>
           </p>
+          <div className="mt-4 flex flex-wrap items-end gap-2">
+            <label className="text-xs text-white/50">
+              Plan
+              <select
+                value={planSlug}
+                onChange={(e) => setPlanSlug(e.target.value)}
+                className="mt-1 block rounded border border-white/10 bg-black/30 px-2 py-1 text-sm"
+              >
+                {plans.map((p) => (
+                  <option key={String(p.id)} value={String(p.slug)}>
+                    {String(p.name)} ({String(p.slug)})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button
+              size="sm"
+              onClick={async () => {
+                setCustMsg(null);
+                try {
+                  await adminFetch("/api/v1/admin/customers", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      action: "assign_plan",
+                      userId: selectedId,
+                      planSlug,
+                    }),
+                  });
+                  setCustMsg(`Plan diubah ke ${planSlug}.`);
+                  onSaved();
+                } catch (err) {
+                  setCustMsg(err instanceof Error ? err.message : "Gagal ubah plan.");
+                }
+              }}
+            >
+              Save plan
+            </Button>
+          </div>
           <div className="mt-4 flex gap-2">
             <input
               value={topup}
@@ -673,30 +742,44 @@ function CustomersPanel({
             <Button
               size="sm"
               onClick={async () => {
-                await adminFetch("/api/v1/admin/customers", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    action: "topup",
-                    userId: selectedId,
-                    amountUsd: Number(topup),
-                    note: "Admin manual top-up",
-                  }),
-                });
-                onSaved();
+                setCustMsg(null);
+                try {
+                  await adminFetch("/api/v1/admin/customers", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      action: "topup",
+                      userId: selectedId,
+                      amountUsd: Number(topup),
+                      note: "Admin manual top-up",
+                    }),
+                  });
+                  setCustMsg("Top-up OK — user otomatis ke Pay As You Go.");
+                  onSaved();
+                } catch (err) {
+                  setCustMsg(err instanceof Error ? err.message : "Top-up gagal.");
+                }
               }}
             >
               Top-up USD
             </Button>
           </div>
+          {custMsg && (
+            <p className={`mt-2 text-xs ${custMsg.includes("gagal") ? "text-[#F472B6]" : "text-[#2DD4BF]"}`}>
+              {custMsg}
+            </p>
+          )}
           <p className="mt-4 text-xs text-white/40">Recent transactions</p>
-          {(detail.transactions as Record<string, unknown>[])?.slice(0, 5).map((tx) => (
+          {(detail.transactions as Record<string, unknown>[])?.slice(0, 8).map((tx) => (
             <div key={String(tx.id)} className="text-xs text-white/50">
-              {String(tx.type)} {formatUsd(Number(tx.amount_usd))}
+              {String(tx.type)}{" "}
+              {tx.type === "charge" ? "−" : "+"}
+              {formatUsd(Number(tx.amount_usd))}
             </div>
           ))}
         </Card>
       )}
+    </div>
     </div>
   );
 }

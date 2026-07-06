@@ -341,7 +341,34 @@ export class AdminRepository {
       created_by: "admin",
     });
 
+    if (amountUsd > 0) {
+      await this.assignPlan(userId, "payg");
+    }
+
     return { ok: true as const, balanceUsd: next };
+  }
+
+  async assignPlan(userId: string, planSlug: string) {
+    const { data: plan } = await this.db
+      .from("plans")
+      .select("id")
+      .eq("slug", planSlug)
+      .maybeSingle();
+
+    if (!plan) return { ok: false as const, error: "Plan not found." };
+
+    const { error } = await this.db.from("subscriptions").upsert(
+      {
+        user_id: userId,
+        plan_id: plan.id,
+        status: "active",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+
+    if (error) return { ok: false as const, error: error.message };
+    return { ok: true as const };
   }
 
   async setRateOverride(

@@ -200,21 +200,40 @@ export class GatewayRepository {
     );
   }
 
-  async deductBalanceUsd(userId: string, amountUsd: number): Promise<boolean> {
-    if (amountUsd <= 0) return true;
+  async deductBalanceUsd(
+    userId: string,
+    amountUsd: number,
+    meta?: { requestId?: string; model?: string }
+  ): Promise<{ ok: boolean; balanceUsd?: number }> {
+    if (amountUsd <= 0) {
+      return { ok: true, balanceUsd: await this.getAccountBalanceUsd(userId) };
+    }
 
     const balance = await this.getAccountBalanceUsd(userId);
-    if (balance < amountUsd) return false;
+    if (balance < amountUsd) return { ok: false };
 
-    const { error } = await this.db
-      .from("account_balances")
-      .upsert({
-        user_id: userId,
-        balance_usd: balance - amountUsd,
-        updated_at: new Date().toISOString(),
-      });
+    const next = balance - amountUsd;
+    const { error } = await this.db.from("account_balances").upsert({
+      user_id: userId,
+      balance_usd: next,
+      updated_at: new Date().toISOString(),
+    });
 
-    return !error;
+    if (error) return { ok: false };
+
+    const note = meta?.requestId
+      ? `API ${meta.model ?? "chat"} · ${meta.requestId}`
+      : "API usage charge";
+
+    await this.db.from("billing_transactions").insert({
+      user_id: userId,
+      type: "charge",
+      amount_usd: amountUsd,
+      note,
+      created_by: "system",
+    });
+
+    return { ok: true, balanceUsd: next };
   }
 
   async insertUsageLog(input: {
