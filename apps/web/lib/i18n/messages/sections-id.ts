@@ -370,54 +370,156 @@ export const sections = {
   },
   legal: {
     privacyTitle: "Kebijakan Privasi",
-    termsTitle: "Syarat Layanan",
+    privacySubtitle:
+      "Kebijakan ini menjelaskan bagaimana Gercep AI menangani informasi untuk Gercep AI Gateway, termasuk permintaan API, metadata layanan, informasi pengguna, dan data operasional.",
+    privacyUpdated: "6 Juli 2026",
     privacyIntro:
-      'Gercep AI ("kami") mengoperasikan gateway inferensi di gercep.ai dan subdomain terkait. Kebijakan ini menjelaskan bagaimana kami menangani data saat kamu menggunakan platform developer kami.',
-    privacyCollectTitle: "Data yang kami kumpulkan",
-    privacyCollect1: "Email dan password akun (Supabase Auth)",
-    privacyCollect2: "Metadata API key (hash key, prefix, timestamp usage)",
-    privacyCollect3: "Log usage: model, jumlah token, ID API key, timestamp",
-    privacyCollect4:
-      "Alamat wallet Solana yang terhubung (jika kamu memilih connect Phantom)",
-    privacyCollect5:
-      "Konten prompt dan completion yang dikirim lewat gateway (diproses untuk memenuhi request API)",
-    privacyUseTitle: "Cara kami menggunakan data",
-    privacyUse1: "Autentikasi request API dan enforcement kuota harian",
-    privacyUse2: "Routing inferensi ke provider model (cth. DeepSeek)",
-    privacyUse3: "Menampilkan statistik usage di dashboard Developers kamu",
-    privacyUse4: "Meningkatkan reliabilitas dan mencegah abuse",
-    privacyThirdTitle: "Pihak ketiga",
-    privacyThirdBody:
-      "Kami menggunakan Supabase (database & auth), Vercel (hosting), DeepSeek (inferensi model), dan provider Solana RPC saat membaca saldo wallet. Provider key disimpan server-side saja — tidak pernah diekspos ke klien.",
+      "Gercep AI Gateway adalah layanan inferensi multi-model berformat OpenAI-compatible yang kami operasikan di gercep.ai dan subdomain terkait.",
+    privacyDocsNote:
+      "Untuk detail teknis endpoint, autentikasi, dan batas penggunaan, lihat dokumentasi API di /docs.",
+    privacyOverviewTitle: "Gambaran",
+    privacyOverview1:
+      "Kebijakan Privasi ini menjelaskan bagaimana Gercep AI mengumpulkan, menggunakan, memproses, dan melindungi informasi saat Anda menggunakan Gercep AI Gateway, situs web, dasbor Developers, API, playground, dan layanan terkait kami.",
+    privacyOverview2:
+      "Gercep AI Gateway merutekan permintaan melalui layanan AI pihak ketiga yang didukung untuk menyediakan akses model, keandalan, metering penggunaan, dan manajemen kuota.",
+    privacyAiTitle: "Pemrosesan Permintaan AI",
+    privacyAi1:
+      "Permintaan API Anda, termasuk instruksi, pesan, file, dan keluaran model, dapat diproses oleh Gercep AI Gateway dan penyedia inferensi pihak ketiga untuk menghasilkan tanggapan dan mengoperasikan layanan.",
+    privacyAi2:
+      "Pemrosesan permintaan dapat mencakup perutean model, percobaan ulang, pencegahan penyalahgunaan, pemeriksaan keamanan, pemantauan keandalan, penegakan kuota, dukungan penagihan, dan analitik penggunaan.",
+    privacyNoTrainingTitle: "Tidak Ada Pelatihan oleh Gercep AI",
+    privacyNoTrainingBody:
+      "Gercep AI tidak menggunakan konten permintaan API pelanggan untuk melatih model dasar milik kami. Penanganan data, retensi, dan kontrol peningkatan model oleh penyedia inferensi pihak ketiga dapat bervariasi menurut penyedia dan konfigurasi layanan.",
+    privacyCollectTitle: "Informasi yang Kami Kumpulkan",
+    privacyCollect1:
+      "Kami dapat mengumpulkan informasi akun seperti nama, alamat email, kata sandi yang di-hash, detail organisasi (jika ada), pesan dukungan, dan informasi otentikasi yang dikelola melalui Supabase Auth.",
+    privacyCollect2:
+      "Kami dapat mengumpulkan metadata operasional seperti pengidentifikasi kunci API (hash dan prefix), model yang diminta, stempel waktu, latensi, status permintaan, jumlah token, biaya perkiraan, alamat IP, informasi kesalahan, serta data penagihan dan transaksi Stripe (jika Anda melakukan top-up saldo).",
+    privacyCollect3:
+      "Kami dapat mengumpulkan informasi penggunaan situs web dan dasbor, termasuk jenis peramban, informasi perangkat, halaman yang dikunjungi, informasi rujukan, dan perkiraan lokasi yang berasal dari alamat IP. Jika Anda memilih menghubungkan dompet Solana (misalnya melalui Phantom), kami dapat menyimpan alamat dompet publik yang terhubung ke akun Anda.",
+    privacyPromptsTitle: "Prompt dan Penyimpanan Output",
+    privacyPrompts1:
+      "Kami tidak secara sengaja menyimpan instruksi atau keluaran mentah dalam log operasional standar. Dalam kasus terbatas, konten permintaan dapat diproses atau diperiksa sementara untuk debugging, pencegahan penyalahgunaan, keamanan, dukungan pelanggan, atau investigasi insiden.",
+    privacyPrompts2:
+      "Jika Anda mengirim file, pesan, atau keluaran melalui layanan, konten tersebut dapat diproses sementara sesuai kebutuhan untuk menyediakan fungsionalitas yang diminta. Penyedia inferensi pihak ketiga dapat memproses konten permintaan sesuai kebijakan mereka sendiri.",
+    privacyUseTitle: "Bagaimana Kami Menggunakan Informasi",
+    privacyUse1:
+      "Kami menggunakan informasi untuk menyediakan, memelihara, mengamankan, men-debug, memantau, dan meningkatkan Gercep AI Gateway serta pengalaman Developers Anda.",
+    privacyUse2:
+      "Kami juga menggunakan informasi untuk mengelola akses API, menegakkan batas penggunaan dan kuota, menghitung penggunaan dan biaya, memproses pembayaran, menanggapi permintaan dukungan, mencegah penyalahgunaan, mematuhi kewajiban hukum, dan mengkomunikasikan pembaruan layanan.",
+    privacyProvidersTitle: "Penyedia Layanan",
+    privacyProviders1:
+      "Kami menggunakan penyedia layanan pihak ketiga untuk mengoperasikan layanan, termasuk Supabase (autentikasi dan basis data), Vercel (hosting), DeepSeek dan penyedia inferensi model lainnya (pemrosesan permintaan AI), Stripe (pembayaran dan penagihan), serta penyedia Solana RPC saat membaca saldo dompet.",
+    privacyProviders2:
+      "Penyedia ini dapat memproses informasi hanya sesuai kebutuhan untuk menyediakan layanan mereka kepada Gercep AI, tunduk pada ketentuan dan praktik penanganan data yang berlaku.",
+    privacyProviders3:
+      "Kunci API penyedia inferensi disimpan di sisi server dan tidak pernah diekspos ke klien. Penanganan data, retensi, dan kontrol peningkatan model dapat bervariasi menurut penyedia, jenis layanan, dan konfigurasi.",
+    privacySensitiveTitle: "Peringatan Data Sensitif",
+    privacySensitive1:
+      "Jangan mengirimkan data pribadi sensitif, data bisnis rahasia, data kesehatan atau keuangan yang diatur, kredensial produksi, atau rahasia dagang melalui layanan kecuali Anda telah meninjau dan menerima persyaratan penanganan data yang berlaku.",
+    privacySensitive2:
+      "Anda bertanggung jawab untuk memastikan bahwa penggunaan Gercep AI Gateway mematuhi hukum, kontrak, dan kebijakan internal yang berlaku untuk data yang Anda kirimkan melalui API atau playground.",
+    privacyCrossBorderTitle: "Pemrosesan Lintas Batas",
+    privacyCrossBorder1:
+      "Data dapat diproses di negara-negara di luar lokasi Anda, termasuk tempat infrastruktur dan penyedia layanan kami beroperasi (misalnya Amerika Serikat, Uni Eropa, atau Singapura, tergantung penyedia).",
+    privacyCrossBorder2:
+      "Dengan menggunakan Gercep AI Gateway, Anda memahami bahwa informasi dapat ditransfer ke dan diproses di yurisdiksi yang mungkin memiliki undang-undang perlindungan data yang berbeda dari negara Anda, termasuk Undang-Undang Perlindungan Data Pribadi (UU PDP) Republik Indonesia sebagaimana berlaku.",
     privacyRetentionTitle: "Retensi",
-    privacyRetentionBody:
-      "Log usage disimpan selama akun kamu aktif. Kamu bisa cabut API key atau unlink wallet dari halaman Developers. Hubungi kami untuk minta penghapusan akun.",
+    privacyRetention1:
+      "Kami menyimpan data akun, penagihan, dukungan, keamanan, dan catatan operasional selama diperlukan untuk mengoperasikan layanan, memenuhi kewajiban hukum, menyelesaikan perselisihan, mencegah penyalahgunaan, dan menegakkan perjanjian.",
+    privacyRetention2:
+      "Metadata operasional dapat dipertahankan untuk tujuan analitik, penagihan, keamanan, dan keandalan. Kami bertujuan membatasi penanganan konten permintaan mentah pada apa yang dibutuhkan untuk menyediakan dan melindungi layanan. Anda dapat mencabut kunci API atau memutus tautan dompet dari halaman Developers.",
+    privacySecurityTitle: "Keamanan",
+    privacySecurity1:
+      "Kami menerapkan langkah-langkah teknis dan organisasional yang wajar yang dirancang untuk melindungi informasi dari akses, kehilangan, penyalahgunaan, atau perubahan yang tidak sah.",
+    privacySecurity2:
+      "Tidak ada layanan internet yang dapat menjamin keamanan mutlak. Anda bertanggung jawab untuk melindungi kunci API, kredensial akun, perangkat, dan izin akses Anda.",
+    privacyRightsTitle: "Pilihan dan Hak Anda",
+    privacyRights1:
+      "Tergantung pada lokasi Anda, Anda mungkin memiliki hak untuk mengakses, memperbaiki, menghapus, membatasi, atau mengekspor informasi pribadi tertentu, termasuk hak yang diatur dalam UU PDP Republik Indonesia.",
+    privacyRights2:
+      "Anda dapat menghubungi kami di privacy@gercep.ai untuk meminta bantuan terkait hak privasi, informasi pengguna, atau data layanan. Kami mungkin perlu memverifikasi identitas Anda sebelum menyelesaikan permintaan.",
+    privacyChangesTitle: "Perubahan pada Kebijakan Ini",
+    privacyChangesBody:
+      "Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Ketika kami membuat perubahan materi, kami akan memperbarui tanggal di atas dan dapat memberikan pemberitahuan tambahan melalui layanan atau saluran komunikasi lainnya.",
     privacyContactTitle: "Kontak",
     privacyContactBody:
-      "Pertanyaan: hubungi lewat channel akun Gercep kamu atau repositori GitHub proyek. Ini kebijakan draft dan bisa diperbarui sebelum launch publik.",
+      "Untuk pertanyaan privasi, dukungan, atau permintaan data, hubungi privacy@gercep.ai. Untuk hal terkait syarat layanan atau penagihan, hubungi legal@gercep.ai.",
+
+    termsTitle: "Syarat Layanan",
+    termsSubtitle:
+      "Syarat ini mengatur penggunaan Anda atas Gercep AI Gateway, termasuk situs web, API, dasbor Developers, playground, dan layanan terkait.",
+    termsUpdated: "6 Juli 2026",
     termsIntro:
-      "Ketentuan ini mengatur penggunaan Gercep AI kamu. Baca dengan saksama sebelum menggunakan Layanan.",
+      "Harap baca Syarat Layanan ini dengan saksama sebelum menggunakan layanan. Dengan mengakses atau menggunakan layanan, Anda menyetujui syarat ini.",
+    termsOverviewTitle: "Gambaran",
+    termsOverviewBody:
+      "Gercep AI Gateway menyediakan akses inferensi model melalui API kompatibel OpenAI, manajemen kunci API, metering penggunaan, penagihan berbasis kredit, dan opsi penghubungan dompet Solana untuk tier kuota. Model inferensi disediakan oleh penyedia pihak ketiga.",
     termsAcceptTitle: "Penerimaan",
     termsAcceptBody:
-      'Dengan menggunakan Gercep AI ("Layanan"), kamu setuju dengan ketentuan ini. Jika tidak setuju, jangan gunakan Layanan.',
-    termsServiceTitle: "Deskripsi layanan",
+      'Dengan menggunakan Gercep AI ("Layanan"), Anda menyetujui Syarat Layanan ini dan Kebijakan Privasi kami. Jika Anda tidak setuju, jangan gunakan Layanan. Jika Anda menggunakan Layanan atas nama organisasi, Anda menyatakan memiliki wewenang untuk mengikat organisasi tersebut.',
+    termsServiceTitle: "Deskripsi Layanan",
     termsServiceBody:
-      "Gercep AI menyediakan gateway API kompatibel OpenAI untuk inferensi LLM, manajemen API key, metering usage, dan opsi link wallet Solana untuk tier kuota. Model disediakan oleh provider inferensi pihak ketiga.",
-    termsAccountTitle: "Tanggung jawab kamu",
-    termsAccountBody:
-      "Jaga keamanan kredensial akun dan API key kamu. Jangan bagikan plain API key secara publik atau commit ke git. Patuhi hukum yang berlaku dan kebijakan acceptable-use provider. Jangan abuse gateway (spam, konten ilegal, credential stuffing).",
-    termsApiTitle: "API key & kuota",
-    termsApiBody:
-      "API key bersifat personal untuk akun kamu. Limit request harian berlaku per tier (lihat Whitepaper). Kami bisa suspend key atau akun yang melanggar ketentuan ini atau melebihi fair use.",
+      "Layanan mencakup gateway API, playground, dasbor Developers, dokumentasi, dan fitur terkait yang kami sediakan dari waktu ke waktu. Kami dapat menambah, mengubah, menangguhkan, atau menghentikan fitur dengan pemberitahuan wajar jika memungkinkan. Ketersediaan model tertentu dapat berubah tanpa pemberitahuan sebelumnya.",
+    termsAccountTitle: "Akun dan Keamanan",
+    termsAccount1:
+      "Anda bertanggung jawab menjaga kerahasiaan kredensial akun dan kunci API Anda. Jangan membagikan kunci API dalam bentuk plain text secara publik, di repositori kode, atau di tempat yang dapat diakses pihak tidak berwenang.",
+    termsAccount2:
+      "Anda harus memberikan informasi akun yang akurat dan segera memberitahu kami jika mengetahui penggunaan tidak sah atas akun atau kunci API Anda.",
+    termsAcceptableUseTitle: "Penggunaan yang Dapat Diterima",
+    termsAcceptableUseIntro: "Anda setuju untuk tidak:",
+    termsAcceptableUse1:
+      "Menggunakan Layanan untuk aktivitas ilegal, melanggar hukum yang berlaku, atau melanggar hak pihak ketiga.",
+    termsAcceptableUse2:
+      "Mengirim spam, malware, konten yang melanggar hukum, atau melakukan credential stuffing, scraping berlebihan, atau serangan terhadap infrastruktur kami.",
+    termsAcceptableUse3:
+      "Mencoba mengakses sistem, data, atau akun lain tanpa izin, atau mengelabui batas penggunaan dan kuota.",
+    termsAcceptableUse4:
+      "Menggunakan Layanan dengan cara yang merusak keandalan, keamanan, atau kinerja Layanan atau penyedia pihak ketiga.",
+    termsAcceptableUse5:
+      "Melanggar kebijakan acceptable use penyedia inferensi model yang mendasari layanan kami.",
+    termsApiTitle: "Kunci API dan Kuota",
+    termsApiBody1:
+      "Kunci API bersifat pribadi untuk akun Anda dan tidak boleh dibagikan ke pihak ketiga kecuali Anda mengizinkannya secara tegas. Batas permintaan, kuota harian, dan tier akses dapat berlaku sesuai konfigurasi akun dan dokumentasi kami.",
+    termsApiBody2:
+      "Kami dapat menangguhkan, membatasi, atau mencabut kunci API atau akun yang melanggar syarat ini, menyalahgunakan Layanan, melebihi fair use, atau menimbulkan risiko keamanan atau operasional.",
+    termsBillingTitle: "Penagihan, Pembayaran, dan Pengembalian Dana",
+    termsBilling1:
+      "Layanan tertentu memerlukan saldo kredit atau pembayaran melalui Stripe. Harga, biaya per token, dan paket top-up ditampilkan di dasbor Developers atau halaman terkait sebelum pembayaran.",
+    termsBilling2:
+      "Pembayaran diproses oleh Stripe sesuai ketentuan mereka. Kecuali diwajibkan oleh hukum yang berlaku, pembayaran untuk kredit yang sudah dikreditkan ke akun Anda bersifat final dan tidak dapat dikembalikan.",
+    termsBilling3:
+      "Kami dapat mengoreksi kesalahan penagihan, menyesuaikan saldo, atau menangguhkan akses jika terjadi sengketa pembayaran, chargeback, atau aktivitas penagihan yang mencurigakan.",
     termsTokenTitle: "Token $GERCEP",
-    termsTokenBody:
-      "Referensi ke $GERCEP menjelaskan utility ekosistem yang direncanakan. Launch token, alokasi, dan vesting dijelaskan di Whitepaper kami dan bisa berubah. Tidak ada yang di sini merupakan saran finansial atau penawaran sekuritas.",
-    termsLimitTitle: "Disclaimer",
-    termsLimitBody:
-      'Layanan disediakan "apa adanya" tanpa jaminan. Kami tidak bertanggung jawab atas akurasi output model, outage provider, atau kerugian tidak langsung. Hasil inferensi bisa salah — verifikasi sebelum dipakai di production.',
-    termsContactTitle: "Perubahan",
+    termsTokenBody1:
+      "Referensi ke token $GERCEP menjelaskan utilitas ekosistem yang direncanakan, termasuk mekanisme kuota atau akses yang dijelaskan dalam Whitepaper kami. Rincian peluncuran, alokasi, vesting, dan utilitas dapat berubah.",
+    termsTokenBody2:
+      "Tidak ada yang dalam Layanan atau dokumentasi ini merupakan saran finansial, penawaran sekuritas, atau ajakan untuk membeli aset kripto. Anda bertanggung jawab mematuhi hukum yang berlaku terkait aset digital di yurisdiksi Anda.",
+    termsIpTitle: "Kekayaan Intelektual",
+    termsIpBody:
+      "Layanan, merek, dokumentasi, dan konten situs web kami dilindungi oleh hukum kekayaan intelektual. Anda mempertahankan hak atas konten yang Anda kirimkan melalui Layanan. Anda memberikan kami lisensi terbatas untuk memproses konten tersebut semata-mata untuk menyediakan Layanan.",
+    termsLimitTitle: "Penafian dan Batasan Tanggung Jawab",
+    termsLimitBody1:
+      'Layanan disediakan "apa adanya" dan "sebagaimana tersedia" tanpa jaminan tersurat maupun tersirat. Kami tidak menjamin akurasi, kelengkapan, atau keandalan keluaran model, ketersediaan penyedia pihak ketiga, atau kesesuaian untuk tujuan tertentu.',
+    termsLimitBody2:
+      "Sejauh diizinkan oleh hukum yang berlaku, Gercep AI tidak bertanggung jawab atas kerugian tidak langsung, insidental, khusus, konsekuensial, atau hilangnya keuntungan, data, atau goodwill. Anda bertanggung jawab memverifikasi keluaran model sebelum digunakan di lingkungan produksi.",
+    termsIndemnityTitle: "Ganti Rugi",
+    termsIndemnityBody:
+      "Anda setuju untuk membela, mengganti rugi, dan membebaskan Gercep AI dari klaim, kerugian, kewajiban, dan biaya yang timbul dari penggunaan Layanan oleh Anda, konten yang Anda kirimkan, atau pelanggaran Anda terhadap syarat ini atau hukum yang berlaku.",
+    termsTerminationTitle: "Penangguhan dan Penghentian",
+    termsTermination1:
+      "Anda dapat berhenti menggunakan Layanan kapan saja dengan mencabut kunci API dan menutup akun Anda sesuai instruksi di dasbor Developers atau dengan menghubungi kami.",
+    termsTermination2:
+      "Kami dapat menangguhkan atau menghentikan akses Anda jika Anda melanggar syarat ini, menimbulkan risiko hukum atau keamanan, atau jika diwajibkan oleh hukum. Ketentuan yang secara wajar harus tetap berlaku setelah penghentian akan tetap berlaku.",
+    termsGoverningTitle: "Hukum yang Berlaku",
+    termsGoverningBody:
+      "Syarat ini diatur oleh dan ditafsirkan sesuai dengan hukum Republik Indonesia, tanpa memperhatikan prinsip konflik hukum. Setiap perselisihan yang tidak dapat diselesaikan secara musyawarah akan diselesaikan melalui pengadilan yang berwenang di Indonesia, kecuali diwajibkan lain oleh hukum yang berlaku.",
+    termsChangesTitle: "Perubahan Syarat",
+    termsChangesBody:
+      "Kami dapat memperbarui Syarat Layanan ini dari waktu ke waktu. Penggunaan berkelanjutan setelah perubahan berlaku merupakan penerimaan Anda. Perubahan materi akan dicatat dengan memperbarui tanggal di atas dan, jika sesuai, pemberitahuan melalui layanan atau email.",
+    termsContactTitle: "Kontak",
     termsContactBody:
-      "Kami bisa memperbarui ketentuan ini. Penggunaan berkelanjutan setelah perubahan berarti penerimaan. Perubahan material akan dicatat di halaman ini.",
+      "Untuk pertanyaan terkait syarat layanan, penagihan, atau hukum, hubungi legal@gercep.ai. Untuk pertanyaan privasi dan data, hubungi privacy@gercep.ai.",
   },
   homeSections: {
     trustedBy: "Trusted by",
