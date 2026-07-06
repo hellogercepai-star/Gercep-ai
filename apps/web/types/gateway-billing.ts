@@ -66,6 +66,9 @@ export type CostProtectionResult =
       code: CostProtectionDenyCode;
       message: string;
       httpStatus: 402 | 403 | 429;
+      requestId: string;
+      planSlug?: string;
+      estimate?: TokenCostEstimate;
     };
 
 export interface UsageLogCostFields {

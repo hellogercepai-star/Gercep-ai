@@ -29,6 +29,7 @@ export async function GET() {
 
   return NextResponse.json({
     balanceUsd,
+    stripeEnabled: Boolean(process.env.STRIPE_SECRET_KEY),
     plan: subscription
       ? {
           slug: subscription.plan.slug,

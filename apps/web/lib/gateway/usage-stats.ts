@@ -5,6 +5,8 @@ export interface UsageLogRow {
   prompt_tokens: number;
   completion_tokens: number;
   total_tokens: number;
+  customer_charge?: number | null;
+  plan_slug?: string | null;
   created_at: string;
 }
 
@@ -13,6 +15,7 @@ export interface UsageSummary {
   totalTokens: number;
   promptTokens: number;
   completionTokens: number;
+  totalCostUsd: number;
 }
 
 export interface UsageByKey {
@@ -31,11 +34,19 @@ export interface UsageRecentEntry {
   promptTokens: number;
   completionTokens: number;
   totalTokens: number;
+  costUsd: number | null;
+  planSlug: string | null;
   createdAt: string;
 }
 
 function emptySummary(): UsageSummary {
-  return { requests: 0, totalTokens: 0, promptTokens: 0, completionTokens: 0 };
+  return {
+    requests: 0,
+    totalTokens: 0,
+    promptTokens: 0,
+    completionTokens: 0,
+    totalCostUsd: 0,
+  };
 }
 
 function sumLogs(logs: UsageLogRow[]): UsageSummary {
@@ -45,6 +56,7 @@ function sumLogs(logs: UsageLogRow[]): UsageSummary {
       totalTokens: acc.totalTokens + log.total_tokens,
       promptTokens: acc.promptTokens + log.prompt_tokens,
       completionTokens: acc.completionTokens + log.completion_tokens,
+      totalCostUsd: acc.totalCostUsd + Number(log.customer_charge ?? 0),
     }),
     emptySummary()
   );
@@ -101,6 +113,8 @@ export function buildUsageStats(
       promptTokens: log.prompt_tokens,
       completionTokens: log.completion_tokens,
       totalTokens: log.total_tokens,
+      costUsd: log.customer_charge != null ? Number(log.customer_charge) : null,
+      planSlug: log.plan_slug ?? null,
       createdAt: log.created_at,
     };
   });

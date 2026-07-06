@@ -316,7 +316,12 @@ export class AdminRepository {
     };
   }
 
-  async topUpBalance(userId: string, amountUsd: number, note: string) {
+  async topUpBalance(
+    userId: string,
+    amountUsd: number,
+    note: string,
+    createdBy = "admin"
+  ) {
     const { data: existing } = await this.db
       .from("account_balances")
       .select("balance_usd")
@@ -338,7 +343,7 @@ export class AdminRepository {
       type: amountUsd >= 0 ? "topup" : "refund",
       amount_usd: amountUsd,
       note,
-      created_by: "admin",
+      created_by: createdBy,
     });
 
     if (amountUsd > 0) {

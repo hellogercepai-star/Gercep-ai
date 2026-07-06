@@ -12,6 +12,7 @@ import {
 import type {
   CostProtectionDenyCode,
   CostProtectionResult,
+  TokenCostEstimate,
 } from "@/types/gateway-billing";
 
 /**
@@ -38,6 +39,7 @@ export class CostProtectionService {
       const sub = await this.repo.ensureDefaultSubscription(userId);
       if (!sub) {
         return deny(
+          requestId,
           "pricing_unavailable",
           "Gateway billing belum dikonfigurasi. Jalankan migration 004_gateway_billing.sql.",
           403
@@ -54,6 +56,7 @@ export class CostProtectionService {
     const subscription = await this.repo.ensureDefaultSubscription(userId);
     if (!subscription) {
       return deny(
+        requestId,
         "pricing_unavailable",
         "Subscription plan tidak tersedia. Hubungi admin.",
         403
@@ -65,9 +68,11 @@ export class CostProtectionService {
       subscription.status !== "trialing"
     ) {
       return deny(
+        requestId,
         "subscription_inactive",
         `Subscription ${subscription.status}. Perbarui paket untuk melanjutkan.`,
-        403
+        403,
+        { planSlug: subscription.plan.slug }
       );
     }
 
@@ -84,23 +89,29 @@ export class CostProtectionService {
     const pricing = await this.repo.getModelPricing(body.model);
     if (!pricing) {
       return deny(
+        requestId,
         "pricing_unavailable",
         `Model '${body.model}' belum dikonfigurasi di billing. Hubungi admin.`,
-        403
+        403,
+        { planSlug: plan.slug }
       );
     }
 
     if (!pricing.enabled) {
       return deny(
+        requestId,
         "model_disabled",
         `Model '${body.model}' dinonaktifkan admin.`,
-        403
+        403,
+        { planSlug: plan.slug }
       );
     }
 
     const walletQuota = await assertWithinDailyQuota(this.db, userId);
     if (!walletQuota.ok) {
-      return deny("wallet_quota_exceeded", walletQuota.message, 429);
+      return deny(requestId, "wallet_quota_exceeded", walletQuota.message, 429, {
+        planSlug: plan.slug,
+      });
     }
 
     const todayStart = startOfToday().toISOString();
@@ -112,9 +123,11 @@ export class CostProtectionService {
 
     if (requestsToday >= effectiveDailyLimit) {
       return deny(
+        requestId,
         "daily_quota_exceeded",
         `Daily quota habis (${effectiveDailyLimit} req/day, plan ${plan.name}).`,
-        429
+        429,
+        { planSlug: plan.slug }
       );
     }
 
@@ -125,9 +138,11 @@ export class CostProtectionService {
     );
     if (requestsLastMinute >= effectiveRpm) {
       return deny(
+        requestId,
         "rate_limit_exceeded",
         `Rate limit ${effectiveRpm} req/menit. Tunggu sebentar.`,
-        429
+        429,
+        { planSlug: plan.slug }
       );
     }
 
@@ -136,9 +151,11 @@ export class CostProtectionService {
       const tokensThisMonth = await this.repo.sumTokensSince(userId, monthStart);
       if (tokensThisMonth >= plan.monthlyTokenLimit) {
         return deny(
+          requestId,
           "monthly_token_limit",
           `Monthly token limit habis (${plan.monthlyTokenLimit.toLocaleString()} tokens).`,
-          429
+          429,
+          { planSlug: plan.slug }
         );
       }
     }
@@ -156,9 +173,11 @@ export class CostProtectionService {
 
     if (estimate.customerChargeUsd > config.maxEstimatedCostPerRequestUsd) {
       return deny(
+        requestId,
         "cost_cap_exceeded",
         `Perkiraan biaya request ($${estimate.customerChargeUsd.toFixed(4)}) melebihi batas $${config.maxEstimatedCostPerRequestUsd}. Kurangi max_tokens.`,
-        402
+        402,
+        { planSlug: plan.slug, estimate }
       );
     }
 
@@ -168,9 +187,11 @@ export class CostProtectionService {
 
       if (config.blockOnNegativeBalance && balance < required) {
         return deny(
+          requestId,
           "insufficient_balance",
           `Saldo tidak cukup ($${balance.toFixed(4)}). Estimasi request: $${required.toFixed(4)}. Top up untuk Pay As You Go.`,
-          402
+          402,
+          { planSlug: plan.slug, estimate }
         );
       }
     }
@@ -185,11 +206,21 @@ export class CostProtectionService {
 }
 
 function deny(
+  requestId: string,
   code: CostProtectionDenyCode,
   message: string,
-  httpStatus: 402 | 403 | 429
+  httpStatus: 402 | 403 | 429,
+  extra?: { planSlug?: string; estimate?: TokenCostEstimate }
 ): CostProtectionResult {
-  return { allowed: false, code, message, httpStatus };
+  return {
+    allowed: false,
+    code,
+    message,
+    httpStatus,
+    requestId,
+    planSlug: extra?.planSlug,
+    estimate: extra?.estimate,
+  };
 }
 
 function zeroEstimate() {

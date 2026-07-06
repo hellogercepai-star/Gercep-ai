@@ -12,6 +12,11 @@ export async function GET(request: NextRequest) {
       profitTodayUsd: metrics.profitTodayUsd,
       avgLatencyMsToday: metrics.avgLatencyMsToday,
     });
+    const critical = alerts.filter((a) => a.level === "critical");
+    if (critical.length > 0 && config.slack_webhook_url) {
+      const { sendSlackAlerts } = await import("@/lib/gateway/slack-alerts");
+      await sendSlackAlerts(config.slack_webhook_url, critical);
+    }
     const failed = await admin.listFailedRequests(20);
     return NextResponse.json({ alerts, config, failedRequests: failed });
   });

@@ -103,6 +103,12 @@ export const sections = {
     billingNoTx: "No transactions yet.",
     billingCharge: "Charge",
     billingTopup: "Top-up",
+    costToday: "Cost today",
+    costSub: "USD from API",
+    cost: "Cost",
+    addCredits: "Add credits",
+    addCreditsDesc: "Top up via Stripe (USD) — automatically enables Pay As You Go.",
+    addCreditsBtn: "Stripe checkout",
   },
   playground: {
     subtitle: "Playground",
@@ -337,10 +343,12 @@ export const sections = {
     status: "Status",
     usageBilling: "Usage & billing",
     usageBillingDesc:
-      "Every completion is logged to the Developers dashboard. Token usage (prompt, completion, total) is available per request and per API key. Billing credits & $GERCEP — coming soon.",
+      "Every completion is logged on /developers with token usage and USD cost per request (Pay As You Go). Top up via admin or Stripe checkout.",
     errors: "Errors",
     error401: "Missing or invalid API key",
     error400: "Invalid request body (model, messages)",
+    error402: "Insufficient balance (Pay As You Go) — top up credits",
+    error429: "Rate limit or daily quota exceeded",
     error502: "Upstream provider error",
   },
   legal: {

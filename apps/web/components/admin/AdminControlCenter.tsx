@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { adminFetch, formatNum, formatUsd } from "@/lib/admin/api";
+import { adminFetch, formatBalanceUsd, formatNum, formatUsd } from "@/lib/admin/api";
 import type { AdminMetrics } from "@/components/admin/AdminDashboard";
 import {
   DualTrendChart,
@@ -373,10 +373,23 @@ export function AdminControlCenter() {
                   className="border-b border-white/5 py-2 text-xs"
                 >
                   <span className="text-[#2DD4BF]">{String(log.action)}</span>
+                  {log.resource_id ? (
+                    <>
+                      <span className="mx-2 text-white/30">·</span>
+                      <span className="font-mono text-white/40">
+                        {String(log.resource_id).slice(0, 20)}
+                      </span>
+                    </>
+                  ) : null}
                   <span className="mx-2 text-white/30">·</span>
                   <span className="text-white/50">
                     {new Date(String(log.created_at)).toLocaleString("id-ID")}
                   </span>
+                  {log.metadata && Object.keys(log.metadata as object).length > 0 ? (
+                    <p className="mt-1 font-mono text-[10px] text-white/30">
+                      {JSON.stringify(log.metadata)}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -691,7 +704,7 @@ function CustomersPanel({
           <p className="mt-2 text-sm">
             Balance:{" "}
             <span className="text-[#2DD4BF]">
-              {formatUsd(Number(detail.balanceUsd ?? 0))}
+              {formatBalanceUsd(Number(detail.balanceUsd ?? 0))}
             </span>
           </p>
           <div className="mt-4 flex flex-wrap items-end gap-2">

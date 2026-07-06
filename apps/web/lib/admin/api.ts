@@ -22,6 +22,13 @@ export function formatUsd(n: number): string {
   return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+/** Balance display — keeps precision when small deductions on large balances */
+export function formatBalanceUsd(n: number): string {
+  if (n === 0) return "$0.00";
+  if (n >= 100) return formatUsd(n);
+  return `$${n.toFixed(4)}`;
+}
+
 export function formatNum(n: number): string {
   return n.toLocaleString("en-US");
 }

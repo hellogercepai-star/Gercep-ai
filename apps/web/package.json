@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "tsx lib/services/gateway/gateway.test.ts && tsx lib/wallet/wallet.test.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -25,6 +26,7 @@
     "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "stripe": "^17.7.0",
     "three": "^0.185.1",
     "tweetnacl": "^1.0.3"
   },
@@ -36,6 +38,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
+    "tsx": "^4.23.0",
     "typescript": "^5"
   }
 }

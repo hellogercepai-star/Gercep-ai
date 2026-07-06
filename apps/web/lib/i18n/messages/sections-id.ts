@@ -103,6 +103,12 @@ export const sections = {
     billingNoTx: "Belum ada transaksi.",
     billingCharge: "Potong",
     billingTopup: "Top-up",
+    costToday: "Biaya hari ini",
+    costSub: "USD dari API",
+    cost: "Biaya",
+    addCredits: "Tambah saldo",
+    addCreditsDesc: "Top-up via Stripe (USD) — otomatis aktifkan Pay As You Go.",
+    addCreditsBtn: "Checkout Stripe",
   },
   playground: {
     subtitle: "Playground",
@@ -337,10 +343,12 @@ export const sections = {
     status: "Status",
     usageBilling: "Usage & billing",
     usageBillingDesc:
-      "Setiap completion di-log ke dashboard di /developers. Token usage (prompt, completion, total) tersedia per request dan per API key. Billing credits & $GERCEP — coming soon.",
+      "Setiap completion di-log di /developers dengan token usage dan biaya USD per request (Pay As You Go). Top-up via admin atau Stripe checkout.",
     errors: "Errors",
     error401: "API key tidak ada atau tidak valid",
     error400: "Request body tidak valid (model, messages)",
+    error402: "Saldo tidak cukup (Pay As You Go) — top-up dulu",
+    error429: "Rate limit atau quota harian habis",
     error502: "Error dari upstream provider",
   },
   legal: {

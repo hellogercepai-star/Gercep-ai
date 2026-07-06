@@ -23,6 +23,7 @@ interface UsageSummary {
   totalTokens: number;
   promptTokens: number;
   completionTokens: number;
+  totalCostUsd: number;
 }
 
 interface UsageByKey {
@@ -41,6 +42,8 @@ interface UsageRecentEntry {
   promptTokens: number;
   completionTokens: number;
   totalTokens: number;
+  costUsd: number | null;
+  planSlug: string | null;
   createdAt: string;
 }
 
@@ -62,6 +65,7 @@ interface BillingInfo {
     payAsYouGo: boolean;
     requiresPositiveBalance: boolean;
   } | null;
+  stripeEnabled?: boolean;
   transactions: Array<{
     id: string;
     type: string;
@@ -289,6 +293,34 @@ export default function DevelopersPage() {
                     </ul>
                   </Card>
                 )}
+                {billing.stripeEnabled && (
+                  <Card className="mt-4" title={t("developers.addCredits")}>
+                    <p className="mb-3 text-xs text-white/50">
+                      {t("developers.addCreditsDesc")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {[5, 10, 25].map((amt) => (
+                        <Button
+                          key={amt}
+                          size="sm"
+                          variant="secondary"
+                          onClick={async () => {
+                            const res = await fetch("/api/v1/billing/checkout", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ amountUsd: amt }),
+                            });
+                            const data = await res.json();
+                            if (data.url) window.location.href = data.url;
+                            else setError(data.error ?? "Checkout failed");
+                          }}
+                        >
+                          ${amt}
+                        </Button>
+                      ))}
+                    </div>
+                  </Card>
+                )}
               </>
             ) : (
               <p className="text-sm text-white/50">{t("developers.billingNoTx")}</p>
@@ -304,11 +336,16 @@ export default function DevelopersPage() {
             <p className="text-sm text-white/50">{t("common.loading")}</p>
           ) : usage ? (
             <>
-              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <StatBox
                   label={t("developers.today")}
                   value={formatTokens(usage.summary.today.totalTokens, dateLocale)}
                   sub={`${usage.summary.today.requests} ${t("common.requests")}`}
+                />
+                <StatBox
+                  label={t("developers.costToday")}
+                  value={formatUsd(usage.summary.today.totalCostUsd ?? 0)}
+                  sub={t("developers.costSub")}
                 />
                 <StatBox
                   label={t("developers.thisMonth")}
@@ -371,7 +408,10 @@ export default function DevelopersPage() {
                           <th className="pb-2 pr-4 font-medium text-right">
                             {t("developers.completion")}
                           </th>
-                          <th className="pb-2 font-medium text-right">{t("developers.total")}</th>
+                          <th className="pb-2 pr-4 font-medium text-right">
+                            {t("developers.total")}
+                          </th>
+                          <th className="pb-2 font-medium text-right">{t("developers.cost")}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
@@ -390,8 +430,11 @@ export default function DevelopersPage() {
                             <td className="py-2.5 pr-4 text-right tabular-nums">
                               {formatTokens(entry.completionTokens, dateLocale)}
                             </td>
-                            <td className="py-2.5 text-right tabular-nums font-medium text-[#2DD4BF]">
+                            <td className="py-2.5 pr-4 text-right tabular-nums font-medium text-[#2DD4BF]">
                               {formatTokens(entry.totalTokens, dateLocale)}
+                            </td>
+                            <td className="py-2.5 text-right tabular-nums text-white/60">
+                              {entry.costUsd != null ? formatUsd(entry.costUsd) : "—"}
                             </td>
                           </tr>
                         ))}
