@@ -1,8 +1,46 @@
 @import "tailwindcss";
 
-:root {
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
   --background: #070711;
-  --foreground: #ededed;
+  --foreground: #f8fafc;
+  --bg-page: #070711;
+  --bg-surface: rgba(255, 255, 255, 0.02);
+  --bg-elevated: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(45, 212, 191, 0.3);
+  --text-primary: #f8fafc;
+  --text-secondary: rgba(248, 250, 252, 0.5);
+  --text-muted: rgba(248, 250, 252, 0.3);
+  --nav-bg: rgba(3, 3, 8, 0.72);
+  --nav-border: rgba(0, 255, 240, 0.1);
+  --home-bg: #030308;
+  --scanline: rgba(255, 255, 255, 0.035);
+  --accent-teal: #2dd4bf;
+  --accent-purple: #a78bfa;
+  --accent-pink: #f472b6;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --background: #fafafa;
+  --foreground: #0f172a;
+  --bg-page: #fafafa;
+  --bg-surface: #ffffff;
+  --bg-elevated: rgba(15, 23, 42, 0.04);
+  --border-default: rgba(15, 23, 42, 0.08);
+  --border-hover: rgba(45, 212, 191, 0.45);
+  --text-primary: #0f172a;
+  --text-secondary: rgba(15, 23, 42, 0.65);
+  --text-muted: rgba(15, 23, 42, 0.4);
+  --nav-bg: rgba(255, 255, 255, 0.88);
+  --nav-border: rgba(15, 23, 42, 0.08);
+  --home-bg: #f4f4f5;
+  --scanline: rgba(15, 23, 42, 0.02);
+  --accent-teal: #0d9488;
+  --accent-purple: #7c3aed;
+  --accent-pink: #db2777;
 }
 
 @theme inline {
@@ -18,11 +56,80 @@ html {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   overflow-y: auto;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* Light mode — homepage & developers terminal surfaces */
+[data-theme="light"] .home-shell {
+  background-color: var(--home-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .theme-nav {
+  background: var(--nav-bg) !important;
+  border-color: var(--nav-border) !important;
+}
+
+[data-theme="light"] .theme-nav a,
+[data-theme="light"] .theme-nav button {
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .theme-nav a:hover {
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .dev-terminal {
+  background: var(--bg-page) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-card {
+  background: var(--bg-surface) !important;
+  border-color: var(--border-default) !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-text-primary {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-header {
+  background: var(--nav-bg) !important;
+  border-color: var(--border-default) !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-balance-inner {
+  background: #ffffff !important;
+}
+
+[data-theme="light"] .dev-terminal .dev-topup-panel {
+  background: rgba(45, 212, 191, 0.06) !important;
+  border-color: rgba(45, 212, 191, 0.2) !important;
+}
+
+[data-theme="light"] .home-shell .text-white,
+[data-theme="light"] .home-shell .text-white\/60,
+[data-theme="light"] .home-shell .text-white\/50 {
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .home-shell h1,
+[data-theme="light"] .home-shell h2,
+[data-theme="light"] .home-shell h3 {
+  color: var(--text-primary);
 }
 
 @keyframes marquee {

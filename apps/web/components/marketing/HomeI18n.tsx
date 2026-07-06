@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 const navHrefs = [
@@ -16,11 +17,11 @@ export function HomeNavBar() {
   const { t } = useLanguage();
 
   return (
-    <nav className="relative z-20 border-b border-[#00fff0]/10 bg-[#030308]/60 backdrop-blur-md">
+    <nav className="theme-nav relative z-20 border-b border-[var(--nav-border)] bg-[var(--nav-bg)] backdrop-blur-md transition-colors duration-300">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link
           href="/"
-          className="font-[family-name:var(--font-display)] text-lg font-semibold"
+          className="font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--text-primary)]"
         >
           Gercep AI
         </Link>
@@ -29,29 +30,30 @@ export function HomeNavBar() {
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm text-white/60 transition hover:text-white"
+              className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
             >
               {t(l.key)}
             </Link>
           ))}
         </div>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <LanguageToggle />
           <Link
             href="/docs"
-            className="hidden text-sm text-white/60 transition hover:text-white sm:inline"
+            className="hidden text-sm text-[var(--text-secondary)] transition hover:text-[var(--text-primary)] sm:inline"
           >
             {t("common.docs")}
           </Link>
           <Link
             href="/login"
-            className="hidden text-sm text-white/60 transition hover:text-white sm:inline"
+            className="hidden text-sm text-[var(--text-secondary)] transition hover:text-[var(--text-primary)] sm:inline"
           >
             {t("common.signIn")}
           </Link>
           <Link
             href="/developers"
-            className="rounded-full border border-white/10 px-4 py-2 text-xs font-medium text-white/80 transition hover:border-white/30 sm:border-0 sm:bg-white sm:text-[#070711] sm:hover:bg-white/90"
+            className="rounded-full border border-[var(--border-default)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] transition hover:border-[var(--border-hover)] sm:border-0 sm:bg-[var(--text-primary)] sm:text-[var(--bg-page)] sm:hover:opacity-90"
           >
             {t("common.apiKeys")}
           </Link>

@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { WalletLinkCard } from "@/components/wallet/WalletLinkCard";
 import { PhantomOpenButton } from "@/components/wallet/PhantomOpenButton";
 import { LanguageToggle } from "@/components/i18n/LanguageToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 interface ApiKeyItem {
@@ -97,7 +98,7 @@ function formatDate(iso: string, locale: string) {
 }
 
 const DEV_CARD =
-  "rounded-[20px] border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] transition-colors hover:border-[rgba(45,212,191,0.3)]";
+  "dev-card rounded-[20px] border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] transition-colors hover:border-[rgba(45,212,191,0.3)]";
 
 function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
   return (
@@ -273,7 +274,7 @@ function TopUpCreditsPanel({
   ];
 
   return (
-    <div className="relative mt-4 overflow-hidden rounded-[20px] border border-[rgba(45,212,191,0.18)] bg-[rgba(45,212,191,0.04)] p-6 md:p-8">
+    <div className="relative mt-4 overflow-hidden rounded-[20px] border border-[rgba(45,212,191,0.18)] bg-[rgba(45,212,191,0.04)] p-6 md:p-8 dev-topup-panel">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.035]"
         style={{
@@ -491,7 +492,7 @@ export default function DevelopersPage() {
 
   return (
     <div
-      className="relative min-h-screen bg-[#050508] text-[#F8FAFC]"
+      className="dev-terminal relative min-h-screen bg-[#050508] text-[#F8FAFC] transition-colors duration-300"
       style={{
         backgroundImage: `
           radial-gradient(circle at 50% 0%, rgba(45,212,191,0.04) 0%, transparent 50%),
@@ -531,20 +532,21 @@ export default function DevelopersPage() {
         .dev-border-glow { animation: dev-border-hue 10s linear infinite; }
       `}</style>
 
-      <header className="relative z-10 border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,8,0.85)] px-6 py-4 backdrop-blur-md">
+      <header className="dev-header theme-nav relative z-10 border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,8,0.85)] px-6 py-4 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div>
             <Link
               href="/"
-              className="font-[family-name:var(--font-display)] text-lg font-bold text-[#F8FAFC]"
+              className="font-[family-name:var(--font-display)] text-lg font-bold text-[#F8FAFC] dev-text-primary"
             >
               Gercep AI
             </Link>
-            <p className="font-mono text-xs text-[rgba(248,250,252,0.5)]">
+            <p className="font-mono text-xs text-[rgba(248,250,252,0.5)] dev-text-secondary">
               {t("developers.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <LanguageToggle />
             <PhantomOpenButton
               className="rounded-[10px] bg-[#AB9FF2] px-3 py-1.5 text-xs font-medium text-[#050508]"
@@ -604,7 +606,7 @@ export default function DevelopersPage() {
               <>
                 <div className="relative overflow-hidden rounded-[20px] p-[1px]">
                   <div className="dev-border-glow absolute inset-0 bg-[conic-gradient(from_0deg,#2DD4BF,#A78BFA,#F472B6,#2DD4BF)] opacity-50" />
-                  <div className="relative overflow-hidden rounded-[19px] bg-[#050508] p-6 md:p-8">
+                  <div className="relative overflow-hidden rounded-[19px] bg-[#050508] p-6 md:p-8 dev-balance-inner">
                     <div
                       className="pointer-events-none absolute inset-0 opacity-[0.04]"
                       style={{
