@@ -51,8 +51,8 @@ function CyberGrid({ reducedMotion }: { reducedMotion: boolean }) {
   });
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.8, 0]}>
-      <planeGeometry args={[40, 40, 1, 1]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.2, 0]}>
+      <planeGeometry args={[50, 50, 1, 1]} />
       <shaderMaterial
         ref={matRef}
         vertexShader={gridVertex}
@@ -63,6 +63,192 @@ function CyberGrid({ reducedMotion }: { reducedMotion: boolean }) {
         blending={THREE.AdditiveBlending}
       />
     </mesh>
+  );
+}
+
+function NearFloorGrid({ reducedMotion }: { reducedMotion: boolean }) {
+  const matRef = useRef<THREE.ShaderMaterial>(null);
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uColor: { value: MAGENTA.clone().lerp(CYAN, 0.35) },
+    }),
+    []
+  );
+
+  useFrame((state) => {
+    if (matRef.current && !reducedMotion) {
+      matRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+    }
+  });
+
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.35, 1.2]}>
+      <planeGeometry args={[24, 16, 1, 1]} />
+      <shaderMaterial
+        ref={matRef}
+        vertexShader={gridVertex}
+        fragmentShader={gridFragment}
+        uniforms={uniforms}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+}
+
+function VerticalDataColumns({ reducedMotion }: { reducedMotion: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const columns = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, i) => ({
+        x: -3.2 + i * 0.48,
+        h: 1.8 + (i % 4) * 0.55,
+        speed: 0.4 + (i % 5) * 0.15,
+        color: i % 3 === 0 ? CYAN : i % 3 === 1 ? MAGENTA : VIOLET,
+      })),
+    []
+  );
+
+  useFrame((state) => {
+    if (!groupRef.current || reducedMotion) return;
+    groupRef.current.children.forEach((child, i) => {
+      child.position.y =
+        -1.6 + Math.sin(state.clock.elapsedTime * columns[i].speed + i) * 0.08;
+    });
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 0, 0.8]}>
+      {columns.map((col, i) => (
+        <mesh key={i} position={[col.x, -1.6 + col.h / 2, 0]}>
+          <boxGeometry args={[0.02, col.h, 0.02]} />
+          <meshBasicMaterial
+            color={col.color}
+            transparent
+            opacity={0.35 + (i % 3) * 0.12}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function HorizonArcs({ reducedMotion }: { reducedMotion: boolean }) {
+  const outerRef = useRef<THREE.Mesh>(null);
+  const innerRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (reducedMotion) return;
+    const t = state.clock.elapsedTime;
+    if (outerRef.current) outerRef.current.rotation.z = t * 0.04;
+    if (innerRef.current) innerRef.current.rotation.z = -t * 0.06;
+  });
+
+  return (
+    <group position={[0, -1.05, 0.3]} rotation={[Math.PI / 2.15, 0, 0]}>
+      <mesh ref={outerRef}>
+        <torusGeometry args={[2.8, 0.012, 8, 96, Math.PI * 0.85]} />
+        <meshBasicMaterial
+          color={CYAN}
+          transparent
+          opacity={0.45}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh ref={innerRef}>
+        <torusGeometry args={[2.2, 0.008, 8, 96, Math.PI * 0.75]} />
+        <meshBasicMaterial
+          color={MAGENTA}
+          transparent
+          opacity={0.35}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+function SideEnergyPillars({ reducedMotion }: { reducedMotion: boolean }) {
+  const leftRef = useRef<THREE.Mesh>(null);
+  const rightRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (reducedMotion) return;
+    const pulse = 0.5 + Math.sin(state.clock.elapsedTime * 2) * 0.15;
+    if (leftRef.current) leftRef.current.scale.y = pulse;
+    if (rightRef.current) rightRef.current.scale.y = pulse * 0.92;
+  });
+
+  return (
+    <>
+      <mesh ref={leftRef} position={[-2.4, -0.2, 0.5]}>
+        <cylinderGeometry args={[0.03, 0.06, 3.2, 8]} />
+        <meshBasicMaterial
+          color={CYAN}
+          transparent
+          opacity={0.25}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh ref={rightRef} position={[2.4, -0.2, 0.5]}>
+        <cylinderGeometry args={[0.03, 0.06, 3.2, 8]} />
+        <meshBasicMaterial
+          color={MAGENTA}
+          transparent
+          opacity={0.22}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+    </>
+  );
+}
+
+function FloatingNodes({ reducedMotion }: { reducedMotion: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const nodes = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, i) => ({
+        x: (Math.random() - 0.5) * 5.5,
+        y: -2 + Math.random() * 2.2,
+        z: (Math.random() - 0.5) * 2.5,
+        s: 0.015 + Math.random() * 0.025,
+        speed: 0.3 + Math.random() * 0.8,
+        color: i % 3 === 0 ? CYAN : i % 3 === 1 ? VIOLET : TEAL,
+      })),
+    []
+  );
+
+  useFrame((state) => {
+    if (!groupRef.current || reducedMotion) return;
+    groupRef.current.children.forEach((child, i) => {
+      child.position.y =
+        nodes[i].y + Math.sin(state.clock.elapsedTime * nodes[i].speed + i) * 0.12;
+    });
+  });
+
+  return (
+    <group ref={groupRef}>
+      {nodes.map((node, i) => (
+        <mesh key={i} position={[node.x, node.y, node.z]}>
+          <sphereGeometry args={[node.s, 6, 6]} />
+          <meshBasicMaterial
+            color={node.color}
+            transparent
+            opacity={0.7}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
@@ -249,9 +435,9 @@ function DataRain({ count, reducedMotion }: { count: number; reducedMotion: bool
     const positions = new Float32Array(count * 3);
     const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 6;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 6;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+      positions[i * 3] = (Math.random() - 0.5) * 7;
+      positions[i * 3 + 1] = -3 + Math.random() * 6;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 5;
       speeds[i] = 0.5 + Math.random() * 2;
     }
     return { positions, speeds };
@@ -264,7 +450,7 @@ function DataRain({ count, reducedMotion }: { count: number; reducedMotion: bool
     for (let i = 0; i < count; i++) {
       const idx = i * 3 + 1;
       arr[idx] -= speeds[i] * 0.02;
-      if (arr[idx] < -3) arr[idx] = 3;
+      if (arr[idx] < -3) arr[idx] = 3.5;
     }
     ref.current.geometry.attributes.position.needsUpdate = true;
     ref.current.rotation.y = Math.sin(t * 0.1) * 0.1;
@@ -342,7 +528,7 @@ function SceneRig({ reducedMotion }: { reducedMotion: boolean }) {
   });
 
   return (
-    <group ref={rigRef} position={[0, 0.2, 0]}>
+    <group ref={rigRef} position={[0, 0.35, 0]}>
       <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.25}>
         <PortalCore reducedMotion={reducedMotion} />
         <WireCage reducedMotion={reducedMotion} />
@@ -372,7 +558,7 @@ function SceneRig({ reducedMotion }: { reducedMotion: boolean }) {
         reducedMotion={reducedMotion}
       />
       <LightBeams reducedMotion={reducedMotion} />
-      <DataRain count={reducedMotion ? 300 : 800} reducedMotion={reducedMotion} />
+      <DataRain count={reducedMotion ? 400 : 1200} reducedMotion={reducedMotion} />
     </group>
   );
 }
@@ -388,7 +574,7 @@ export function GatewayScene() {
   return (
     <>
       <color attach="background" args={["#030308"]} />
-      <fog attach="fog" args={["#030308", 3, 16]} />
+      <fog attach="fog" args={["#030308", 4, 22]} />
       <ambientLight intensity={0.08} />
       <pointLight position={[2, 3, 4]} intensity={4} color="#00fff0" />
       <pointLight position={[-3, -1, 3]} intensity={3} color="#ff00aa" />
@@ -402,13 +588,18 @@ export function GatewayScene() {
       />
 
       <CyberGrid reducedMotion={reducedMotion} />
+      <NearFloorGrid reducedMotion={reducedMotion} />
+      <HorizonArcs reducedMotion={reducedMotion} />
+      <VerticalDataColumns reducedMotion={reducedMotion} />
+      <SideEnergyPillars reducedMotion={reducedMotion} />
+      <FloatingNodes reducedMotion={reducedMotion} />
       <Sparkles
-        count={reducedMotion ? 40 : 120}
-        scale={6}
-        size={2}
-        speed={0.4}
+        count={reducedMotion ? 60 : 180}
+        scale={[7, 5, 4]}
+        size={2.2}
+        speed={0.45}
         color="#00fff0"
-        opacity={0.6}
+        opacity={0.65}
       />
       <SceneRig reducedMotion={reducedMotion} />
 
