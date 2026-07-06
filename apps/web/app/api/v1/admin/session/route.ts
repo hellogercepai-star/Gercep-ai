@@ -28,6 +28,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const { logAdminAudit } = await import("@/lib/gateway/audit-log");
+    const db = createAdminClient();
+    await logAdminAudit(db, { action: "admin.login" });
+  } catch {
+    /* audit optional if db unavailable */
+  }
+
   const response = NextResponse.json({ ok: true });
   response.cookies.set(ADMIN_SESSION_COOKIE, token, {
     httpOnly: true,

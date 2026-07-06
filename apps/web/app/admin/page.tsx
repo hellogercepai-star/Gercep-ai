@@ -1,4 +1,4 @@
-import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { AdminControlCenter } from "@/components/admin/AdminControlCenter";
 
 export const metadata = {
   title: "Admin · Gercep AI Gateway",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function AdminPage() {
-  return <AdminDashboard />;
+  return <AdminControlCenter />;
 }

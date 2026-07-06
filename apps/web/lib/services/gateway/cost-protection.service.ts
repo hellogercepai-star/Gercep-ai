@@ -72,6 +72,15 @@ export class CostProtectionService {
     }
 
     const plan = subscription.plan;
+
+    const { data: override } = await this.db
+      .from("customer_rate_overrides")
+      .select("daily_request_limit, requests_per_minute")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const effectiveRpm =
+      override?.requests_per_minute ?? plan.requestsPerMinute;
     const pricing = await this.repo.getModelPricing(body.model);
     if (!pricing) {
       return deny(
@@ -97,7 +106,7 @@ export class CostProtectionService {
     const todayStart = startOfToday().toISOString();
     const requestsToday = await this.repo.countRequestsSince(userId, todayStart);
     const effectiveDailyLimit = Math.max(
-      plan.dailyRequestLimit,
+      override?.daily_request_limit ?? plan.dailyRequestLimit,
       walletQuota.quota.dailyRequests
     );
 
@@ -114,10 +123,10 @@ export class CostProtectionService {
       userId,
       oneMinuteAgo
     );
-    if (requestsLastMinute >= plan.requestsPerMinute) {
+    if (requestsLastMinute >= effectiveRpm) {
       return deny(
         "rate_limit_exceeded",
-        `Rate limit ${plan.requestsPerMinute} req/menit. Tunggu sebentar.`,
+        `Rate limit ${effectiveRpm} req/menit. Tunggu sebentar.`,
         429
       );
     }
