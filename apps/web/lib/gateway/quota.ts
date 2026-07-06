@@ -98,7 +98,10 @@ export async function getWalletQuotaForUser(
 export async function assertWithinDailyQuota(
   supabase: SupabaseClient,
   userId: string
-): Promise<{ ok: true } | { ok: false; message: string; quota: WalletQuotaInfo }> {
+): Promise<
+  | { ok: true; quota: WalletQuotaInfo }
+  | { ok: false; message: string; quota: WalletQuotaInfo }
+> {
   const { data: wallet } = await supabase
     .from("wallet_links")
     .select("address")
@@ -119,7 +122,7 @@ export async function assertWithinDailyQuota(
     };
   }
 
-  return { ok: true };
+  return { ok: true, quota };
 }
 
 function formatTokens(n: number): string {
