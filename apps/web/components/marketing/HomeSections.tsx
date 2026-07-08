@@ -127,7 +127,7 @@ export function HomeSections() {
       titleKey: "homeSections.footerPlatform",
       links: [
         { lKey: "nav.models", h: "/models" },
-        { lKey: "nav.pricing", h: "#pricing" },
+        { lKey: "nav.pricing", h: "/pricing" },
         { lKey: "common.playground", h: "/playground" },
         { lKey: "common.developers", h: "/developers" },
       ],

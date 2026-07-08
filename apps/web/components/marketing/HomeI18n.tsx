@@ -8,7 +8,7 @@ import { useLanguage } from "@/components/i18n/LanguageProvider";
 const navHrefs = [
   { key: "nav.models", href: "/models" },
   { key: "common.playground", href: "/playground" },
-  { key: "nav.pricing", href: "#pricing" },
+  { key: "nav.pricing", href: "/pricing" },
   { key: "common.docs", href: "/docs" },
   { key: "common.whitepaper", href: "/whitepaper" },
 ];
