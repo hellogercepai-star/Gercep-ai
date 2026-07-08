@@ -397,6 +397,7 @@ export default function DevelopersPage() {
   );
   const [checkoutAmount, setCheckoutAmount] = useState<number | null>(null);
   const [needsLogin, setNeedsLogin] = useState(false);
+  const [showWallet, setShowWallet] = useState(false);
   const [origin, setOrigin] = useState("https://your-domain");
 
   const loadData = useCallback(async () => {
@@ -553,6 +554,18 @@ export default function DevelopersPage() {
               label="Phantom"
             />
             <Link
+              href="/models"
+              className="text-sm text-[rgba(248,250,252,0.5)] transition hover:text-[#F8FAFC]"
+            >
+              Models
+            </Link>
+            <Link
+              href="/pricing"
+              className="text-sm text-[rgba(248,250,252,0.5)] transition hover:text-[#F8FAFC]"
+            >
+              Pricing
+            </Link>
+            <Link
               href="/docs"
               className="text-sm text-[rgba(248,250,252,0.5)] transition hover:text-[#F8FAFC]"
             >
@@ -593,6 +606,89 @@ export default function DevelopersPage() {
             </Link>
           </div>
         )}
+        <Card
+          title={t("developers.createKeyTitle")}
+          description={t("developers.createKeyDesc")}
+          className={`${DEV_CARD} dev-section-in mb-6 !p-6`}
+          style={{ animationDelay: "160ms" }}
+        >
+          <div className="flex gap-2">
+            <input
+              value={newKeyName}
+              onChange={(e) => setNewKeyName(e.target.value)}
+              placeholder={t("developers.keyNamePlaceholder")}
+              className="flex-1 rounded-[10px] border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] px-3 py-2 text-sm text-[#F8FAFC] outline-none placeholder:text-[rgba(248,250,252,0.3)] focus:border-[rgba(45,212,191,0.4)] focus:shadow-[0_0_20px_rgba(45,212,191,0.15)]"
+            />
+            <Button
+              onClick={handleCreate}
+              disabled={creating}
+              className="!rounded-[10px]"
+            >
+              {creating ? "..." : t("developers.createKey")}
+            </Button>
+          </div>
+
+          {plainKey && (
+            <div className="mt-4 rounded-[20px] border border-[rgba(45,212,191,0.3)] bg-[rgba(45,212,191,0.08)] p-4">
+              <p className="font-mono text-xs uppercase tracking-wider text-[#2DD4BF]">
+                {t("developers.saveKeyNow")}
+              </p>
+              <code className="mt-2 block break-all font-mono text-sm text-[#F8FAFC]">
+                {plainKey}
+              </code>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="mt-3 !rounded-[10px]"
+                onClick={() => navigator.clipboard.writeText(plainKey)}
+              >
+                {t("common.copy")}
+              </Button>
+            </div>
+          )}
+        </Card>
+
+        <Card
+          title={t("developers.yourKeys")}
+          className={`${DEV_CARD} dev-section-in !p-6`}
+          style={{ animationDelay: "200ms" }}
+        >
+          {loading ? (
+            <p className="text-sm text-[rgba(248,250,252,0.5)]">{t("common.loading")}</p>
+          ) : keys.length === 0 ? (
+            <p className="text-sm text-[rgba(248,250,252,0.5)]">{t("developers.noKeys")}</p>
+          ) : (
+            <ul className="divide-y divide-[rgba(255,255,255,0.04)]">
+              {keys.map((k) => (
+                <li
+                  key={k.id}
+                  className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0"
+                >
+                  <div>
+                    <p className="font-medium text-[#F8FAFC]">{k.name}</p>
+                    <p className="font-mono text-xs text-[rgba(248,250,252,0.4)]">
+                      {k.keyPrefix}
+                    </p>
+                    {k.lastUsedAt && (
+                      <p className="mt-0.5 font-mono text-xs text-[rgba(248,250,252,0.3)]">
+                        {t("developers.lastUsed")} {formatDate(k.lastUsedAt, dateLocale)}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="!rounded-[10px]"
+                    onClick={() => handleRevoke(k.id)}
+                  >
+                    {t("common.revoke")}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
         {/* Billing */}
         {!needsLogin && (
           <section className="dev-section-in">
@@ -872,91 +968,15 @@ export default function DevelopersPage() {
         </section>
 
         <div className="dev-section-in" style={{ animationDelay: "120ms" }}>
-          <WalletLinkCard />
+          <button
+            type="button"
+            onClick={() => setShowWallet((v) => !v)}
+            className="mb-3 rounded-[10px] border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.04)] px-4 py-2 text-sm text-[rgba(248,250,252,0.5)] transition hover:border-[rgba(45,212,191,0.3)] hover:text-[#F8FAFC]"
+          >
+            ⚙ Wallet Settings
+          </button>
+          {showWallet && <WalletLinkCard />}
         </div>
-
-        <Card
-          title={t("developers.createKeyTitle")}
-          description={t("developers.createKeyDesc")}
-          className={`${DEV_CARD} dev-section-in mb-6 !p-6`}
-          style={{ animationDelay: "160ms" }}
-        >
-          <div className="flex gap-2">
-            <input
-              value={newKeyName}
-              onChange={(e) => setNewKeyName(e.target.value)}
-              placeholder={t("developers.keyNamePlaceholder")}
-              className="flex-1 rounded-[10px] border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] px-3 py-2 text-sm text-[#F8FAFC] outline-none placeholder:text-[rgba(248,250,252,0.3)] focus:border-[rgba(45,212,191,0.4)] focus:shadow-[0_0_20px_rgba(45,212,191,0.15)]"
-            />
-            <Button
-              onClick={handleCreate}
-              disabled={creating}
-              className="!rounded-[10px]"
-            >
-              {creating ? "..." : t("developers.createKey")}
-            </Button>
-          </div>
-
-          {plainKey && (
-            <div className="mt-4 rounded-[20px] border border-[rgba(45,212,191,0.3)] bg-[rgba(45,212,191,0.08)] p-4">
-              <p className="font-mono text-xs uppercase tracking-wider text-[#2DD4BF]">
-                {t("developers.saveKeyNow")}
-              </p>
-              <code className="mt-2 block break-all font-mono text-sm text-[#F8FAFC]">
-                {plainKey}
-              </code>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="mt-3 !rounded-[10px]"
-                onClick={() => navigator.clipboard.writeText(plainKey)}
-              >
-                {t("common.copy")}
-              </Button>
-            </div>
-          )}
-        </Card>
-
-        <Card
-          title={t("developers.yourKeys")}
-          className={`${DEV_CARD} dev-section-in !p-6`}
-          style={{ animationDelay: "200ms" }}
-        >
-          {loading ? (
-            <p className="text-sm text-[rgba(248,250,252,0.5)]">{t("common.loading")}</p>
-          ) : keys.length === 0 ? (
-            <p className="text-sm text-[rgba(248,250,252,0.5)]">{t("developers.noKeys")}</p>
-          ) : (
-            <ul className="divide-y divide-[rgba(255,255,255,0.04)]">
-              {keys.map((k) => (
-                <li
-                  key={k.id}
-                  className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0"
-                >
-                  <div>
-                    <p className="font-medium text-[#F8FAFC]">{k.name}</p>
-                    <p className="font-mono text-xs text-[rgba(248,250,252,0.4)]">
-                      {k.keyPrefix}
-                    </p>
-                    {k.lastUsedAt && (
-                      <p className="mt-0.5 font-mono text-xs text-[rgba(248,250,252,0.3)]">
-                        {t("developers.lastUsed")} {formatDate(k.lastUsedAt, dateLocale)}
-                      </p>
-                    )}
-                  </div>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    className="!rounded-[10px]"
-                    onClick={() => handleRevoke(k.id)}
-                  >
-                    {t("common.revoke")}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
 
         {error && (
           <p className="font-mono text-sm text-[#F472B6]">{error}</p>
