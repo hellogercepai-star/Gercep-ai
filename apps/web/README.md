@@ -25,6 +25,7 @@ Run in Supabase SQL Editor **in order**:
 | 3 | `supabase/migrations/003_wallet_links_repair.sql` | Wallet repair (if needed) |
 | 4 | `supabase/migrations/004_gateway_billing.sql` | Plans, pricing, PAYG billing |
 | 5 | `supabase/migrations/005_admin_control.sql` | Audit, transactions, overrides |
+| 6 | `supabase/migrations/006_multi_provider.sql` | OpenAI, Gemini, Grok, NVIDIA pricing |
 
 ## Required environment variables
 
@@ -33,7 +34,11 @@ Run in Supabase SQL Editor **in order**:
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-side gateway auth & billing |
-| `DEEPSEEK_API_KEY` | DeepSeek provider (inference) |
+| `DEEPSEEK_API_KEY` | DeepSeek models |
+| `OPENAI_API_KEY` | GPT-4o, GPT-4.1, GPT-5 |
+| `GOOGLE_API_KEY` | Gemini 2.0 Flash, Gemini 1.5 Pro |
+| `XAI_API_KEY` | Grok 2, Grok 3 |
+| `NVIDIA_API_KEY` | NVIDIA NIM (Llama, Nemotron) |
 | `GATEWAY_ADMIN_SECRET` | Admin login at `/admin` |
 
 See `.env.example` for Stripe, Solana, and dev vars.

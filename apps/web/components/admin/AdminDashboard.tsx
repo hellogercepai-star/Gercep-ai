@@ -323,7 +323,7 @@ export function AdminDashboard() {
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
                   <p className="text-[10px] uppercase text-white/40">Provider</p>
-                  <p className="mt-1 font-medium">DeepSeek (live)</p>
+                  <p className="mt-1 font-medium">OpenAI · Gemini · Grok · NVIDIA · DeepSeek</p>
                 </div>
               </div>
             </Card>
